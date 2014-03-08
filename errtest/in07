@@ -1,0 +1,50 @@
+/*
+ * One interface, one module
+ * Tests:
+ *	  error message for rules
+ */
+
+    
+    event open (string a1 , int a2 , unsigned int a3);
+
+    event g(int a1, int a2);
+
+    event f(int a1, double a3);
+
+    event f1(int a1, int a3);
+
+    event f2 (int a1, int a2);
+
+    event f3(int a1, int a2);
+   
+    int i,j;
+   int logMessage(string x) ;
+
+   open(file, flags, mode) -> {
+            logMessage(str);
+    } ;
+
+   g(a1,a2,a3)) ->{;};
+   g(a1,a2,a3) ->{;};
+   (g(a1,a2,a3))) -> {;};   
+   g(a1,a2,a3) ->{;};
+   g(a1,a2,a3)\/f(x,y,z))->{;};
+   g(a1,a2,a3) ->{;};
+   f(x,y,z)*** ->{;};   
+   g(a1,a2,a3) ->{;};
+   f(x,y,z)|a=1; ->{;};   
+   g(a1,a2,a3) ->{;};
+   f(x,y,z) | ((x=y) && (a=1) ->{;};
+   g(a1,a2,a3) ->{;};
+   any; ->{;};
+   g(a1,a2,a3) ->{;};
+   any (x,y) ->{;};  
+   g(a1,a2,a3) ->{;};
+   g(a1,a2,a3) {;};
+   g(a1,a2,a3) ->{;};
+   f1(a1,a2,a3) ->{};
+   g(a1,a2,a3) ->{;};
+   f1(a1,a2,a3) -> {;}; 
+   g(a1,a2,a3) ->{;};
+   f2 ->{;}; 
+   g(a1,a2,a3) ->{;};

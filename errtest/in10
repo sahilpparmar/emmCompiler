@@ -1,0 +1,73 @@
+/* 
+ * One interface, one module
+ * Tests: all operators
+ *        If stmt to some extent
+ * Error: Line 33: Operator missing between i and j
+ *        Line 42: Invalid operatos '**'
+ *        Line 52: Not a statement
+ *        Line 62 : Expression contains extra ')'
+ *
+ *
+ *
+ */
+
+class CString;
+int f(int g);
+string get(const CString);
+
+
+event open (CString a1 , int a2 , unsigned int a3);
+int logMessage(string x) ;
+
+int i = 2 ;
+int j = 3 ;
+int k = 4 ;
+double f = 3.3;
+
+S S1 ;
+
+
+open(file, flags, mode) | (get(file) == i) -> {
+                logMessage("open: testing exprs and operators"); 
+
+                if ((i  j) || (j > k)) {
+                        i = (23 * (-i)/j) - f + sizeof(S1) - (45 % j) ;
+                }
+                else {
+                        j = i & (j | k) ^ i & (!j);
+                }
+
+                
+                if ((i >  j) || (j > k)) {
+                        i = (23 ** (-i)/j) - f + sizeof(S1) - (45 % j) ;
+                }
+                else {
+                        j = i & (j | k) ^ i & (!j);
+                }
+
+                if ((i >  j) || (j > k)) {
+                        i = (23 * (-i)/j) - f + sizeof(S1) - (45 % j) ;
+                };
+                else {
+                        i & (j | k) ^ i & (!j);
+                }
+
+                if ((i >  j) || (j > k)) {
+                        i = (23 * (-i)/j) - f + sizeof(S1) - (45 % j) ;
+                };
+                else {
+                        j = i & (j | k) ^ i & (!j);
+                };
+
+                if(!i && i<=j || (j >=k))){
+                        logMessage("Y is zero") ;
+                };
+                
+                if(i == j && j != k) {
+                        k = k << (j >> i) ;
+                }
+
+            if (i==j) k=j; else k=k;
+
+        } ;
+

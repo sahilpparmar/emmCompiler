@@ -1,22 +1,21 @@
-CC= g++
-#CC= clang++
-CFLAGS = -c -g -O 
+CC = g++
+#CC = clang++
+CFLAGS = -c -g -O
 FLEX = flex
+BISON = bison
 
-demo:	drivLex.o E--_lexer.o
-	$(CC) -o demo E--_lexer.o drivLex.o -lfl
+demo:	driveParse.o E--_lexer.o E--_parser.o E--.tab.h
+	$(CC) -o demo E--_lexer.o E--_parser.o driveParse.o -lfl
 
-E--_lexer.o:	E--_lexer.C
-	$(CC) $(CFLAGS) E--_lexer.C
+E--_lexer.o:	E--_lexer.C E--.tab.h
+	g++ $(CFLAGS) E--_lexer.C
 
-E--_lexer.C:	E--_lexer.l++
-	$(FLEX) -p -8 -Ce -o E--_lexer.C E--_lexer.l++
-
-drivLex.o: drivLex.C
-	$(CC) $(CFLAGS) drivLex.C
+E--_parser.C: E--_parser.y++
+	$(BISON) -v -t -d -o E--_parser.C E--_parser.y++;
+	mv E--_parser.H E--.tab.h
 
 clean:
 	-echo "Removing all object files!"
 	-rm -f demo *.o
 	-echo "Removing intermediate C files!"
-	-rm -f E--_lexer.C
+	-rm -f E--_parser.C

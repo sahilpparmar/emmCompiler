@@ -1,0 +1,283 @@
+%{
+#include <iostream>
+extern int yylex();
+extern void yyerror(const char *s);
+extern void errMsg(const char *s);
+#define prt(x) cout << x << endl;
+using namespace std;
+%}
+
+%union{
+   char* cVal;
+   unsigned int uVal;
+   double dblVal;
+};
+
+/* Operators */
+
+%token TOK_LEX_ERROR TOK_PAT_STAR TOK_PAT_OR TOK_PAT_NOT
+%token TOK_PLUS TOK_MINUS TOK_UMINUS TOK_MULT TOK_DIV TOK_MOD 
+%token TOK_BITAND TOK_BITOR TOK_BITNOT TOK_BITXOR TOK_SHL TOK_SHR 
+%token TOK_GT TOK_LT TOK_GE TOK_LE TOK_EQ  TOK_NE TOK_AND TOK_OR TOK_NOT 
+%token TOK_COMMA TOK_ASSIGN TOK_SEMICOLON TOK_COLON TOK_ARROW TOK_DOT
+%token TOK_LBRACE TOK_RBRACE TOK_LPAREN TOK_RPAREN TOK_LBRACK
+
+/* Key words */
+
+%token TOK_IF TOK_ELSE TOK_CLASS TOK_RETURN TOK_EVENT TOK_ANY TOK_PRINT 
+%token TOK_ULONGNUM TOK_UINTNUM TOK_DOUBLENUM TOK_VOID TOK_STRING TOK_STRCONST 
+%token TOK_INT TOK_UNSIGNED TOK_BOOL TOK_BYTE TOK_DOUBLE TOK_SHORT
+%token TOK_LONG TOK_TRUE TOK_FALSE TOK_IDENT
+
+/*********************   Precedence and Associativity    ********************/
+
+%expect 1
+
+%nonassoc   TOK_ASSIGN
+%left       TOK_PAT_OR
+%left       TOK_COLON
+%left       TOK_PAT_STAR
+%right      TOK_PAT_NOT
+%left       TOK_OR
+%left       TOK_AND
+%right      TOK_NOT
+%nonassoc   TOK_EQ TOK_NE TOK_GT TOK_LT TOK_GE TOK_LE
+%left       TOK_BITOR TOK_BITXOR
+%left       TOK_BITAND
+%left       TOK_BITNOT
+%left       TOK_SHL TOK_SHR 
+%left       TOK_PLUS TOK_MINUS
+%left       TOK_MULT TOK_DIV TOK_MOD
+%right      TOK_UMINUS
+%left       TOK_LBRACK
+%left       TOK_DOT
+
+/**************************************************************************/
+
+%start s_specification
+%%
+
+s_specification:    program                                                 {       prt("Spec");    }
+                  ;
+
+program:            specification
+                  ;
+
+specification:      specification declaration
+                  | specification rules
+                  |
+                  ;
+
+declaration:        event_decl
+                  | function_proto
+                  | class_decl
+                  | variable_decl
+                  ;
+
+rules:              primitive_all TOK_ARROW rule_stmts                        {       prt("Rule");  }
+                  ;
+
+rule_stmts:         TOK_LBRACE compound_stmt TOK_RBRACE TOK_SEMICOLON         {       prt("CompoundStmt");  }
+                  | TOK_LBRACE compound_stmt TOK_RBRACE                       {       prt("CompoundStmt");  }
+                  | empty_block TOK_SEMICOLON
+                  | empty_block
+                  | expressions TOK_SEMICOLON                                 {       prt("AssignStmt");    }
+                  ;
+
+primitive_all:      normal_event primitive_types                                  
+                  | any_event                                                 {       prt("PrimitivePat");  }
+                  | binary_event_oprs
+                  | TOK_LPAREN primitive_all TOK_RPAREN                       {       prt("(EventPat)");  }
+                  ;
+
+primitive_types:    TOK_BITOR expressions                                     {       prt("PrimitivePatWithCond");  }
+                  |                                                           {       prt("PrimitivePat"); }
+                  ;
+
+binary_event_oprs:  primitive_all TOK_PAT_OR      primitive_all               {       prt("EventPat \\/ EventPat");     }
+                  | primitive_all TOK_COLON       primitive_all               {       prt("EventPat : EventPat");       }
+                  | primitive_all TOK_PAT_STAR    primitive_all               {       prt("EventPat **");      }
+                  | TOK_NOT   primitive_all                                   {       prt("!EventPat");     }
+                  |
+                  ;
+
+any_event:          TOK_ANY                                                   {       prt("anyEvent");   }
+                  ;
+
+normal_event:       TOK_IDENT event_aparam_l                                  {       prt("NormalEvent");   }
+                  ;
+
+event_aparam_l:      TOK_LPAREN event_aparam_l TOK_RPAREN                      
+                  | event_aparam_l TOK_COMMA TOK_IDENT                        {       prt("EventFormalParam");   }
+                  | TOK_IDENT                                                 {       prt("EventFormalParam");   }
+                  | TOK_LPAREN TOK_RPAREN
+                  ;
+
+
+compound_stmt:      TOK_LBRACE compound_stmt TOK_RBRACE                       {       prt("CompoundStmt");  }
+                  | empty_block
+                  | compound_stmt simple_stmt
+                  |
+                  ;
+
+simple_stmt:        func_invocation TOK_SEMICOLON                             {       prt("FunctionInvocationStmt"); }
+                  | assignment TOK_SEMICOLON                                  {       prt("AssignStmt"); }
+                  | if_else_block 
+                  ;
+
+if_else_block:      TOK_IF condition basic_block                              {       prt("IfThenStmt"); }
+                  | TOK_IF condition basic_block TOK_ELSE basic_block         {       prt("IfThenElseStmt"); }
+                  ;
+
+basic_block:        TOK_LBRACE compound_stmt TOK_RBRACE                       {       prt("CompoundStmt");  }
+                  | empty_block
+                  | simple_stmt
+                  | TOK_SEMICOLON
+                  ;
+
+empty_block:        TOK_LBRACE TOK_SEMICOLON TOK_RBRACE                       {       prt("CompoundStmt");  }
+                  ;
+
+
+condition:          TOK_LPAREN expressions TOK_RPAREN                         {       prt("(Expr)"); }
+                  ;
+
+func_invocation:    TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN            {       prt("FunctionInvocation"); }
+                  | TOK_IDENT TOK_LPAREN TOK_RPAREN                           {       prt("FunctionInvocation"); }
+                  ;
+
+caller_param_l:     caller_param_l TOK_COMMA expressions
+                  | expressions
+                  ;
+
+assignment:         ref_expr TOK_ASSIGN expressions                           {       prt("Assignment");        }
+
+expressions:        literal
+                  | ref_expr
+                  | func_invocation
+                  | assignment  
+                  | unary_operation
+                  | binary_operation
+                  | TOK_LPAREN expressions TOK_RPAREN                         {       prt("(Expr)");            }
+                  ;
+
+unary_operation:    TOK_NOT expressions                                       {       prt("!Expr");             }
+                  | TOK_BITNOT expressions                                    {       prt("~Expr");             }
+                  | TOK_MINUS expressions %prec TOK_UMINUS                    {       prt("-Expr");             }
+                  ;
+
+binary_operation:   expressions TOK_OR          expressions                   {       prt("Expr || Expr");      }
+                  | expressions TOK_AND         expressions                   {       prt("Expr && Expr");      }
+                  | expressions TOK_EQ          expressions                   {       prt("Expr == Expr");      }
+                  | expressions TOK_NE          expressions                   {       prt("Expr != Expr");      }
+                  | expressions TOK_GT          expressions                   {       prt("Expr > Expr");       }
+                  | expressions TOK_LT          expressions                   {       prt("Expr < Expr");       }
+                  | expressions TOK_GE          expressions                   {       prt("Expr >= Expr");      }
+                  | expressions TOK_LE          expressions                   {       prt("Expr <= Expr");      }
+                  | expressions TOK_BITOR       expressions                   {       prt("Expr | Expr");       }
+                  | expressions TOK_BITXOR      expressions                   {       prt("Expr ^ Expr");       }
+                  | expressions TOK_BITAND      expressions                   {       prt("Expr & Expr");       }
+                  | expressions TOK_SHL         expressions                   {       prt("Expr << Expr");      }
+                  | expressions TOK_SHR         expressions                   {       prt("Expr >> Expr");      }
+                  | expressions TOK_PLUS        expressions                   {       prt("Expr + Expr");       }
+                  | expressions TOK_MINUS       expressions                   {       prt("Expr - Expr");       }
+                  | expressions TOK_MULT        expressions                   {       prt("Expr * Expr");       }
+                  | expressions TOK_DIV         expressions                   {       prt("Expr / Expr");       }
+                  | expressions TOK_MOD         expressions                   {       prt("Expr % Expr");       }
+                  ;
+
+ref_expr:           TOK_IDENT                                                 {       prt("RefExpr");           }
+                  ;
+variable_decl:      type variable_l TOK_SEMICOLON
+                  | type variable_init_l TOK_SEMICOLON
+                  | type error TOK_SEMICOLON                        {   errMsg("Error in variable declaration, may be a missing identifier");}
+                  | error variable_l TOK_SEMICOLON                  {   errMsg("Error in variable declaration, may be a missing type name or identifier");}
+
+variable_l:         variable_l TOK_COMMA TOK_IDENT                            {       prt("VariableDecl"); }
+                  | TOK_IDENT                                                 {       prt("VariableDecl"); }
+                  | variable_l error TOK_IDENT TOK_SEMICOLON        {   errMsg("Error in variable declaration, may be a missing \",\" or identifier");}
+                  ;
+
+variable_init_l:    variable_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expressions{       prt("VariableDeclWithInit");}
+                  | TOK_IDENT TOK_ASSIGN expressions                          {       prt("VariableDeclWithInit");}
+                  | variable_init_l error TOK_IDENT TOK_SEMICOLON   {   errMsg("Error in variable declaration, may be a missing \",\" or identifier");}
+                            
+class_decl:         TOK_CLASS TOK_IDENT TOK_SEMICOLON TOK_SEMICOLON           {       prt("ClassDecl");  }
+                  | TOK_CLASS TOK_IDENT TOK_SEMICOLON                         {       prt("ClassDecl");  }
+                  | TOK_CLASS error TOK_SEMICOLON                   {   errMsg("Syntax error in class declaration: expecting class name");}
+                  ;
+
+function_body:      function_body variable_decl
+                  | function_body simple_stmt 
+                  |
+                  ;
+
+function_defn:      TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON         {       prt("FunctionBody");   }
+
+function_type:      TOK_SEMICOLON
+                  | function_defn
+                  ;
+
+function_decl:      type TOK_IDENT func_param_l                              {       prt("FunctionDecl");  }
+                  ;
+
+function_proto:     function_decl function_type
+                  ;
+
+func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {       prt("FormalParamList");   }
+                  | TOK_LPAREN func_param_l error               {       errMsg("Syntax error in formal parameter declaration"); }
+                  | func_param_l TOK_COMMA func_param
+                  | func_param
+                  | TOK_LPAREN TOK_RPAREN
+                  ;
+
+func_param:         type TOK_IDENT                                            {       prt("FormalParam");       }
+                  | TOK_IDENT TOK_IDENT                                       {       prt("Type"); prt("FormalParam");  }
+                  | type error                                  {       errMsg("Syntax error in formal parameter declaration"); }
+                  | TOK_IDENT error                             {       errMsg("Syntax error in formal parameter declaration"); }
+                  ;
+
+event_decl:         TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON          {       prt("EventDecl");   }
+                  | TOK_EVENT error TOK_LPAREN                  {       errMsg("Expected an event name");    }
+                  | TOK_EVENT TOK_IDENT error                   {       errMsg("Error in event declaration: missing event name or \"(\"");}
+                  ;
+
+event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                      {       prt("FormalParamList");   }
+                  | TOK_LPAREN event_param_l error              {       errMsg("Error in parsing event parameters, may be a missing \")\"");}
+                  | event_param_l TOK_COMMA event_param
+                  | event_param
+                  | TOK_LPAREN TOK_RPAREN
+                  ;
+
+event_param:        type TOK_IDENT                                            {       prt("FormalParam");       }
+                  | TOK_IDENT TOK_IDENT                                       {       prt("Type"); prt("FormalParam");  }
+                  | type error                                  {       errMsg("Error in event declaration, expecting formal parameters");}
+                  | TOK_IDENT error                             {       errMsg("Error in event declaration, expecting formal parameters");}
+                  ;
+
+literal:            TOK_ULONGNUM                                              {       prt("Literal");    }
+                  | TOK_UINTNUM                                               {       prt("Literal");    }
+                  | TOK_DOUBLENUM                                             {       prt("Literal");    }
+                  | TOK_STRCONST                                              {       prt("Literal");    }
+                  | TOK_TRUE                                                  {       prt("Literal");    }
+                  | TOK_FALSE                                                 {       prt("Literal");    }
+                  ;
+
+type:               base_type                                                 {       prt("Type");    }
+                  | unsigned_type                                             {       prt("Type");    }
+                  ;
+
+unsigned_type:      TOK_UNSIGNED base_type
+                  ;
+
+base_type:          TOK_VOID           
+                  | TOK_BOOL           
+                  | TOK_BYTE           
+                  | TOK_STRING         
+                  | TOK_INT            
+                  | TOK_DOUBLE         
+                  | TOK_SHORT
+                  | TOK_LONG
+                  ;
+
+%%

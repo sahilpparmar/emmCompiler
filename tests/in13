@@ -1,8 +1,0 @@
-/*reserved word*/
-
-bool	any	bit	class	byte	double	else	enum
-false	float   for	if	int	return	
-
-static	true	void    interface  
-while	print   string  event   
-import

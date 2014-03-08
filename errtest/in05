@@ -1,0 +1,41 @@
+/*
+ *	Errors in function invocation
+ *
+ */
+
+
+	
+    void f1(int a) {;}; 
+
+    void f2(int a, int b) {;}; 
+
+
+    void f3() {;};
+    void f4(int a) {;};
+    void f5(int a)  {;};
+
+    void f6(int b){ ;};
+    void f7() {;}
+
+   
+    int f8(int a1,int a2) {;};    
+
+    void g() {
+	int a1, a2;
+	a1=1;
+   };
+ 
+
+    event open (string a1 , int a2 , unsigned int a3);
+ 
+   int logMessage(string x) ;
+
+   open(file, flags, mode) -> {
+            logMessage(str);
+            f6(x,);
+            2f(y);
+            
+	    f7(;
+            f7()		
+    } ;
+

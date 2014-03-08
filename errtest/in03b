@@ -1,0 +1,18 @@
+/* 
+ * 
+ * Tests: 
+ *      class declaration and variable declaration
+ */        
+
+    class CString;;
+	
+    int a,;
+    int a b;
+    a,b;   
+    
+    event open (CString a1 , int a2 , unsigned int a3);
+    int logMessage(string x) ;
+
+    open(file, flags, mode) -> { 
+            logMessage("open: testing almost nothing"); 
+    };

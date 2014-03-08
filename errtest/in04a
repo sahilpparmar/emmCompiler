@@ -1,0 +1,31 @@
+/*
+	Errors in function declaration
+ */
+
+
+	
+    void f1(int a) {;}; 
+
+    void f11(int) {;}; 
+    void f12(int a, b) {;}; 
+
+    f2(int a) {;};
+
+    void f7() {;}
+
+   
+    int (int a1,int a2) {;};    
+
+    void g() {
+	int a1, a2;
+	a1=1;
+   };
+ 
+    event open (string a1 , int a2 , unsigned int a3);
+ 
+   int logMessage(string x) ;
+
+   open(file, flags, mode) -> {
+            logMessage(str);
+    } ;
+

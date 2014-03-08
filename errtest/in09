@@ -1,0 +1,30 @@
+/* One interface, one module
+ * Tests: all types
+ * 
+ * 
+ */
+        
+class CString;;
+string get(const CString);
+void setCStr(CString, string s);
+
+event open (CString a1 , int a2 ,a3);
+int logMessage(string x) ;
+
+
+
+byte b3 ;
+
+int s = 20000 ; 
+int i = 65536;
+double l ;
+
+us1 = 4;
+unsigned int ui = -20;
+int;
+
+(int a, int b);
+
+=1;
+
+double d = 34.456; 

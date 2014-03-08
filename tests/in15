@@ -1,9 +1,0 @@
-/*good and bad floating point constant*/
-0.321
-.321
-125.0
-125.
-.3E-04
-1.e+06
-1e-06
-.e-07

@@ -1,0 +1,16 @@
+/* 
+ *
+ * Tests: 
+ *        errors for event declaration
+ */
+       
+    event open (string , int a2 , unsigned int a3);
+ 	
+    event f1(int, int a3;
+
+    event f2 int a1, int a2);
+
+    event (int a1, int a2);	
+
+    open(file, flags, mode) -> {;} ;
+
