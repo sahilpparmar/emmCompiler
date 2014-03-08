@@ -1,11 +1,1 @@
-in09:9:syntax error
-in09:9:Syntax error in formal parameter declaration
-in09:11:syntax error
-in09:11:Error encountered while parsing event parameters
-in09:22:syntax error
-in09:22:Error in variable declaration, may be a missing type name or identifier
-in09:24:syntax error
-in09:24:Error in variable declaration, may be a missing identifier
-in09:26:Syntax error, expecting a declaration
-in09:28:Syntax error, expecting a declaration
-in09:31:Must contain at least one rule
+in09:35:Error: Return statement is valid only within a function

@@ -1,8 +1,15 @@
 #include <libgen.h>
 #include <unistd.h>
+
 #include <iostream>
+#include "all.h"
+#include "Ast.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include "SymTabMgr.h"
+#include "STEClasses.h"
+#include "SymTab.h"
+#include "Value.h"
+
 using namespace std;
 
 #include "E--.tab.h"
@@ -15,7 +22,6 @@ using namespace std;
 
 #define MAX_DEBUG_LEVEL 2
 
-
 #ifdef DEBUG_LEXER
 #ifdef LEXER_OUT
 ofstream lexOutStr(LEXER_OUT);
@@ -25,20 +31,18 @@ ostream& lexOut = cout;
 #endif
 #endif
 
+extern EventEntry* any;
 extern int yyparse();
 extern int yylinenum;
 extern const char* yyfilename;
 extern YYSTYPE yylval;
-
-void errMsg(const char* s) {
-  cerr << yyfilename << ":" << yylinenum << ":" << s << endl;
-};
 
 void yyerror(const char *s)
 {
   errMsg(s);
 }
 
+SymTabMgr stm;
 string outputFile;
 const char* inputFile = "";
 string cppShellCmd, ccShellCmd;
@@ -58,6 +62,17 @@ printUsage(const char* cmd) {
 	"[-I include_dir] [-L<library directory>]\n   [-l<library>]"
     "[-Dmacro[=defn]] [-Uname] " //[-t <target language>]\n   "
     "[-o <output file>] <input file>\n" 
+    /*"\t-v: debugging\n"
+    "\t\t0: none\n"
+    "\t\t1: print AST 'out' file\n"
+    "\t\t2: print lots of internal debugging info\n"
+    "\t-o output file name\n"
+	"\t-t: Specify type of output\n"
+	"\t\tc: Output C code\n"
+	"\t\tb: Output a binary (.o) file\n"
+	"\t\ts: Output a shared library (default)\n"
+	"\t\td: Output a dotty file\n"
+	"\t\tp: Output Prolog code\n"*/
 	"Environment variable CPP can be used to override the default command\n"
     "for running cpp program. This variable can include the program name\n"
     "as well as command-line arguments to the command. Similarly, the\n"
@@ -71,49 +86,50 @@ parseOptions(int argc, char* argv[]) {
   opterr = 0; // Suppress printing of errors by getopt.
 
   if (getenv(CPP_PROG_NAME) == NULL)
-		cppShellCmd = DEFAULT_CPP_PROG_NAME;  else cppShellCmd = getenv(CPP_PROG_NAME);
+	cppShellCmd = DEFAULT_CPP_PROG_NAME;  else cppShellCmd = getenv(CPP_PROG_NAME);
   cppShellCmd += " ";
 
   if (getenv(CC_PROG_NAME) == NULL)
-		ccShellCmd = DEFAULT_CC_PROG_NAME;
+	ccShellCmd = DEFAULT_CC_PROG_NAME;
   else ccShellCmd = getenv(CC_PROG_NAME);
   ccShellCmd += " ";
   if (getenv(CC_PROG_OPTS) != NULL) {
-		ccShellCmd += getenv(CC_PROG_OPTS);
-		ccShellCmd += " ";
+	ccShellCmd += getenv(CC_PROG_OPTS);
+	ccShellCmd += " ";
   }
 
   while (1) {
-		if ((argc > 2) || (argc < 2)) {
-			cerr << "Please specify only a single input file\n";
-			return -1;
-		} else {
-	  	inputFile = argv[1];
-	  	return 0;
-		}
+	if ((argc > 2) || (argc < 2)) {
+		cerr << "Please specify only a single input file\n";
+		return -1;
+	}
+	else {
+	  inputFile = argv[1];
+	  return 0;
+	}
   }
 
   genSharedLib = !(genCCode || genBinCode || genDottyCode || genPrologCode);
   if (genSharedLib)
-		outFileSuffix = ".so";
+	outFileSuffix = ".so";
 
   if (*inputFile == '\0') 
     return -1;
 
   if (outputFile == "") {
-		size_t pos;
-		if (genSharedLib) {
-	  	string sinputFile(inputFile);
-	  	if ((pos = sinputFile.rfind('/')) == string::npos)
-				outputFile = "lib" + sinputFile;
-	  	else outputFile = 
+	size_t pos;
+	if (genSharedLib) {
+	  string sinputFile(inputFile);
+	  if ((pos = sinputFile.rfind('/')) == string::npos)
+		outputFile = "lib" + sinputFile;
+	  else outputFile = 
 			 sinputFile.substr(0, pos) + "/lib" + sinputFile.substr(pos+1);
-		} else 
-			outputFile = inputFile;
+	}
+	else outputFile = inputFile;
 
-		if ((pos = outputFile.rfind('.')) != outputFile.npos)
-	  	outputFile.replace(pos, outputFile.size(), outFileSuffix);
-		else outputFile += outFileSuffix;
+	if ((pos = outputFile.rfind('.')) != outputFile.npos)
+	  outputFile.replace(pos, outputFile.size(), outFileSuffix);
+	else outputFile += outFileSuffix;
   }
 
   return 0;
@@ -129,6 +145,17 @@ main(int argc, char *argv[], char *envp[]) {
 
   cppShellCmd += inputFile;
   cppShellCmd += " ";
+
+  /* ccCmd = "mv ";
+  ccCmd += outputFile;
+  ccCmd += " ";
+  ccCmd += outputFile;
+  ccCmd += ".c; ";
+  ccCmd += ccShellCmd;
+  if (genSharedLib)
+	ccCmd += "-shared ";
+  ccCmd += "-o ";
+  ccCmd += outputFile;*/
 
   if ((yyin = popen(cppShellCmd.c_str(), "r")) == NULL) {
     cerr << "Unexpected error in reading input file\n";
@@ -173,6 +200,17 @@ main(int argc, char *argv[], char *envp[]) {
   return 0;
 #else
   //   yydebug = 1;
-	yyparse();
+  any = new EventEntry("any");
+  if (stm.insert(any) == OK) {
+    Type *te = new Type((vector<Type*>*)NULL, Type::EVENT);
+    any->type(te);
+  }
+  yyparse();
+  stm.leaveToScope(SymTabEntry::Kind::GLOBAL_KIND);
+  GlobalEntry *ge = (GlobalEntry*)(stm.currentScope());
+  if (ge != NULL) {
+	cout << "Finished parsing, here is the AST\n";
+	ge->print(cout, 0);
+  }
 #endif
 }

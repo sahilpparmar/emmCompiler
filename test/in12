@@ -11,7 +11,7 @@
     int k = 4 ;
     double f = 3.3;
 
-    bit b ;
+    int b ;
     string s ;
     byte bt;
 

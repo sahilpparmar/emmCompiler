@@ -1,72 +1,17 @@
-Type
-FormalParam
-Type
-FormalParam
-Type
-FormalParam
-FormalParamList
-EventDecl
-Type
-FormalParam
-Type
-FormalParam
-FormalParamList
-EventDecl
-Type
-FormalParam
-Type
-FormalParam
-FormalParamList
-EventDecl
-Type
-FormalParam
-Type
-FormalParam
-FormalParamList
-EventDecl
-Type
-FormalParam
-Type
-FormalParam
-FormalParamList
-EventDecl
-Type
-FormalParam
-Type
-FormalParam
-FormalParamList
-EventDecl
-Type
-VariableDecl
-VariableDecl
-Type
-Type
-FormalParam
-FormalParamList
-FunctionDecl
-EventFormalParam
-EventFormalParam
-EventFormalParam
-NormalEvent
-PrimitivePat
-RefExpr
-FunctionInvocation
-FunctionInvocationStmt
-CompoundStmt
-Rule
-EventFormalParam
-EventFormalParam
-EventFormalParam
-EventFormalParam
-EventFormalParam
-EventFormalParam
-NormalEvent
-CompoundStmt
-Rule
-EventFormalParam
-EventFormalParam
-EventFormalParam
-NormalEvent
-CompoundStmt
-Rule
-Spec
+Finished parsing, here is the AST
+
+  event a(int x);
+  event b(int y, int z);
+  int z;
+  int f;
+  int g;
+  int w;
+  int j;
+  int y;
+
+  ((a(int g)):(b(int y, int w)|f==w))-->  z=g;;
+  ((a(int h)) \/ (b(int y, int w)|h==w))-->  z=1;;
+  ((a(int i)) \/ (b(int y, int w)|i==w))-->  z=w;;
+  ((a(int j)) \/ (b(int y, int w)|j==w))-->  z=j;;
+  (a(int k))-->  z=(k+y);;
+  

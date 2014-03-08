@@ -1,73 +1,58 @@
 /* 
  * One interface, one module
- * Tests: all operators
- *        If stmt to some extent
- * Error: Line 33: Operator missing between i and j
- *        Line 42: Invalid operatos '**'
- *        Line 52: Not a statement
- *        Line 62 : Expression contains extra ')'
- *
- *
- *
+ * Tests: Abstract event declarations
+ *                Enum Declarations
+ *                Function Declarations
+ *                Event patterns in Rule
  */
 
-class CString;
-int f(int g);
-string get(const CString);
+    class CString;;
+    string get(CString c);
+    class ArgV;
+    class pid_t;
+    int getpid_t(pid_t t);
+    class SchedParamP;
+    class StatP;
+    class NewStatP;
+    int logMessage(string x);
+    int logMessageInt(string x, int y) ;    
+    int getpid();
+    int isChild(pid_t a);
+    event open (CString a1 , int a2 , unsigned int a3);
+    event close (int a1);
+    event lstat(CString a1 , NewStatP a2 );
+    event execve(CString a1, ArgV a2, ArgV a3);
+    event fork();
+    event clone();
+    event unlink(CString a1);
+    event kill ( pid_t a1 , int a2 );
+    event ptrace ( pid_t a1 , int a2 , int a3 , int a4);
+    event sched_setscheduler ( pid_t a1 , int a2 , SchedParamP a3);
+    event umask(int a1) ;
+    event write(int a1, CString a2, int a3) ;
+    event chmod(CString a1, unsigned int a2) ;
+    event truncate(CString a1, int a2) ;    
+    event sysinfo(int a1) ;
+int tmp;
+int y;
+
+#define proc_ops() ((execve()) \/ (clone()) \/ (fork()))
+
+#define ABS(X) ((open(a1, a2, a3) | ((get(a1) == "abc") && (X = a2))): (lstat(s1, s2):(close(c1) | (c1 == X)))*)
 
 
-event open (CString a1 , int a2 , unsigned int a3);
-int logMessage(string x) ;
-
-int i = 2 ;
-int j = 3 ;
-int k = 4 ;
+int i = 2;
+int j = 3;
+int k = 4;
 double f = 3.3;
 
-S S1 ;
 
+// Simple pattern 2: 
+open(file,flags,mode)**: any** :
+        
+// Simple pattern 3: tests all the operators
+(open(file, flags, mode) \/ unlink(file) \/chmod(file, mode) \/ truncate(file2, len))** -> {
+        logMessageInt("simple pattern 3, %d", mode);
+};
 
-open(file, flags, mode) | (get(file) == i) -> {
-                logMessage("open: testing exprs and operators"); 
-
-                if ((i  j) || (j > k)) {
-                        i = (23 * (-i)/j) - f + sizeof(S1) - (45 % j) ;
-                }
-                else {
-                        j = i & (j | k) ^ i & (!j);
-                }
-
-                
-                if ((i >  j) || (j > k)) {
-                        i = (23 ** (-i)/j) - f + sizeof(S1) - (45 % j) ;
-                }
-                else {
-                        j = i & (j | k) ^ i & (!j);
-                }
-
-                if ((i >  j) || (j > k)) {
-                        i = (23 * (-i)/j) - f + sizeof(S1) - (45 % j) ;
-                };
-                else {
-                        i & (j | k) ^ i & (!j);
-                }
-
-                if ((i >  j) || (j > k)) {
-                        i = (23 * (-i)/j) - f + sizeof(S1) - (45 % j) ;
-                };
-                else {
-                        j = i & (j | k) ^ i & (!j);
-                };
-
-                if(!i && i<=j || (j >=k))){
-                        logMessage("Y is zero") ;
-                };
-                
-                if(i == j && j != k) {
-                        k = k << (j >> i) ;
-                }
-
-            if (i==j) k=j; else k=k;
-
-        } ;
-
+        

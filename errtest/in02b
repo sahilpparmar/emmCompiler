@@ -1,16 +1,18 @@
 /* 
- *
+ * One interface, one module
  * Tests: 
- *        errors for event declaration
+ *        function declaration
+ *        function invocation
  */
-       
-    event open (string , int a2 , unsigned int a3);
- 	
-    event f1(int, int a3;
+        
 
-    event f2 int a1, int a2);
+    event open (string a1 , int a2 , unsigned int a3);
+    int logMessage(string x) ;
+    int logMessage(string x) ;
 
-    event (int a1, int a2);	
 
-    open(file, flags, mode) -> {;} ;
+    open(file, flags, mode) -> { 
+	print();	
+        logMessage(c) ;
 
+    } ;

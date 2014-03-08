@@ -67,35 +67,34 @@
      TOK_SEMICOLON = 285,
      TOK_COLON = 286,
      TOK_ARROW = 287,
-     TOK_DOT = 288,
-     TOK_LBRACE = 289,
-     TOK_RBRACE = 290,
-     TOK_LPAREN = 291,
-     TOK_RPAREN = 292,
-     TOK_LBRACK = 293,
-     TOK_IF = 294,
-     TOK_ELSE = 295,
-     TOK_CLASS = 296,
-     TOK_RETURN = 297,
-     TOK_EVENT = 298,
-     TOK_ANY = 299,
-     TOK_PRINT = 300,
-     TOK_ULONGNUM = 301,
-     TOK_UINTNUM = 302,
-     TOK_DOUBLENUM = 303,
-     TOK_VOID = 304,
-     TOK_STRING = 305,
-     TOK_STRCONST = 306,
-     TOK_INT = 307,
-     TOK_UNSIGNED = 308,
-     TOK_BOOL = 309,
-     TOK_BYTE = 310,
-     TOK_DOUBLE = 311,
-     TOK_SHORT = 312,
-     TOK_LONG = 313,
-     TOK_TRUE = 314,
-     TOK_FALSE = 315,
-     TOK_IDENT = 316
+     TOK_LBRACE = 288,
+     TOK_RBRACE = 289,
+     TOK_LPAREN = 290,
+     TOK_RPAREN = 291,
+     TOK_IF = 292,
+     TOK_ELSE = 293,
+     TOK_CLASS = 294,
+     TOK_RETURN = 295,
+     TOK_EVENT = 296,
+     TOK_ANY = 297,
+     TOK_PRINT = 298,
+     TOK_UINTNUM = 299,
+     TOK_DOUBLENUM = 300,
+     TOK_VOID = 301,
+     TOK_STRING = 302,
+     TOK_STRCONST = 303,
+     TOK_INT = 304,
+     TOK_UNSIGNED = 305,
+     TOK_BOOL = 306,
+     TOK_BYTE = 307,
+     TOK_DOUBLE = 308,
+     TOK_SHORT = 309,
+     TOK_TRUE = 310,
+     TOK_FALSE = 311,
+     TOK_IDENT = 312,
+     TOK_DOUBLE_COLON = 313,
+     TOK_LBRACK = 314,
+     TOK_DOT = 315
    };
 #endif
 
@@ -106,16 +105,43 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 10 "E--_parser.y++"
+#line 23 "E--_parser.y++"
 
-   char* cVal;
-   unsigned int uVal;
-   double dblVal;
+  unsigned int 	     uVal;
+  double             dVal;
+  char*              cVal;
+  vector<string>*    strVector;
+  Value*             valVal;
+
+  ExprNode*          exprVal;
+  vector<ExprNode*>* exprList;
+  RefExprNode*       refexpVal;
+
+  ClassEntry*        classEntry;
+  Type*              typeVal;
+  vector<Type*>*     typeList; 
+
+  EventEntry*        eventEntry;                        
+  VariableEntry*     variableEntry;
+  FunctionEntry*     functionEntry;
+
+  BasePatNode*       patVal;
+  PrimitivePatNode*  primPatVal;
+  StmtNode*          stmtVal;
+  list<StmtNode*>*   stmtList;
+  IfNode*            ifVal;
+  CompoundStmtNode*  compoundStmtVal;
+  RuleNode*          ruleNode;
+
+  vector<RuleNode*>* transList;
+  
+  vector<Type*>*     formalTypeVal;
+  const OpNode::OpInfo*    funIval;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 119 "E--_parser.H"
+#line 145 "E--_parser.H"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

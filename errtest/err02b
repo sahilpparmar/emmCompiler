@@ -1,7 +1,0 @@
-in02b:7:syntax error
-in02b:7:Error in event declaration, expecting formal parameters
-in02b:9:syntax error
-in02b:9:Error in event declaration, expecting formal parameters and a ")"
-in02b:11:syntax error
-in02b:11:Error in event declaration: missing event name or "("
-in02b:13:Expected an event name

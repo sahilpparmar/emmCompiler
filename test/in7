@@ -7,10 +7,10 @@ event open (string a1 , int a2 , unsigned int a3);
         
 byte b3;
 
-short s = 20000 ; 
+int s = 20000 ; 
 int i = 65536;
 int j = -65536;
-long l ;
+int l ;
 
 unsigned int us1 = 4;
 unsigned int ui = -20;

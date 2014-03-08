@@ -59,10 +59,10 @@
     int isInt(int i) ;
     unsigned int isUInt(unsigned int i) ;
 
-    short isShort(short s) ;
+    int isShort(int s) ;
     unsigned int isUShort(unsigned int s) ;
         
-    long isLong(long l) ;
+    int isLong(int l) ;
     unsigned int isULong(unsigned int l) ;
 
     int valid_write; 

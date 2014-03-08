@@ -1,0 +1,4 @@
+void fun(int c) {
+int a, b;
+a = b+c;
+};

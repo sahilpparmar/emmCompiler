@@ -1,31 +1,40 @@
-/*
-	Errors in function declaration
+/* 
+ * One interface, one module
+ * Tests: all types
  */
 
+event open (string a1 , int a2 , unsigned int a3);
+event open(int a, int b);
 
-	
-    void f1(int a) {;}; 
+        
+byte b3;
 
-    void f11(int) {;}; 
-    void f12(int a, b) {;}; 
+class CString;
 
-    f2(int a) {;};
+class String;
 
-    void f7() {;}
+CString a;
+String a;
 
-   
-    int (int a1,int a2) {;};    
+int i = 65536;
+int j = -65536;
 
-    void g() {
-	int a1, a2;
-	a1=1;
-   };
- 
-    event open (string a1 , int a2 , unsigned int a3);
- 
-   int logMessage(string x) ;
 
-   open(file, flags, mode) -> {
-            logMessage(str);
-    } ;
+unsigned int us1 = 4;
+unsigned int ui = -20;
+unsigned int ul = 80 ;
+
+int ci = 2 ;
+double d = 34.456; 
+
+bool b5=true;
+
+string str = "sss";
+
+string str1;//  = 0;
+
+open(file, flags, mode) -> {
+   ;	
+
+};
 
