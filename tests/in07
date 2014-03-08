@@ -1,0 +1,15 @@
+"Testing Strings"
+""
+"\x10"
+"How do I Quote (\") thee?"
+"Are backslashes (\\\\) ok?"
+"escape sequences \\ \n \t \? \r \c \\\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30"
+"Big escape sequence test: \"\\\"\\\\\"\ntest\ntest\ttest\ttest"
+" Newlines
+	in 
+		strings
+			(not
+				a
+					feature
+						in
+							Java)."

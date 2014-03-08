@@ -1,0 +1,9 @@
+/* putting it all together */
+
+public class HelloWorld{		// The canonical "first" program
+public int main(string argv[]) {	// Nothing private; nothing to hide
+	System.out.println("Hello World!");	//* Say it! *
+	return 0;			// 		and exit
+} 
+}
+

@@ -1,0 +1,6 @@
+Token: 288 Attribute: (id) id
+in18:3: Error: Unrecognized token `@'
+Token: 288 Attribute: (id) junk
+in19:1: Error: Unrecognized token `@'
+in18:9: Error: Unrecognized token `@'
+Token: 288 Attribute: (id) end

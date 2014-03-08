@@ -1,0 +1,7 @@
+Good_AND_Bad_Identifiers
+
+.badID
+
+word1"string"word2
+
+word3/* comment */word4

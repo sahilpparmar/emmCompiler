@@ -1,0 +1,20 @@
+/* This_is_a_comment */
+/*/ This_is_also_a_comment /*/
+/ / Not_a_comment
+/ * Also_not_a_comment * /
+/** Yet_another_comment **/
+
+/**/	"Successfully processed empty comment"
+/* "really a comment" */
+/* "really a 
+multiline"
+	comment
+*/
+
+""	// test empty string
+
+" really /* a string */"
+"multiline string
+containing /* stuff that	looks like
+a multiline 
+*/ comment"

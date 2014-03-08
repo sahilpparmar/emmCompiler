@@ -1,0 +1,24 @@
+Token: 282 Attribute: (string) Testing Strings
+Token: 282 Attribute: (string) 
+Token: 282 Attribute: (string) 
+Token: 282 Attribute: (string) How do I Quote (") thee?
+Token: 282 Attribute: (string) Are backslashes (\\) ok?
+Token: 282 Attribute: (string) escape sequences \ 
+ 	 ?  c \ !"#$%&'()*+,-./0
+Token: 282 Attribute: (string) Big escape sequence test: "\"\\"
+test
+test	test	test
+String constant cannot span multiple lines
+Token: 282 Attribute: (string)  Newlines
+Token: 288 Attribute: (id) in
+Token: 288 Attribute: (id) strings
+Token: 295 
+Token: 288 Attribute: (id) not
+Token: 288 Attribute: (id) a
+Token: 288 Attribute: (id) feature
+Token: 288 Attribute: (id) in
+Token: 288 Attribute: (id) Java
+Token: 296 
+Token: 291 
+String constant cannot span multiple lines
+Token: 282 Attribute: (string) 
