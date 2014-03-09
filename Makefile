@@ -29,3 +29,4 @@ clean:
 	-rm -f demo *.o
 	-echo "Removing intermediate C files!"
 	-rm -f E--_parser.C
+	-rm -rf myoutputs
