@@ -107,36 +107,36 @@ typedef union YYSTYPE
 /* Line 2068 of yacc.c  */
 #line 101 "E--_parser.y++"
 
-    unsigned int       uVal;
-    double             dVal;
-    char*              cVal;
-    vector<string>*    strVector;
-    Value*             valVal;
+    unsigned int        uVal;
+    double              dVal;
+    char*               cVal;
+    vector<string>*     strVector;
+    Value*              valVal;
 
-    ExprNode*          exprVal;
-    vector<ExprNode*>* exprList;
-    RefExprNode*       refexpVal;
+    ExprNode*           exprVal;
+    vector<ExprNode*>*  exprList;
+    RefExprNode*        refexpVal;
 
-    ClassEntry*        classEntry;
-    Type*              typeVal;
-    vector<Type*>*     typeList; 
+    ClassEntry*         classEntry;
+    Type*               typeVal;
+    vector<Type*>*      typeList; 
 
-    FunctionEntry*     functionEntry;
-    EventEntry*        eventEntry;                        
-    VariableEntry*     variableEntry;
+    FunctionEntry*      functionEntry;
+    EventEntry*         eventEntry;                        
+    VariableEntry*      variableEntry;
     vector<VariableEntry*>* varList;
 
-    StmtNode*          stmtVal;
-    list<StmtNode*>*   stmtList;
-    IfNode*            ifVal;
-    CompoundStmtNode*  compoundStmtVal;
-    RuleNode*          ruleNode;
+    StmtNode*           stmtVal;
+    list<StmtNode*>*    stmtList;
+    IfNode*             ifVal;
+    CompoundStmtNode*   compoundStmtVal;
+    RuleNode*           ruleNode;
 
-    BasePatNode*       patVal;
-    PrimitivePatNode*  primPatVal;
-    vector<RuleNode*>* transList;
+    BasePatNode*        patVal;
+    PrimitivePatNode*   primPatVal;
+    vector<RuleNode*>*  transList;
 
-    const OpNode::OpInfo*    funIval;
+    const OpNode::OpInfo*   funIval;
 
 
 

@@ -1,1 +1,6 @@
-a(f) : (b(y, w, x)|w==f) -> z=w;
+a(f) : (b(y, w)|w==f) -> z=w;
+void fun(int c, int d, int e) {
+    int a = 20, b = 10, c = 30;
+    double aa, bb, cc;
+    logMessage("open: testing almost nothing", a + b, b); 
+};

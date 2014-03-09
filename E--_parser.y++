@@ -99,36 +99,36 @@ vector<VariableEntry*>* curVarList  = NULL;
 %}
 
 %union {
-    unsigned int       uVal;
-    double             dVal;
-    char*              cVal;
-    vector<string>*    strVector;
-    Value*             valVal;
+    unsigned int        uVal;
+    double              dVal;
+    char*               cVal;
+    vector<string>*     strVector;
+    Value*              valVal;
 
-    ExprNode*          exprVal;
-    vector<ExprNode*>* exprList;
-    RefExprNode*       refexpVal;
+    ExprNode*           exprVal;
+    vector<ExprNode*>*  exprList;
+    RefExprNode*        refexpVal;
 
-    ClassEntry*        classEntry;
-    Type*              typeVal;
-    vector<Type*>*     typeList; 
+    ClassEntry*         classEntry;
+    Type*               typeVal;
+    vector<Type*>*      typeList; 
 
-    FunctionEntry*     functionEntry;
-    EventEntry*        eventEntry;                        
-    VariableEntry*     variableEntry;
+    FunctionEntry*      functionEntry;
+    EventEntry*         eventEntry;                        
+    VariableEntry*      variableEntry;
     vector<VariableEntry*>* varList;
 
-    StmtNode*          stmtVal;
-    list<StmtNode*>*   stmtList;
-    IfNode*            ifVal;
-    CompoundStmtNode*  compoundStmtVal;
-    RuleNode*          ruleNode;
+    StmtNode*           stmtVal;
+    list<StmtNode*>*    stmtList;
+    IfNode*             ifVal;
+    CompoundStmtNode*   compoundStmtVal;
+    RuleNode*           ruleNode;
 
-    BasePatNode*       patVal;
-    PrimitivePatNode*  primPatVal;
-    vector<RuleNode*>* transList;
+    BasePatNode*        patVal;
+    PrimitivePatNode*   primPatVal;
+    vector<RuleNode*>*  transList;
 
-    const OpNode::OpInfo*    funIval;
+    const OpNode::OpInfo*   funIval;
 };
 
 /* Operators */
@@ -177,7 +177,7 @@ vector<VariableEntry*>* curVarList  = NULL;
 %type <ifVal>  if_then_else_stmt 
 */
 
-%type <functionEntry> function_decl
+%type <functionEntry> function_decl function_proto
 %type <variableEntry> global_decl global_l global_init_l local_decl local_l local_init_l
 %type <classEntry>  class_decl
 %type <eventEntry> event_decl any_event normal_event 
@@ -375,8 +375,8 @@ class_decl:         TOK_CLASS TOK_IDENT TOK_SEMICOLON TOK_SEMICOLON         {   
                   | TOK_CLASS TOK_IDENT TOK_SEMICOLON                       {   $$ = allocClassEntry($2); prt("ClassDecl");  }
                   ;
 
-function_body:      function_body local_decl 
-                  | function_body simple_stmt
+function_body:      function_body local_decl
+                  | function_body simple_stmt                               {   if (!curStmtList) curStmtList = new list<StmtNode*>; curStmtList->push_back($2);}
                   |
                   ;
 
@@ -392,17 +392,21 @@ local_init_l:       local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression  {   
                   | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, $3); prt("VariableDeclWithInit"); }
                   ;
 
-function_defn:      TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON       {   prt("FunctionBody");  }
-
-function_decl:      type TOK_IDENT func_param_l                             {   allocFuncEntry($2, $1, curTypeList); curTypeList = NULL; prt("FunctionDecl");  }
+function_defn:      TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON       {   $$ = allocCompStmtNode(curStmtList);        curStmtList = NULL;     prt("FunctionBody");  }
                   ;
 
-function_proto:     function_decl TOK_SEMICOLON
-                  | function_decl function_defn
+function_decl:      type TOK_IDENT func_param_l                             {   $$ = allocFuncEntry($2, $1, curTypeList);   curTypeList = NULL;     prt("FunctionDecl");  }
                   ;
 
+function_proto:     function_decl TOK_SEMICOLON                             {   $$ = $1;                    }
+                  | function_decl function_defn                             {   $1->body($2);   $$ = $1;    }
+                  ;
+ /*
+ new SymTabEntry(string name, SymTabEntry::Kind k, int lineno, int columnno, string filename, Type *t)
+ stm.enterScope(ste);
+ */
 func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {   prt("FormalParamList");     }
-                  | func_param_l TOK_COMMA func_param                       {   curTypeList->push_back($3);  }
+                  | func_param_l TOK_COMMA func_param                       {   curTypeList->push_back($3); }
                   | func_param                                              {   curTypeList = new vector<Type*>(); curTypeList->push_back($1);}
                   | TOK_LPAREN TOK_RPAREN
                   ;
