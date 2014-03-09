@@ -10,7 +10,7 @@ Terminals unused in grammar
    TOK_DOT
 
 
-State 197 conflicts: 1 shift/reduce
+State 199 conflicts: 1 shift/reduce
 
 
 Grammar
@@ -28,7 +28,7 @@ Grammar
     6 declaration: event_decl
     7            | function_proto
     8            | class_decl
-    9            | variable_decl
+    9            | global_decl
 
    10 rule: primitive_all TOK_ARROW rule_stmts
 
@@ -121,62 +121,71 @@ Grammar
 
    80 ref_expr: TOK_IDENT
 
-   81 variable_decl: type variable_l TOK_SEMICOLON
-   82              | type variable_init_l TOK_SEMICOLON
+   81 global_decl: type global_l TOK_SEMICOLON
+   82            | type global_init_l TOK_SEMICOLON
 
-   83 variable_l: variable_l TOK_COMMA TOK_IDENT
-   84           | TOK_IDENT
+   83 global_l: global_l TOK_COMMA TOK_IDENT
+   84         | TOK_IDENT
 
-   85 variable_init_l: variable_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression
-   86                | TOK_IDENT TOK_ASSIGN expression
+   85 global_init_l: global_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression
+   86              | TOK_IDENT TOK_ASSIGN expression
 
    87 class_decl: TOK_CLASS TOK_IDENT TOK_SEMICOLON TOK_SEMICOLON
    88           | TOK_CLASS TOK_IDENT TOK_SEMICOLON
 
-   89 function_body: function_body variable_decl
+   89 function_body: function_body local_decl
    90              | function_body simple_stmt
    91              | /* empty */
 
-   92 function_defn: TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON
+   92 local_decl: type local_l TOK_SEMICOLON
+   93           | type local_init_l TOK_SEMICOLON
 
-   93 function_decl: type TOK_IDENT func_param_l
+   94 local_l: local_l TOK_COMMA TOK_IDENT
+   95        | TOK_IDENT
 
-   94 function_proto: function_decl TOK_SEMICOLON
-   95               | function_decl function_defn
+   96 local_init_l: local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression
+   97             | TOK_IDENT TOK_ASSIGN expression
 
-   96 func_param_l: TOK_LPAREN func_param_l TOK_RPAREN
-   97             | func_param_l TOK_COMMA func_param
-   98             | func_param
-   99             | TOK_LPAREN TOK_RPAREN
+   98 function_defn: TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON
 
-  100 func_param: type TOK_IDENT
-  101           | TOK_IDENT TOK_IDENT
+   99 function_decl: type TOK_IDENT func_param_l
 
-  102 event_decl: TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON
+  100 function_proto: function_decl TOK_SEMICOLON
+  101               | function_decl function_defn
 
-  103 event_param_l: TOK_LPAREN event_param_l TOK_RPAREN
-  104              | event_param_l TOK_COMMA event_param
-  105              | event_param
-  106              | TOK_LPAREN TOK_RPAREN
+  102 func_param_l: TOK_LPAREN func_param_l TOK_RPAREN
+  103             | func_param_l TOK_COMMA func_param
+  104             | func_param
+  105             | TOK_LPAREN TOK_RPAREN
 
-  107 event_param: type TOK_IDENT
-  108            | TOK_IDENT TOK_IDENT
+  106 func_param: type TOK_IDENT
+  107           | TOK_IDENT TOK_IDENT
 
-  109 literal: TOK_UINTNUM
-  110        | TOK_DOUBLENUM
-  111        | TOK_STRCONST
-  112        | TOK_TRUE
-  113        | TOK_FALSE
+  108 event_decl: TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON
 
-  114 type: baseType
+  109 event_param_l: TOK_LPAREN event_param_l TOK_RPAREN
+  110              | event_param_l TOK_COMMA event_param
+  111              | event_param
+  112              | TOK_LPAREN TOK_RPAREN
 
-  115 baseType: TOK_VOID
-  116         | TOK_BOOL
-  117         | TOK_BYTE
-  118         | TOK_STRING
-  119         | TOK_INT
-  120         | TOK_DOUBLE
-  121         | TOK_UNSIGNED TOK_INT
+  113 event_param: type TOK_IDENT
+  114            | TOK_IDENT TOK_IDENT
+
+  115 literal: TOK_UINTNUM
+  116        | TOK_DOUBLENUM
+  117        | TOK_STRCONST
+  118        | TOK_TRUE
+  119        | TOK_FALSE
+
+  120 type: baseType
+
+  121 baseType: TOK_VOID
+  122         | TOK_BOOL
+  123         | TOK_BYTE
+  124         | TOK_STRING
+  125         | TOK_INT
+  126         | TOK_DOUBLE
+  127         | TOK_UNSIGNED TOK_INT
 
 
 Terminals, with rules where they appear
@@ -208,37 +217,37 @@ TOK_NE (279) 65
 TOK_AND (280) 63
 TOK_OR (281) 62
 TOK_NOT (282) 24 59
-TOK_COMMA (283) 29 49 83 85 97 104
-TOK_ASSIGN (284) 51 85 86
-TOK_SEMICOLON (285) 11 13 15 36 37 44 45 81 82 87 88 92 94 102
+TOK_COMMA (283) 29 49 83 85 94 96 103 110
+TOK_ASSIGN (284) 51 85 86 96 97
+TOK_SEMICOLON (285) 11 13 15 36 37 44 45 81 82 87 88 92 93 98 100 108
 TOK_COLON (286) 22
 TOK_ARROW (287) 10
-TOK_LBRACE (288) 11 12 32 41 45 92
-TOK_RBRACE (289) 11 12 32 41 45 92
-TOK_LPAREN (290) 20 28 31 46 47 48 58 96 99 103 106
-TOK_RPAREN (291) 20 28 31 46 47 48 58 96 99 103 106
+TOK_LBRACE (288) 11 12 32 41 45 98
+TOK_RBRACE (289) 11 12 32 41 45 98
+TOK_LPAREN (290) 20 28 31 46 47 48 58 102 105 109 112
+TOK_RPAREN (291) 20 28 31 46 47 48 58 102 105 109 112
 TOK_IF (292) 39 40
 TOK_ELSE (293) 40
 TOK_CLASS (294) 87 88
 TOK_RETURN (295)
-TOK_EVENT (296) 102
+TOK_EVENT (296) 108
 TOK_ANY (297) 26
 TOK_PRINT (298)
-TOK_UINTNUM (299) 109
-TOK_DOUBLENUM (300) 110
-TOK_VOID (301) 115
-TOK_STRING (302) 118
-TOK_STRCONST (303) 111
-TOK_INT (304) 119 121
-TOK_UNSIGNED (305) 121
-TOK_BOOL (306) 116
-TOK_BYTE (307) 117
-TOK_DOUBLE (308) 120
+TOK_UINTNUM (299) 115
+TOK_DOUBLENUM (300) 116
+TOK_VOID (301) 121
+TOK_STRING (302) 124
+TOK_STRCONST (303) 117
+TOK_INT (304) 125 127
+TOK_UNSIGNED (305) 127
+TOK_BOOL (306) 122
+TOK_BYTE (307) 123
+TOK_DOUBLE (308) 126
 TOK_SHORT (309)
-TOK_TRUE (310) 112
-TOK_FALSE (311) 113
-TOK_IDENT (312) 27 29 30 47 48 80 83 84 85 86 87 88 93 100 101 102
-    107 108
+TOK_TRUE (310) 118
+TOK_FALSE (311) 119
+TOK_IDENT (312) 27 29 30 47 48 80 83 84 85 86 87 88 94 95 96 97 99
+    106 107 108 113 114
 TOK_DOUBLE_COLON (313)
 TOK_LBRACK (314)
 TOK_DOT (315)
@@ -291,7 +300,7 @@ assignment (81)
 expression (82)
     on left: 52 53 54 55 56 57 58, on right: 15 18 46 49 50 51 58 59
     60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 85
-    86
+    86 96 97
 unary_operation (83)
     on left: 59 60 61, on right: 56
 binary_operation (84)
@@ -299,38 +308,44 @@ binary_operation (84)
     on right: 57
 ref_expr (85)
     on left: 80, on right: 51 53
-variable_decl (86)
-    on left: 81 82, on right: 9 89
-variable_l (87)
+global_decl (86)
+    on left: 81 82, on right: 9
+global_l (87)
     on left: 83 84, on right: 81 83
-variable_init_l (88)
+global_init_l (88)
     on left: 85 86, on right: 82 85
 class_decl (89)
     on left: 87 88, on right: 8
 function_body (90)
-    on left: 89 90 91, on right: 89 90 92
-function_defn (91)
-    on left: 92, on right: 95
-function_decl (92)
-    on left: 93, on right: 94 95
-function_proto (93)
-    on left: 94 95, on right: 7
-func_param_l (94)
-    on left: 96 97 98 99, on right: 93 96 97
-func_param (95)
-    on left: 100 101, on right: 97 98
-event_decl (96)
-    on left: 102, on right: 6
-event_param_l (97)
-    on left: 103 104 105 106, on right: 102 103 104
-event_param (98)
-    on left: 107 108, on right: 104 105
-literal (99)
-    on left: 109 110 111 112 113, on right: 52
-type (100)
-    on left: 114, on right: 81 82 93 100 107
-baseType (101)
-    on left: 115 116 117 118 119 120 121, on right: 114
+    on left: 89 90 91, on right: 89 90 98
+local_decl (91)
+    on left: 92 93, on right: 89
+local_l (92)
+    on left: 94 95, on right: 92 94
+local_init_l (93)
+    on left: 96 97, on right: 93 96
+function_defn (94)
+    on left: 98, on right: 101
+function_decl (95)
+    on left: 99, on right: 100 101
+function_proto (96)
+    on left: 100 101, on right: 7
+func_param_l (97)
+    on left: 102 103 104 105, on right: 99 102 103
+func_param (98)
+    on left: 106 107, on right: 103 104
+event_decl (99)
+    on left: 108, on right: 6
+event_param_l (100)
+    on left: 109 110 111 112, on right: 108 109 110
+event_param (101)
+    on left: 113 114, on right: 110 111
+literal (102)
+    on left: 115 116 117 118 119, on right: 52
+type (103)
+    on left: 120, on right: 81 82 92 93 99 106 113
+baseType (104)
+    on left: 121 122 123 124 125 126 127, on right: 120
 
 
 state 0
@@ -387,7 +402,7 @@ state 3
     binary_event_oprs  go to state 21
     any_event          go to state 22
     normal_event       go to state 23
-    variable_decl      go to state 24
+    global_decl        go to state 24
     class_decl         go to state 25
     function_decl      go to state 26
     function_proto     go to state 27
@@ -447,7 +462,7 @@ state 7
 
 state 8
 
-  102 event_decl: TOK_EVENT . TOK_IDENT event_param_l TOK_SEMICOLON
+  108 event_decl: TOK_EVENT . TOK_IDENT event_param_l TOK_SEMICOLON
 
     TOK_IDENT  shift, and go to state 34
 
@@ -461,51 +476,51 @@ state 9
 
 state 10
 
-  115 baseType: TOK_VOID .
+  121 baseType: TOK_VOID .
 
-    $default  reduce using rule 115 (baseType)
+    $default  reduce using rule 121 (baseType)
 
 
 state 11
 
-  118 baseType: TOK_STRING .
+  124 baseType: TOK_STRING .
 
-    $default  reduce using rule 118 (baseType)
+    $default  reduce using rule 124 (baseType)
 
 
 state 12
 
-  119 baseType: TOK_INT .
+  125 baseType: TOK_INT .
 
-    $default  reduce using rule 119 (baseType)
+    $default  reduce using rule 125 (baseType)
 
 
 state 13
 
-  121 baseType: TOK_UNSIGNED . TOK_INT
+  127 baseType: TOK_UNSIGNED . TOK_INT
 
     TOK_INT  shift, and go to state 35
 
 
 state 14
 
-  116 baseType: TOK_BOOL .
+  122 baseType: TOK_BOOL .
 
-    $default  reduce using rule 116 (baseType)
+    $default  reduce using rule 122 (baseType)
 
 
 state 15
 
-  117 baseType: TOK_BYTE .
+  123 baseType: TOK_BYTE .
 
-    $default  reduce using rule 117 (baseType)
+    $default  reduce using rule 123 (baseType)
 
 
 state 16
 
-  120 baseType: TOK_DOUBLE .
+  126 baseType: TOK_DOUBLE .
 
-    $default  reduce using rule 120 (baseType)
+    $default  reduce using rule 126 (baseType)
 
 
 state 17
@@ -571,7 +586,7 @@ state 23
 
 state 24
 
-    9 declaration: variable_decl .
+    9 declaration: global_decl .
 
     $default  reduce using rule 9 (declaration)
 
@@ -585,8 +600,8 @@ state 25
 
 state 26
 
-   94 function_proto: function_decl . TOK_SEMICOLON
-   95               | function_decl . function_defn
+  100 function_proto: function_decl . TOK_SEMICOLON
+  101               | function_decl . function_defn
 
     TOK_SEMICOLON  shift, and go to state 44
     TOK_LBRACE     shift, and go to state 45
@@ -610,21 +625,21 @@ state 28
 
 state 29
 
-   81 variable_decl: type . variable_l TOK_SEMICOLON
-   82              | type . variable_init_l TOK_SEMICOLON
-   93 function_decl: type . TOK_IDENT func_param_l
+   81 global_decl: type . global_l TOK_SEMICOLON
+   82            | type . global_init_l TOK_SEMICOLON
+   99 function_decl: type . TOK_IDENT func_param_l
 
     TOK_IDENT  shift, and go to state 47
 
-    variable_l       go to state 48
-    variable_init_l  go to state 49
+    global_l       go to state 48
+    global_init_l  go to state 49
 
 
 state 30
 
-  114 type: baseType .
+  120 type: baseType .
 
-    $default  reduce using rule 114 (type)
+    $default  reduce using rule 120 (type)
 
 
 state 31
@@ -660,7 +675,7 @@ state 33
 
 state 34
 
-  102 event_decl: TOK_EVENT TOK_IDENT . event_param_l TOK_SEMICOLON
+  108 event_decl: TOK_EVENT TOK_IDENT . event_param_l TOK_SEMICOLON
 
     TOK_LPAREN    shift, and go to state 52
     TOK_VOID      shift, and go to state 10
@@ -680,9 +695,9 @@ state 34
 
 state 35
 
-  121 baseType: TOK_UNSIGNED TOK_INT .
+  127 baseType: TOK_UNSIGNED TOK_INT .
 
-    $default  reduce using rule 121 (baseType)
+    $default  reduce using rule 127 (baseType)
 
 
 state 36
@@ -818,14 +833,14 @@ state 43
 
 state 44
 
-   94 function_proto: function_decl TOK_SEMICOLON .
+  100 function_proto: function_decl TOK_SEMICOLON .
 
-    $default  reduce using rule 94 (function_proto)
+    $default  reduce using rule 100 (function_proto)
 
 
 state 45
 
-   92 function_defn: TOK_LBRACE . function_body TOK_RBRACE TOK_SEMICOLON
+   98 function_defn: TOK_LBRACE . function_body TOK_RBRACE TOK_SEMICOLON
 
     $default  reduce using rule 91 (function_body)
 
@@ -834,16 +849,16 @@ state 45
 
 state 46
 
-   95 function_proto: function_decl function_defn .
+  101 function_proto: function_decl function_defn .
 
-    $default  reduce using rule 95 (function_proto)
+    $default  reduce using rule 101 (function_proto)
 
 
 state 47
 
-   84 variable_l: TOK_IDENT .
-   86 variable_init_l: TOK_IDENT . TOK_ASSIGN expression
-   93 function_decl: type TOK_IDENT . func_param_l
+   84 global_l: TOK_IDENT .
+   86 global_init_l: TOK_IDENT . TOK_ASSIGN expression
+   99 function_decl: type TOK_IDENT . func_param_l
 
     TOK_ASSIGN    shift, and go to state 85
     TOK_LPAREN    shift, and go to state 86
@@ -856,7 +871,7 @@ state 47
     TOK_DOUBLE    shift, and go to state 16
     TOK_IDENT     shift, and go to state 87
 
-    $default  reduce using rule 84 (variable_l)
+    $default  reduce using rule 84 (global_l)
 
     func_param_l  go to state 88
     func_param    go to state 89
@@ -866,8 +881,8 @@ state 47
 
 state 48
 
-   81 variable_decl: type variable_l . TOK_SEMICOLON
-   83 variable_l: variable_l . TOK_COMMA TOK_IDENT
+   81 global_decl: type global_l . TOK_SEMICOLON
+   83 global_l: global_l . TOK_COMMA TOK_IDENT
 
     TOK_COMMA      shift, and go to state 91
     TOK_SEMICOLON  shift, and go to state 92
@@ -875,8 +890,8 @@ state 48
 
 state 49
 
-   82 variable_decl: type variable_init_l . TOK_SEMICOLON
-   85 variable_init_l: variable_init_l . TOK_COMMA TOK_IDENT TOK_ASSIGN expression
+   82 global_decl: type global_init_l . TOK_SEMICOLON
+   85 global_init_l: global_init_l . TOK_COMMA TOK_IDENT TOK_ASSIGN expression
 
     TOK_COMMA      shift, and go to state 93
     TOK_SEMICOLON  shift, and go to state 94
@@ -901,8 +916,8 @@ state 51
 
 state 52
 
-  103 event_param_l: TOK_LPAREN . event_param_l TOK_RPAREN
-  106              | TOK_LPAREN . TOK_RPAREN
+  109 event_param_l: TOK_LPAREN . event_param_l TOK_RPAREN
+  112              | TOK_LPAREN . TOK_RPAREN
 
     TOK_LPAREN    shift, and go to state 52
     TOK_RPAREN    shift, and go to state 96
@@ -923,15 +938,15 @@ state 52
 
 state 53
 
-  108 event_param: TOK_IDENT . TOK_IDENT
+  114 event_param: TOK_IDENT . TOK_IDENT
 
     TOK_IDENT  shift, and go to state 98
 
 
 state 54
 
-  102 event_decl: TOK_EVENT TOK_IDENT event_param_l . TOK_SEMICOLON
-  104 event_param_l: event_param_l . TOK_COMMA event_param
+  108 event_decl: TOK_EVENT TOK_IDENT event_param_l . TOK_SEMICOLON
+  110 event_param_l: event_param_l . TOK_COMMA event_param
 
     TOK_COMMA      shift, and go to state 99
     TOK_SEMICOLON  shift, and go to state 100
@@ -939,14 +954,14 @@ state 54
 
 state 55
 
-  105 event_param_l: event_param .
+  111 event_param_l: event_param .
 
-    $default  reduce using rule 105 (event_param_l)
+    $default  reduce using rule 111 (event_param_l)
 
 
 state 56
 
-  107 event_param: type . TOK_IDENT
+  113 event_param: type . TOK_IDENT
 
     TOK_IDENT  shift, and go to state 101
 
@@ -1122,37 +1137,37 @@ state 67
 
 state 68
 
-  109 literal: TOK_UINTNUM .
+  115 literal: TOK_UINTNUM .
 
-    $default  reduce using rule 109 (literal)
+    $default  reduce using rule 115 (literal)
 
 
 state 69
 
-  110 literal: TOK_DOUBLENUM .
+  116 literal: TOK_DOUBLENUM .
 
-    $default  reduce using rule 110 (literal)
+    $default  reduce using rule 116 (literal)
 
 
 state 70
 
-  111 literal: TOK_STRCONST .
+  117 literal: TOK_STRCONST .
 
-    $default  reduce using rule 111 (literal)
+    $default  reduce using rule 117 (literal)
 
 
 state 71
 
-  112 literal: TOK_TRUE .
+  118 literal: TOK_TRUE .
 
-    $default  reduce using rule 112 (literal)
+    $default  reduce using rule 118 (literal)
 
 
 state 72
 
-  113 literal: TOK_FALSE .
+  119 literal: TOK_FALSE .
 
-    $default  reduce using rule 113 (literal)
+    $default  reduce using rule 119 (literal)
 
 
 state 73
@@ -1317,9 +1332,9 @@ state 83
 
 state 84
 
-   89 function_body: function_body . variable_decl
+   89 function_body: function_body . local_decl
    90              | function_body . simple_stmt
-   92 function_defn: TOK_LBRACE function_body . TOK_RBRACE TOK_SEMICOLON
+   98 function_defn: TOK_LBRACE function_body . TOK_RBRACE TOK_SEMICOLON
 
     TOK_RBRACE    shift, and go to state 134
     TOK_IF        shift, and go to state 135
@@ -1337,14 +1352,14 @@ state 84
     func_invocation    go to state 138
     assignment         go to state 139
     ref_expr           go to state 140
-    variable_decl      go to state 141
+    local_decl         go to state 141
     type               go to state 142
     baseType           go to state 30
 
 
 state 85
 
-   86 variable_init_l: TOK_IDENT TOK_ASSIGN . expression
+   86 global_init_l: TOK_IDENT TOK_ASSIGN . expression
 
     TOK_MINUS      shift, and go to state 63
     TOK_BITNOT     shift, and go to state 64
@@ -1368,8 +1383,8 @@ state 85
 
 state 86
 
-   96 func_param_l: TOK_LPAREN . func_param_l TOK_RPAREN
-   99             | TOK_LPAREN . TOK_RPAREN
+  102 func_param_l: TOK_LPAREN . func_param_l TOK_RPAREN
+  105             | TOK_LPAREN . TOK_RPAREN
 
     TOK_LPAREN    shift, and go to state 86
     TOK_RPAREN    shift, and go to state 144
@@ -1390,61 +1405,61 @@ state 86
 
 state 87
 
-  101 func_param: TOK_IDENT . TOK_IDENT
+  107 func_param: TOK_IDENT . TOK_IDENT
 
     TOK_IDENT  shift, and go to state 146
 
 
 state 88
 
-   93 function_decl: type TOK_IDENT func_param_l .
-   97 func_param_l: func_param_l . TOK_COMMA func_param
+   99 function_decl: type TOK_IDENT func_param_l .
+  103 func_param_l: func_param_l . TOK_COMMA func_param
 
     TOK_COMMA  shift, and go to state 147
 
-    $default  reduce using rule 93 (function_decl)
+    $default  reduce using rule 99 (function_decl)
 
 
 state 89
 
-   98 func_param_l: func_param .
+  104 func_param_l: func_param .
 
-    $default  reduce using rule 98 (func_param_l)
+    $default  reduce using rule 104 (func_param_l)
 
 
 state 90
 
-  100 func_param: type . TOK_IDENT
+  106 func_param: type . TOK_IDENT
 
     TOK_IDENT  shift, and go to state 148
 
 
 state 91
 
-   83 variable_l: variable_l TOK_COMMA . TOK_IDENT
+   83 global_l: global_l TOK_COMMA . TOK_IDENT
 
     TOK_IDENT  shift, and go to state 149
 
 
 state 92
 
-   81 variable_decl: type variable_l TOK_SEMICOLON .
+   81 global_decl: type global_l TOK_SEMICOLON .
 
-    $default  reduce using rule 81 (variable_decl)
+    $default  reduce using rule 81 (global_decl)
 
 
 state 93
 
-   85 variable_init_l: variable_init_l TOK_COMMA . TOK_IDENT TOK_ASSIGN expression
+   85 global_init_l: global_init_l TOK_COMMA . TOK_IDENT TOK_ASSIGN expression
 
     TOK_IDENT  shift, and go to state 150
 
 
 state 94
 
-   82 variable_decl: type variable_init_l TOK_SEMICOLON .
+   82 global_decl: type global_init_l TOK_SEMICOLON .
 
-    $default  reduce using rule 82 (variable_decl)
+    $default  reduce using rule 82 (global_decl)
 
 
 state 95
@@ -1456,15 +1471,15 @@ state 95
 
 state 96
 
-  106 event_param_l: TOK_LPAREN TOK_RPAREN .
+  112 event_param_l: TOK_LPAREN TOK_RPAREN .
 
-    $default  reduce using rule 106 (event_param_l)
+    $default  reduce using rule 112 (event_param_l)
 
 
 state 97
 
-  103 event_param_l: TOK_LPAREN event_param_l . TOK_RPAREN
-  104              | event_param_l . TOK_COMMA event_param
+  109 event_param_l: TOK_LPAREN event_param_l . TOK_RPAREN
+  110              | event_param_l . TOK_COMMA event_param
 
     TOK_COMMA   shift, and go to state 99
     TOK_RPAREN  shift, and go to state 151
@@ -1472,14 +1487,14 @@ state 97
 
 state 98
 
-  108 event_param: TOK_IDENT TOK_IDENT .
+  114 event_param: TOK_IDENT TOK_IDENT .
 
-    $default  reduce using rule 108 (event_param)
+    $default  reduce using rule 114 (event_param)
 
 
 state 99
 
-  104 event_param_l: event_param_l TOK_COMMA . event_param
+  110 event_param_l: event_param_l TOK_COMMA . event_param
 
     TOK_VOID      shift, and go to state 10
     TOK_STRING    shift, and go to state 11
@@ -1497,16 +1512,16 @@ state 99
 
 state 100
 
-  102 event_decl: TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON .
+  108 event_decl: TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON .
 
-    $default  reduce using rule 102 (event_decl)
+    $default  reduce using rule 108 (event_decl)
 
 
 state 101
 
-  107 event_param: type TOK_IDENT .
+  113 event_param: type TOK_IDENT .
 
-    $default  reduce using rule 107 (event_param)
+    $default  reduce using rule 113 (event_param)
 
 
 state 102
@@ -2210,7 +2225,7 @@ state 133
 
 state 134
 
-   92 function_defn: TOK_LBRACE function_body TOK_RBRACE . TOK_SEMICOLON
+   98 function_defn: TOK_LBRACE function_body TOK_RBRACE . TOK_SEMICOLON
 
     TOK_SEMICOLON  shift, and go to state 180
 
@@ -2262,20 +2277,20 @@ state 140
 
 state 141
 
-   89 function_body: function_body variable_decl .
+   89 function_body: function_body local_decl .
 
     $default  reduce using rule 89 (function_body)
 
 
 state 142
 
-   81 variable_decl: type . variable_l TOK_SEMICOLON
-   82              | type . variable_init_l TOK_SEMICOLON
+   92 local_decl: type . local_l TOK_SEMICOLON
+   93           | type . local_init_l TOK_SEMICOLON
 
     TOK_IDENT  shift, and go to state 185
 
-    variable_l       go to state 48
-    variable_init_l  go to state 49
+    local_l       go to state 186
+    local_init_l  go to state 187
 
 
 state 143
@@ -2298,7 +2313,7 @@ state 143
    77                 | expression . TOK_MULT expression
    78                 | expression . TOK_DIV expression
    79                 | expression . TOK_MOD expression
-   86 variable_init_l: TOK_IDENT TOK_ASSIGN expression .
+   86 global_init_l: TOK_IDENT TOK_ASSIGN expression .
 
     TOK_PLUS    shift, and go to state 114
     TOK_MINUS   shift, and go to state 115
@@ -2319,35 +2334,35 @@ state 143
     TOK_AND     shift, and go to state 130
     TOK_OR      shift, and go to state 131
 
-    $default  reduce using rule 86 (variable_init_l)
+    $default  reduce using rule 86 (global_init_l)
 
 
 state 144
 
-   99 func_param_l: TOK_LPAREN TOK_RPAREN .
+  105 func_param_l: TOK_LPAREN TOK_RPAREN .
 
-    $default  reduce using rule 99 (func_param_l)
+    $default  reduce using rule 105 (func_param_l)
 
 
 state 145
 
-   96 func_param_l: TOK_LPAREN func_param_l . TOK_RPAREN
-   97             | func_param_l . TOK_COMMA func_param
+  102 func_param_l: TOK_LPAREN func_param_l . TOK_RPAREN
+  103             | func_param_l . TOK_COMMA func_param
 
     TOK_COMMA   shift, and go to state 147
-    TOK_RPAREN  shift, and go to state 186
+    TOK_RPAREN  shift, and go to state 188
 
 
 state 146
 
-  101 func_param: TOK_IDENT TOK_IDENT .
+  107 func_param: TOK_IDENT TOK_IDENT .
 
-    $default  reduce using rule 101 (func_param)
+    $default  reduce using rule 107 (func_param)
 
 
 state 147
 
-   97 func_param_l: func_param_l TOK_COMMA . func_param
+  103 func_param_l: func_param_l TOK_COMMA . func_param
 
     TOK_VOID      shift, and go to state 10
     TOK_STRING    shift, and go to state 11
@@ -2358,44 +2373,44 @@ state 147
     TOK_DOUBLE    shift, and go to state 16
     TOK_IDENT     shift, and go to state 87
 
-    func_param  go to state 187
+    func_param  go to state 189
     type        go to state 90
     baseType    go to state 30
 
 
 state 148
 
-  100 func_param: type TOK_IDENT .
+  106 func_param: type TOK_IDENT .
 
-    $default  reduce using rule 100 (func_param)
+    $default  reduce using rule 106 (func_param)
 
 
 state 149
 
-   83 variable_l: variable_l TOK_COMMA TOK_IDENT .
+   83 global_l: global_l TOK_COMMA TOK_IDENT .
 
-    $default  reduce using rule 83 (variable_l)
+    $default  reduce using rule 83 (global_l)
 
 
 state 150
 
-   85 variable_init_l: variable_init_l TOK_COMMA TOK_IDENT . TOK_ASSIGN expression
+   85 global_init_l: global_init_l TOK_COMMA TOK_IDENT . TOK_ASSIGN expression
 
-    TOK_ASSIGN  shift, and go to state 188
+    TOK_ASSIGN  shift, and go to state 190
 
 
 state 151
 
-  103 event_param_l: TOK_LPAREN event_param_l TOK_RPAREN .
+  109 event_param_l: TOK_LPAREN event_param_l TOK_RPAREN .
 
-    $default  reduce using rule 103 (event_param_l)
+    $default  reduce using rule 109 (event_param_l)
 
 
 state 152
 
-  104 event_param_l: event_param_l TOK_COMMA event_param .
+  110 event_param_l: event_param_l TOK_COMMA event_param .
 
-    $default  reduce using rule 104 (event_param_l)
+    $default  reduce using rule 110 (event_param_l)
 
 
 state 153
@@ -2410,7 +2425,7 @@ state 154
    32 compoundStmt: TOK_LBRACE compoundStmt . TOK_RBRACE
    34             | compoundStmt . simple_stmt
 
-    TOK_RBRACE  shift, and go to state 189
+    TOK_RBRACE  shift, and go to state 191
     TOK_IF      shift, and go to state 135
     TOK_IDENT   shift, and go to state 73
 
@@ -2426,7 +2441,7 @@ state 155
    11 rule_stmts: TOK_LBRACE compoundStmt TOK_RBRACE . TOK_SEMICOLON
    12           | TOK_LBRACE compoundStmt TOK_RBRACE .
 
-    TOK_SEMICOLON  shift, and go to state 190
+    TOK_SEMICOLON  shift, and go to state 192
 
     $default  reduce using rule 12 (rule_stmts)
 
@@ -2457,8 +2472,8 @@ state 159
    47 func_invocation: TOK_IDENT TOK_LPAREN caller_param_l . TOK_RPAREN
    49 caller_param_l: caller_param_l . TOK_COMMA expression
 
-    TOK_COMMA   shift, and go to state 191
-    TOK_RPAREN  shift, and go to state 192
+    TOK_COMMA   shift, and go to state 193
+    TOK_RPAREN  shift, and go to state 194
 
 
 state 160
@@ -3190,9 +3205,9 @@ state 179
 
 state 180
 
-   92 function_defn: TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON .
+   98 function_defn: TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON .
 
-    $default  reduce using rule 92 (function_defn)
+    $default  reduce using rule 98 (function_defn)
 
 
 state 181
@@ -3212,7 +3227,7 @@ state 181
 
     func_invocation   go to state 76
     assignment        go to state 77
-    expression        go to state 193
+    expression        go to state 195
     unary_operation   go to state 79
     binary_operation  go to state 80
     ref_expr          go to state 81
@@ -3224,15 +3239,15 @@ state 182
    39 if_then_else_stmt: TOK_IF condition . basic_block
    40                  | TOK_IF condition . basic_block TOK_ELSE basic_block
 
-    TOK_SEMICOLON  shift, and go to state 194
-    TOK_LBRACE     shift, and go to state 195
+    TOK_SEMICOLON  shift, and go to state 196
+    TOK_LBRACE     shift, and go to state 197
     TOK_IF         shift, and go to state 135
     TOK_IDENT      shift, and go to state 73
 
-    simple_stmt        go to state 196
+    simple_stmt        go to state 198
     if_then_else_stmt  go to state 137
-    basic_block        go to state 197
-    empty_block        go to state 198
+    basic_block        go to state 199
+    empty_block        go to state 200
     func_invocation    go to state 138
     assignment         go to state 139
     ref_expr           go to state 140
@@ -3254,31 +3269,49 @@ state 184
 
 state 185
 
-   84 variable_l: TOK_IDENT .
-   86 variable_init_l: TOK_IDENT . TOK_ASSIGN expression
+   95 local_l: TOK_IDENT .
+   97 local_init_l: TOK_IDENT . TOK_ASSIGN expression
 
-    TOK_ASSIGN  shift, and go to state 85
+    TOK_ASSIGN  shift, and go to state 201
 
-    $default  reduce using rule 84 (variable_l)
+    $default  reduce using rule 95 (local_l)
 
 
 state 186
 
-   96 func_param_l: TOK_LPAREN func_param_l TOK_RPAREN .
+   92 local_decl: type local_l . TOK_SEMICOLON
+   94 local_l: local_l . TOK_COMMA TOK_IDENT
 
-    $default  reduce using rule 96 (func_param_l)
+    TOK_COMMA      shift, and go to state 202
+    TOK_SEMICOLON  shift, and go to state 203
 
 
 state 187
 
-   97 func_param_l: func_param_l TOK_COMMA func_param .
+   93 local_decl: type local_init_l . TOK_SEMICOLON
+   96 local_init_l: local_init_l . TOK_COMMA TOK_IDENT TOK_ASSIGN expression
 
-    $default  reduce using rule 97 (func_param_l)
+    TOK_COMMA      shift, and go to state 204
+    TOK_SEMICOLON  shift, and go to state 205
 
 
 state 188
 
-   85 variable_init_l: variable_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN . expression
+  102 func_param_l: TOK_LPAREN func_param_l TOK_RPAREN .
+
+    $default  reduce using rule 102 (func_param_l)
+
+
+state 189
+
+  103 func_param_l: func_param_l TOK_COMMA func_param .
+
+    $default  reduce using rule 103 (func_param_l)
+
+
+state 190
+
+   85 global_init_l: global_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN . expression
 
     TOK_MINUS      shift, and go to state 63
     TOK_BITNOT     shift, and go to state 64
@@ -3293,28 +3326,28 @@ state 188
 
     func_invocation   go to state 76
     assignment        go to state 77
-    expression        go to state 199
+    expression        go to state 206
     unary_operation   go to state 79
     binary_operation  go to state 80
     ref_expr          go to state 81
     literal           go to state 82
 
 
-state 189
+state 191
 
    32 compoundStmt: TOK_LBRACE compoundStmt TOK_RBRACE .
 
     $default  reduce using rule 32 (compoundStmt)
 
 
-state 190
+state 192
 
    11 rule_stmts: TOK_LBRACE compoundStmt TOK_RBRACE TOK_SEMICOLON .
 
     $default  reduce using rule 11 (rule_stmts)
 
 
-state 191
+state 193
 
    49 caller_param_l: caller_param_l TOK_COMMA . expression
 
@@ -3331,21 +3364,21 @@ state 191
 
     func_invocation   go to state 76
     assignment        go to state 77
-    expression        go to state 200
+    expression        go to state 207
     unary_operation   go to state 79
     binary_operation  go to state 80
     ref_expr          go to state 81
     literal           go to state 82
 
 
-state 192
+state 194
 
    47 func_invocation: TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN .
 
     $default  reduce using rule 47 (func_invocation)
 
 
-state 193
+state 195
 
    46 condition: TOK_LPAREN expression . TOK_RPAREN
    62 binary_operation: expression . TOK_OR expression
@@ -3385,17 +3418,17 @@ state 193
     TOK_NE      shift, and go to state 129
     TOK_AND     shift, and go to state 130
     TOK_OR      shift, and go to state 131
-    TOK_RPAREN  shift, and go to state 201
+    TOK_RPAREN  shift, and go to state 208
 
 
-state 194
+state 196
 
    44 basic_block: TOK_SEMICOLON .
 
     $default  reduce using rule 44 (basic_block)
 
 
-state 195
+state 197
 
    41 basic_block: TOK_LBRACE . compoundStmt TOK_RBRACE
    45 empty_block: TOK_LBRACE . TOK_SEMICOLON TOK_RBRACE
@@ -3405,36 +3438,88 @@ state 195
 
     $default  reduce using rule 35 (compoundStmt)
 
-    compoundStmt  go to state 202
+    compoundStmt  go to state 209
     empty_block   go to state 110
 
 
-state 196
+state 198
 
    43 basic_block: simple_stmt .
 
     $default  reduce using rule 43 (basic_block)
 
 
-state 197
+state 199
 
    39 if_then_else_stmt: TOK_IF condition basic_block .
    40                  | TOK_IF condition basic_block . TOK_ELSE basic_block
 
-    TOK_ELSE  shift, and go to state 203
+    TOK_ELSE  shift, and go to state 210
 
     TOK_ELSE  [reduce using rule 39 (if_then_else_stmt)]
     $default  reduce using rule 39 (if_then_else_stmt)
 
 
-state 198
+state 200
 
    42 basic_block: empty_block .
 
     $default  reduce using rule 42 (basic_block)
 
 
-state 199
+state 201
+
+   97 local_init_l: TOK_IDENT TOK_ASSIGN . expression
+
+    TOK_MINUS      shift, and go to state 63
+    TOK_BITNOT     shift, and go to state 64
+    TOK_NOT        shift, and go to state 65
+    TOK_LPAREN     shift, and go to state 67
+    TOK_UINTNUM    shift, and go to state 68
+    TOK_DOUBLENUM  shift, and go to state 69
+    TOK_STRCONST   shift, and go to state 70
+    TOK_TRUE       shift, and go to state 71
+    TOK_FALSE      shift, and go to state 72
+    TOK_IDENT      shift, and go to state 73
+
+    func_invocation   go to state 76
+    assignment        go to state 77
+    expression        go to state 211
+    unary_operation   go to state 79
+    binary_operation  go to state 80
+    ref_expr          go to state 81
+    literal           go to state 82
+
+
+state 202
+
+   94 local_l: local_l TOK_COMMA . TOK_IDENT
+
+    TOK_IDENT  shift, and go to state 212
+
+
+state 203
+
+   92 local_decl: type local_l TOK_SEMICOLON .
+
+    $default  reduce using rule 92 (local_decl)
+
+
+state 204
+
+   96 local_init_l: local_init_l TOK_COMMA . TOK_IDENT TOK_ASSIGN expression
+
+    TOK_IDENT  shift, and go to state 213
+
+
+state 205
+
+   93 local_decl: type local_init_l TOK_SEMICOLON .
+
+    $default  reduce using rule 93 (local_decl)
+
+
+state 206
 
    62 binary_operation: expression . TOK_OR expression
    63                 | expression . TOK_AND expression
@@ -3454,7 +3539,7 @@ state 199
    77                 | expression . TOK_MULT expression
    78                 | expression . TOK_DIV expression
    79                 | expression . TOK_MOD expression
-   85 variable_init_l: variable_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression .
+   85 global_init_l: global_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression .
 
     TOK_PLUS    shift, and go to state 114
     TOK_MINUS   shift, and go to state 115
@@ -3475,10 +3560,10 @@ state 199
     TOK_AND     shift, and go to state 130
     TOK_OR      shift, and go to state 131
 
-    $default  reduce using rule 85 (variable_init_l)
+    $default  reduce using rule 85 (global_init_l)
 
 
-state 200
+state 207
 
    49 caller_param_l: caller_param_l TOK_COMMA expression .
    62 binary_operation: expression . TOK_OR expression
@@ -3522,19 +3607,19 @@ state 200
     $default  reduce using rule 49 (caller_param_l)
 
 
-state 201
+state 208
 
    46 condition: TOK_LPAREN expression TOK_RPAREN .
 
     $default  reduce using rule 46 (condition)
 
 
-state 202
+state 209
 
    34 compoundStmt: compoundStmt . simple_stmt
    41 basic_block: TOK_LBRACE compoundStmt . TOK_RBRACE
 
-    TOK_RBRACE  shift, and go to state 204
+    TOK_RBRACE  shift, and go to state 214
     TOK_IF      shift, and go to state 135
     TOK_IDENT   shift, and go to state 73
 
@@ -3545,33 +3630,159 @@ state 202
     ref_expr           go to state 140
 
 
-state 203
+state 210
 
    40 if_then_else_stmt: TOK_IF condition basic_block TOK_ELSE . basic_block
 
-    TOK_SEMICOLON  shift, and go to state 194
-    TOK_LBRACE     shift, and go to state 195
+    TOK_SEMICOLON  shift, and go to state 196
+    TOK_LBRACE     shift, and go to state 197
     TOK_IF         shift, and go to state 135
     TOK_IDENT      shift, and go to state 73
 
-    simple_stmt        go to state 196
+    simple_stmt        go to state 198
     if_then_else_stmt  go to state 137
-    basic_block        go to state 205
-    empty_block        go to state 198
+    basic_block        go to state 215
+    empty_block        go to state 200
     func_invocation    go to state 138
     assignment         go to state 139
     ref_expr           go to state 140
 
 
-state 204
+state 211
+
+   62 binary_operation: expression . TOK_OR expression
+   63                 | expression . TOK_AND expression
+   64                 | expression . TOK_EQ expression
+   65                 | expression . TOK_NE expression
+   66                 | expression . TOK_GT expression
+   67                 | expression . TOK_LT expression
+   68                 | expression . TOK_GE expression
+   69                 | expression . TOK_LE expression
+   70                 | expression . TOK_BITOR expression
+   71                 | expression . TOK_BITXOR expression
+   72                 | expression . TOK_BITAND expression
+   73                 | expression . TOK_SHL expression
+   74                 | expression . TOK_SHR expression
+   75                 | expression . TOK_PLUS expression
+   76                 | expression . TOK_MINUS expression
+   77                 | expression . TOK_MULT expression
+   78                 | expression . TOK_DIV expression
+   79                 | expression . TOK_MOD expression
+   97 local_init_l: TOK_IDENT TOK_ASSIGN expression .
+
+    TOK_PLUS    shift, and go to state 114
+    TOK_MINUS   shift, and go to state 115
+    TOK_MULT    shift, and go to state 116
+    TOK_DIV     shift, and go to state 117
+    TOK_MOD     shift, and go to state 118
+    TOK_BITAND  shift, and go to state 119
+    TOK_BITOR   shift, and go to state 120
+    TOK_BITXOR  shift, and go to state 121
+    TOK_SHL     shift, and go to state 122
+    TOK_SHR     shift, and go to state 123
+    TOK_GT      shift, and go to state 124
+    TOK_LT      shift, and go to state 125
+    TOK_GE      shift, and go to state 126
+    TOK_LE      shift, and go to state 127
+    TOK_EQ      shift, and go to state 128
+    TOK_NE      shift, and go to state 129
+    TOK_AND     shift, and go to state 130
+    TOK_OR      shift, and go to state 131
+
+    $default  reduce using rule 97 (local_init_l)
+
+
+state 212
+
+   94 local_l: local_l TOK_COMMA TOK_IDENT .
+
+    $default  reduce using rule 94 (local_l)
+
+
+state 213
+
+   96 local_init_l: local_init_l TOK_COMMA TOK_IDENT . TOK_ASSIGN expression
+
+    TOK_ASSIGN  shift, and go to state 216
+
+
+state 214
 
    41 basic_block: TOK_LBRACE compoundStmt TOK_RBRACE .
 
     $default  reduce using rule 41 (basic_block)
 
 
-state 205
+state 215
 
    40 if_then_else_stmt: TOK_IF condition basic_block TOK_ELSE basic_block .
 
     $default  reduce using rule 40 (if_then_else_stmt)
+
+
+state 216
+
+   96 local_init_l: local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN . expression
+
+    TOK_MINUS      shift, and go to state 63
+    TOK_BITNOT     shift, and go to state 64
+    TOK_NOT        shift, and go to state 65
+    TOK_LPAREN     shift, and go to state 67
+    TOK_UINTNUM    shift, and go to state 68
+    TOK_DOUBLENUM  shift, and go to state 69
+    TOK_STRCONST   shift, and go to state 70
+    TOK_TRUE       shift, and go to state 71
+    TOK_FALSE      shift, and go to state 72
+    TOK_IDENT      shift, and go to state 73
+
+    func_invocation   go to state 76
+    assignment        go to state 77
+    expression        go to state 217
+    unary_operation   go to state 79
+    binary_operation  go to state 80
+    ref_expr          go to state 81
+    literal           go to state 82
+
+
+state 217
+
+   62 binary_operation: expression . TOK_OR expression
+   63                 | expression . TOK_AND expression
+   64                 | expression . TOK_EQ expression
+   65                 | expression . TOK_NE expression
+   66                 | expression . TOK_GT expression
+   67                 | expression . TOK_LT expression
+   68                 | expression . TOK_GE expression
+   69                 | expression . TOK_LE expression
+   70                 | expression . TOK_BITOR expression
+   71                 | expression . TOK_BITXOR expression
+   72                 | expression . TOK_BITAND expression
+   73                 | expression . TOK_SHL expression
+   74                 | expression . TOK_SHR expression
+   75                 | expression . TOK_PLUS expression
+   76                 | expression . TOK_MINUS expression
+   77                 | expression . TOK_MULT expression
+   78                 | expression . TOK_DIV expression
+   79                 | expression . TOK_MOD expression
+   96 local_init_l: local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression .
+
+    TOK_PLUS    shift, and go to state 114
+    TOK_MINUS   shift, and go to state 115
+    TOK_MULT    shift, and go to state 116
+    TOK_DIV     shift, and go to state 117
+    TOK_MOD     shift, and go to state 118
+    TOK_BITAND  shift, and go to state 119
+    TOK_BITOR   shift, and go to state 120
+    TOK_BITXOR  shift, and go to state 121
+    TOK_SHL     shift, and go to state 122
+    TOK_SHR     shift, and go to state 123
+    TOK_GT      shift, and go to state 124
+    TOK_LT      shift, and go to state 125
+    TOK_GE      shift, and go to state 126
+    TOK_LE      shift, and go to state 127
+    TOK_EQ      shift, and go to state 128
+    TOK_NE      shift, and go to state 129
+    TOK_AND     shift, and go to state 130
+    TOK_OR      shift, and go to state 131
+
+    $default  reduce using rule 96 (local_init_l)

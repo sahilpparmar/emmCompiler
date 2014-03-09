@@ -17,7 +17,9 @@ ExprNode::ExprNode(ExprNodeType et, const Value* val, int line, int column,
 				   string file):
 	AstNode(AstNode::NodeType::EXPR_NODE, line, column, file)
 {
-	// Add your code here
+    exprType_ = et;
+    val_ = val;
+    //coercedType =
 }
 
 
@@ -25,6 +27,37 @@ ExprNode::ExprNode(const ExprNode& e) : AstNode(e)
 {
 	// Add your code here
 }
+
+/****************************************************************/
+
+RefExprNode::RefExprNode(string ext, const SymTabEntry* ste, 
+                            int line, int column, string file): 
+        ExprNode(ExprNode::ExprNodeType::REF_EXPR_NODE, 0, line, column, file)
+{
+    ext_ = ext;
+    sym_ = ste;
+}
+
+RefExprNode::RefExprNode(const RefExprNode& ref) : ExprNode(ref)
+{
+
+}
+
+/****************************************************************/
+
+InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param, 
+		 int line, int column, string file):
+        ExprNode(ExprNode::ExprNodeType::INV_NODE, 0, line, column, file)
+{
+    ste_ = ste;
+    params_ = param;
+}
+
+InvocationNode::InvocationNode(const InvocationNode& ref) : ExprNode(ref)
+{
+
+}
+
 /****************************************************************/
 extern const OpNode::OpInfo opInfo[] = {
   // print name, arity, paren_flag, fixity, arg types, out type, constraints

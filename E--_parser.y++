@@ -14,43 +14,94 @@ extern const OpNode::OpInfo opInfo[];
 
 #define prt(x) cout << x << endl;
 
-static VariableEntry* allocateVarNode(string name, VariableEntry::VarKind v, Type* type, ExprNode* init) {
+static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type* type, ExprNode* init) {
+    assert(type != NULL);
     return new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
 }
 
+static ClassEntry* allocClassEntry(char* name) {
+    assert(name != NULL);
+    return new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+}
+
+static EventEntry* allocEventEntry(char* name) {
+    assert(name != NULL);
+    return new EventEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+}
+
+static FunctionEntry* allocFuncEntry(char* name, Type* type) {
+    assert(name != NULL);
+    return new FunctionEntry(string(name), type, yylineno, yycolumnno, string(yyfilename));
+}
+
+static RefExprNode* allocRefExprNode(char* str) {
+    assert(str != NULL);
+    SymTabEntry* sym = NULL; // symtab_lookup (str)
+    return new RefExprNode(string(str), sym, yylineno, yycolumnno, string(yyfilename));
+}
+
+static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
+    SymTabEntry* sym = NULL; // symtab_lookup (str)
+    return new InvocationNode(sym, param_l, yylineno, yycolumnno, string(yyfilename));
+}
+
+static ValueNode* allocValueNode(Value* val) {
+    return new ValueNode(val, yylineno, yycolumnno, string(yyfilename));
+}
+
+static OpNode* allocOpNode(OpNode::OpCode op, ExprNode *l, ExprNode *r) {
+    return new OpNode(op, l, r, yylineno, yycolumnno, string(yyfilename));
+}
+
+static ExprStmtNode* allocExprStmtNode(ExprNode* e) {
+    return new ExprStmtNode(e, yylineno, yycolumnno, string(yyfilename));
+}
+
+static IfNode* allocIfNode(ExprNode* cond, StmtNode* thenStmt, StmtNode* elseStmt) {
+    return new IfNode(cond, thenStmt, elseStmt, yylineno, yycolumnno, string(yyfilename));
+}
+
+static CompoundStmtNode* allocCompStmtNode(list<StmtNode*> *Slist) {
+    return new CompoundStmtNode(Slist, yylineno, yycolumnno, string(yyfilename));
+}
+
+Type*               curType     = NULL;
+vector<ExprNode*>*  curExprList = NULL;
+list<StmtNode*>*    curStmtList = NULL;
+
 %}
 
-%union{
-  unsigned int 	     uVal;
-  double             dVal;
-  char*              cVal;
-  vector<string>*    strVector;
-  Value*             valVal;
+%union {
+    unsigned int       uVal;
+    double             dVal;
+    char*              cVal;
+    vector<string>*    strVector;
+    Value*             valVal;
 
-  ExprNode*          exprVal;
-  vector<ExprNode*>* exprList;
-  RefExprNode*       refexpVal;
+    ExprNode*          exprVal;
+    vector<ExprNode*>* exprList;
+    RefExprNode*       refexpVal;
 
-  ClassEntry*        classEntry;
-  Type*              typeVal;
-  vector<Type*>*     typeList; 
+    ClassEntry*        classEntry;
+    Type*              typeVal;
+    vector<Type*>*     typeList; 
 
-  EventEntry*        eventEntry;                        
-  VariableEntry*     variableEntry;
-  FunctionEntry*     functionEntry;
+    EventEntry*        eventEntry;                        
+    VariableEntry*     variableEntry;
+    FunctionEntry*     functionEntry;
 
-  BasePatNode*       patVal;
-  PrimitivePatNode*  primPatVal;
-  StmtNode*          stmtVal;
-  list<StmtNode*>*   stmtList;
-  IfNode*            ifVal;
-  CompoundStmtNode*  compoundStmtVal;
-  RuleNode*          ruleNode;
+    BasePatNode*       patVal;
+    PrimitivePatNode*  primPatVal;
+    StmtNode*          stmtVal;
+    list<StmtNode*>*   stmtList;
+    IfNode*            ifVal;
+    CompoundStmtNode*  compoundStmtVal;
+    RuleNode*          ruleNode;
 
-  vector<RuleNode*>* transList;
-  
-  vector<Type*>*     formalTypeVal;
-  const OpNode::OpInfo*    funIval;
+    vector<RuleNode*>* transList;
+
+    vector<Type*>*     formalTypeVal;
+    const OpNode::OpInfo*    funIval;
 };
 
 /* Operators */
@@ -100,20 +151,24 @@ static VariableEntry* allocateVarNode(string name, VariableEntry::VarKind v, Typ
 */
 
 %type <functionEntry> function_decl
-%type <variableEntry> variable_decl func_param event_param
-%type <typeList> func_param_l event_param_l event_aparam_l caller_param_l
+%type <variableEntry> global_decl global_l global_init_l func_param event_param local_decl local_l local_init_l
+%type <classEntry>  class_decl
 %type <eventEntry> event_decl 
+
+%type <refexpVal> ref_expr
+%type <valVal> literal
+%type <exprVal> expression func_invocation assignment binary_operation unary_operation condition
+%type <typeList> func_param_l event_param_l event_aparam_l
+%type <exprList> caller_param_l
+%type <ifVal> if_then_else_stmt 
+%type <stmtVal> simple_stmt basic_block 
+%type <compoundStmtVal> compoundStmt empty_block function_defn function_body
+
+%type <ruleNode> rule
 %type <patVal> rule_stmts
 %type <primPatVal> any_event normal_event primitive_all
-%type <typeVal> type baseType
-%type <exprVal> expression func_invocation assignment
-%type <refexpVal> ref_expr
-%type <ruleNode> rule
-%type <stmtVal> simple_stmt
-%type <compoundStmtVal> compoundStmt basic_block empty_block function_defn
-%type <ifVal> if_then_else_stmt 
-%type <valVal> literal
 
+%type <typeVal> type baseType
 %type <cVal> TOK_IDENT TOK_PRINT 
 %type <uVal> TOK_UINTNUM 
 %type <dVal> TOK_DOUBLENUM 
@@ -149,7 +204,7 @@ static VariableEntry* allocateVarNode(string name, VariableEntry::VarKind v, Typ
 %start s_specification
 %%
 
-s_specification:    program                                                 {       prt("Spec");    }
+s_specification:    program                                                 {   prt("Spec");    }
                   ;
 
 program:            specification
@@ -163,170 +218,181 @@ specification:      specification declaration
 declaration:        event_decl
                   | function_proto
                   | class_decl
-                  | variable_decl
+                  | global_decl
                   ;
 
-rule:               primitive_all TOK_ARROW rule_stmts                        {       prt("Rule");  }
+rule:               primitive_all TOK_ARROW rule_stmts                      {   prt("Rule");  }
                   ;
 
-rule_stmts:         TOK_LBRACE compoundStmt TOK_RBRACE TOK_SEMICOLON         {       prt("CompoundStmt");  }
-                  | TOK_LBRACE compoundStmt TOK_RBRACE                       {       prt("CompoundStmt");  }
+rule_stmts:         TOK_LBRACE compoundStmt TOK_RBRACE TOK_SEMICOLON        {   allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
+                  | TOK_LBRACE compoundStmt TOK_RBRACE                      {   allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
                   | empty_block TOK_SEMICOLON
                   | empty_block
-                  | expression TOK_SEMICOLON                                 {       prt("AssignStmt");    }
+                  | expression TOK_SEMICOLON                                {   prt("AssignStmt");    }
                   ;
 
-primitive_all:      normal_event                                              {       prt("PrimitivePat"); }
-                  | any_event                                                 {       prt("PrimitivePat");  }
-                  | normal_event TOK_BITOR expression                         {       prt("PrimitivePatWithCond");  }
+primitive_all:      normal_event                                            {   prt("PrimitivePat"); }
+                  | any_event                                               {   prt("PrimitivePat");  }
+                  | normal_event TOK_BITOR expression                       {   prt("PrimitivePatWithCond");  }
                   | binary_event_oprs
-                  | TOK_LPAREN primitive_all TOK_RPAREN                       {       prt("(EventPat)");  }
+                  | TOK_LPAREN primitive_all TOK_RPAREN                     {   prt("(EventPat)");  }
                   ;
 
-binary_event_oprs:  primitive_all TOK_PAT_OR      primitive_all               {       prt("EventPat \\/ EventPat");     }
-                  | primitive_all TOK_COLON       primitive_all               {       prt("EventPat : EventPat");       }
-                  | primitive_all TOK_PAT_STAR    primitive_all               {       prt("EventPat **");      }
-                  | TOK_NOT   primitive_all                                   {       prt("!EventPat");     }
+binary_event_oprs:  primitive_all TOK_PAT_OR      primitive_all             {   prt("EventPat \\/ EventPat");     }
+                  | primitive_all TOK_COLON       primitive_all             {   prt("EventPat : EventPat");       }
+                  | primitive_all TOK_PAT_STAR    primitive_all             {   prt("EventPat **");      }
+                  | TOK_NOT   primitive_all                                 {   prt("!EventPat");     }
                   |
                   ;
 
-any_event:          TOK_ANY                                                   {       prt("anyEvent");   }
+any_event:          TOK_ANY                                                 {   prt("anyEvent");   }
                   ;
 
-normal_event:       TOK_IDENT event_aparam_l                                  {       prt("NormalEvent");   }
+normal_event:       TOK_IDENT event_aparam_l                                {   prt("NormalEvent");   }
                   ;
 
-event_aparam_l:     TOK_LPAREN event_aparam_l TOK_RPAREN                      
-                  | event_aparam_l TOK_COMMA TOK_IDENT                        {       prt("EventFormalParam");   }
-                  | TOK_IDENT                                                 {       prt("EventFormalParam");   }
+event_aparam_l:     TOK_LPAREN event_aparam_l TOK_RPAREN                    
+                  | event_aparam_l TOK_COMMA TOK_IDENT                      {   prt("EventFormalParam");   }
+                  | TOK_IDENT                                               {   prt("EventFormalParam");   }
                   | TOK_LPAREN TOK_RPAREN
                   ;
 
 
-compoundStmt:       TOK_LBRACE compoundStmt TOK_RBRACE                       {       prt("CompoundStmt");  }
-                  | empty_block
-                  | compoundStmt simple_stmt
+compoundStmt:       TOK_LBRACE compoundStmt TOK_RBRACE                      {   $$ = allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
+                  | empty_block                                             {   $$ = $1;                                                    }
+                  | compoundStmt simple_stmt                                {   if (!curStmtList) curStmtList = new list<StmtNode*>; curStmtList->push_back($2);}
                   |
                   ;
 
-simple_stmt:        func_invocation TOK_SEMICOLON                             {       prt("FunctionInvocationStmt"); }
-                  | assignment TOK_SEMICOLON                                  {       prt("AssignStmt"); }
-                  | if_then_else_stmt 
+simple_stmt:        func_invocation TOK_SEMICOLON                           {   $$ = allocExprStmtNode($1); prt("FunctionInvocationStmt");  }
+                  | assignment TOK_SEMICOLON                                {   $$ = allocExprStmtNode($1); prt("AssignStmt");              }
+                  | if_then_else_stmt                                       {   $$ = $1;                                                    }
                   ;
 
-if_then_else_stmt:  TOK_IF condition basic_block                              {       prt("IfThenStmt"); }
-                  | TOK_IF condition basic_block TOK_ELSE basic_block         {       prt("IfThenElseStmt"); }
+if_then_else_stmt:  TOK_IF condition basic_block                            {   $$ = allocIfNode($2, $3, NULL); prt("IfThenStmt");          }
+                  | TOK_IF condition basic_block TOK_ELSE basic_block       {   $$ = allocIfNode($2, $3, $5);   prt("IfThenElseStmt");      }
                   ;
 
-basic_block:        TOK_LBRACE compoundStmt TOK_RBRACE                       {       prt("CompoundStmt");  }
-                  | empty_block
-                  | simple_stmt
+basic_block:        TOK_LBRACE compoundStmt TOK_RBRACE                      {   $$ = allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
+                  | empty_block                                             {   $$ = $1;                                                    }
+                  | simple_stmt                                             {   $$ = $1;                                                    }
                   | TOK_SEMICOLON
                   ;
 
-empty_block:        TOK_LBRACE TOK_SEMICOLON TOK_RBRACE                       {       prt("CompoundStmt");  }
+empty_block:        TOK_LBRACE TOK_SEMICOLON TOK_RBRACE                     {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
                   ;
 
-
-condition:          TOK_LPAREN expression TOK_RPAREN                         {       prt("(Expr)"); }
+condition:          TOK_LPAREN expression TOK_RPAREN                        {   $$ = $2;    prt("(Expr)"); }
                   ;
 
-func_invocation:    TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN            {       prt("FunctionInvocation"); }
-                  | TOK_IDENT TOK_LPAREN TOK_RPAREN                           {       prt("FunctionInvocation"); }
+func_invocation:    TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocInvNode($1, curExprList); curExprList = NULL; prt("FunctionInvocation"); }
+                  | TOK_IDENT TOK_LPAREN TOK_RPAREN                         {   $$ = allocInvNode($1, NULL); prt("FunctionInvocation"); }
                   ;
 
-caller_param_l:     caller_param_l TOK_COMMA expression
-                  | expression
+caller_param_l:     caller_param_l TOK_COMMA expression                     {   curExprList->push_back($3);                                             }
+                  | expression                                              {   curExprList = new vector<ExprNode*>(); curExprList->push_back($1);      }
                   ;
 
-assignment:         ref_expr TOK_ASSIGN expression                           {       prt("Assignment");        }
+assignment:         ref_expr TOK_ASSIGN expression                          {   $$ = allocOpNode(OpNode::OpCode::ASSIGN, $1, $3); prt("Assignment");    }
 
-expression:         literal
-                  | ref_expr
-                  | func_invocation
-                  | assignment  
-                  | unary_operation
-                  | binary_operation
-                  | TOK_LPAREN expression TOK_RPAREN                           {       prt("(Expr)");            }
+expression:         literal                                                 {   $$ = allocValueNode($1);    }
+                  | ref_expr                                                {   $$ = $1;                    }
+                  | func_invocation                                         {   $$ = $1;                    }
+                  | assignment                                              {   $$ = $1;                    }
+                  | unary_operation                                         {   $$ = $1;                    }
+                  | binary_operation                                        {   $$ = $1;                    }
+                  | TOK_LPAREN expression TOK_RPAREN                        {   $$ = $2;    prt("(Expr)");  }
                   ;
 
-unary_operation:    TOK_NOT expression                                        {       prt("!Expr");             }
-                  | TOK_BITNOT expression                                     {       prt("~Expr");             }
-                  | TOK_MINUS expression %prec TOK_UMINUS                     {       prt("-Expr");             }
+unary_operation:    TOK_NOT expression                                      {   $$ = allocOpNode(OpNode::OpCode::NOT   , $2, NULL); prt("!Expr");         }
+                  | TOK_BITNOT expression                                   {   $$ = allocOpNode(OpNode::OpCode::BITNOT, $2, NULL); prt("~Expr");         }
+                  | TOK_MINUS expression %prec TOK_UMINUS                   {   $$ = allocOpNode(OpNode::OpCode::UMINUS, $2, NULL); prt("-Expr");         }
                   ;
 
-binary_operation:   expression TOK_OR          expression                     {       prt("Expr || Expr");      }
-                  | expression TOK_AND         expression                     {       prt("Expr && Expr");      }
-                  | expression TOK_EQ          expression                     {       prt("Expr == Expr");      }
-                  | expression TOK_NE          expression                     {       prt("Expr != Expr");      }
-                  | expression TOK_GT          expression                     {       prt("Expr > Expr");       }
-                  | expression TOK_LT          expression                     {       prt("Expr < Expr");       }
-                  | expression TOK_GE          expression                     {       prt("Expr >= Expr");      }
-                  | expression TOK_LE          expression                     {       prt("Expr <= Expr");      }
-                  | expression TOK_BITOR       expression                     {       prt("Expr | Expr");       }
-                  | expression TOK_BITXOR      expression                     {       prt("Expr ^ Expr");       }
-                  | expression TOK_BITAND      expression                     {       prt("Expr & Expr");       }
-                  | expression TOK_SHL         expression                     {       prt("Expr << Expr");      }
-                  | expression TOK_SHR         expression                     {       prt("Expr >> Expr");      }
-                  | expression TOK_PLUS        expression                     {       prt("Expr + Expr");       }
-                  | expression TOK_MINUS       expression                     {       prt("Expr - Expr");       }
-                  | expression TOK_MULT        expression                     {       prt("Expr * Expr");       }
-                  | expression TOK_DIV         expression                     {       prt("Expr / Expr");       }
-                  | expression TOK_MOD         expression                     {       prt("Expr % Expr");       }
+binary_operation:   expression TOK_OR          expression                   {   $$ = allocOpNode(OpNode::OpCode::OR    , $1, $3); prt("Expr || Expr");    }
+                  | expression TOK_AND         expression                   {   $$ = allocOpNode(OpNode::OpCode::AND   , $1, $3); prt("Expr && Expr");    }
+                  | expression TOK_EQ          expression                   {   $$ = allocOpNode(OpNode::OpCode::EQ    , $1, $3); prt("Expr == Expr");    }
+                  | expression TOK_NE          expression                   {   $$ = allocOpNode(OpNode::OpCode::NE    , $1, $3); prt("Expr != Expr");    }
+                  | expression TOK_GT          expression                   {   $$ = allocOpNode(OpNode::OpCode::GT    , $1, $3); prt("Expr > Expr");     }
+                  | expression TOK_LT          expression                   {   $$ = allocOpNode(OpNode::OpCode::LT    , $1, $3); prt("Expr < Expr");     }
+                  | expression TOK_GE          expression                   {   $$ = allocOpNode(OpNode::OpCode::GE    , $1, $3); prt("Expr >= Expr");    }
+                  | expression TOK_LE          expression                   {   $$ = allocOpNode(OpNode::OpCode::LE    , $1, $3); prt("Expr <= Expr");    }
+                  | expression TOK_BITOR       expression                   {   $$ = allocOpNode(OpNode::OpCode::BITOR , $1, $3); prt("Expr | Expr");     }
+                  | expression TOK_BITXOR      expression                   {   $$ = allocOpNode(OpNode::OpCode::BITXOR, $1, $3); prt("Expr ^ Expr");     }
+                  | expression TOK_BITAND      expression                   {   $$ = allocOpNode(OpNode::OpCode::BITAND, $1, $3); prt("Expr & Expr");     }
+                  | expression TOK_SHL         expression                   {   $$ = allocOpNode(OpNode::OpCode::SHL   , $1, $3); prt("Expr << Expr");    }
+                  | expression TOK_SHR         expression                   {   $$ = allocOpNode(OpNode::OpCode::SHR   , $1, $3); prt("Expr >> Expr");    }
+                  | expression TOK_PLUS        expression                   {   $$ = allocOpNode(OpNode::OpCode::PLUS  , $1, $3); prt("Expr + Expr");     }
+                  | expression TOK_MINUS       expression                   {   $$ = allocOpNode(OpNode::OpCode::MINUS , $1, $3); prt("Expr - Expr");     }
+                  | expression TOK_MULT        expression                   {   $$ = allocOpNode(OpNode::OpCode::MULT  , $1, $3); prt("Expr * Expr");     }
+                  | expression TOK_DIV         expression                   {   $$ = allocOpNode(OpNode::OpCode::DIV   , $1, $3); prt("Expr / Expr");     }
+                  | expression TOK_MOD         expression                   {   $$ = allocOpNode(OpNode::OpCode::MOD   , $1, $3); prt("Expr % Expr");     }
                   ;
 
-ref_expr:           TOK_IDENT                                                 {       prt("RefExpr");           }
+ref_expr:           TOK_IDENT                                               {   $$ = allocRefExprNode($1); prt("RefExpr"); }
                   ;
 
-variable_decl:      type variable_l TOK_SEMICOLON 
-                  | type variable_init_l TOK_SEMICOLON
+global_decl:        type global_l TOK_SEMICOLON     
+                  | type global_init_l TOK_SEMICOLON
                   ;
 
-variable_l:         variable_l TOK_COMMA TOK_IDENT                            {       prt("VariableDecl"); }
-                  | TOK_IDENT                                                 {       prt("VariableDecl"); }
+global_l:           global_l TOK_COMMA TOK_IDENT        {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
+                  | TOK_IDENT                           {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
                   ;
 
-variable_init_l:    variable_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression {       prt("VariableDeclWithInit");}
-                  | TOK_IDENT TOK_ASSIGN expression                           {       prt("VariableDeclWithInit");}
+global_init_l:      global_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, $5); prt("VariableDeclWithInit"); }
+                  | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, $3); prt("VariableDeclWithInit"); }
                             
-class_decl:         TOK_CLASS TOK_IDENT TOK_SEMICOLON TOK_SEMICOLON           {       prt("ClassDecl");  }
-                  | TOK_CLASS TOK_IDENT TOK_SEMICOLON                         {       prt("ClassDecl");  }
+class_decl:         TOK_CLASS TOK_IDENT TOK_SEMICOLON TOK_SEMICOLON         {   $$ = allocClassEntry($2); prt("ClassDecl");  }
+                  | TOK_CLASS TOK_IDENT TOK_SEMICOLON                       {   $$ = allocClassEntry($2); prt("ClassDecl");  }
                   ;
 
-function_body:      function_body variable_decl
-                  | function_body simple_stmt 
+function_body:      function_body local_decl 
+                  | function_body simple_stmt
                   |
                   ;
 
-function_defn:      TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON         {       prt("FunctionBody");   }
+local_decl:         type local_l TOK_SEMICOLON
+                  | type local_init_l TOK_SEMICOLON
+                  ;
 
-function_decl:      type TOK_IDENT func_param_l                               {       prt("FunctionDecl");  }
+local_l:            local_l TOK_COMMA TOK_IDENT         {   $$ = allocVarEntry($3, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
+                  | TOK_IDENT                           {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
+                  ;
+
+local_init_l:       local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression  {   $$ = allocVarEntry($3, VariableEntry::LOCAL_VAR, curType, $5); prt("VariableDeclWithInit"); }
+                  | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, $3); prt("VariableDeclWithInit"); }
+                  ;
+
+function_defn:      TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON       {   prt("FunctionBody");  }
+
+function_decl:      type TOK_IDENT func_param_l                             {   allocFuncEntry($2, $1); prt("FunctionDecl");  }
                   ;
 
 function_proto:     function_decl TOK_SEMICOLON
                   | function_decl function_defn
                   ;
 
-func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {       prt("FormalParamList");   }
+func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {   prt("FormalParamList");   }
                   | func_param_l TOK_COMMA func_param
                   | func_param
                   | TOK_LPAREN TOK_RPAREN
                   ;
-func_param:         type TOK_IDENT          {   $$ = allocateVarNode($2, VariableEntry::VarKind::PARAM_VAR, $1, nullptr); prt("FormalParam");}
-                  | TOK_IDENT TOK_IDENT                                       {       prt("Type"); prt("FormalParam");  }
+func_param:         type TOK_IDENT          {   $$ = allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
+                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");  }
                   ;
 
-event_decl:         TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON          {       prt("EventDecl");   }
+event_decl:         TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON         {   $$ = allocEventEntry($2);   prt("EventDecl");   }
                   ;
 
-event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                      {       prt("FormalParamList");   }
+event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   prt("FormalParamList");   }
                   | event_param_l TOK_COMMA event_param
                   | event_param
                   | TOK_LPAREN TOK_RPAREN
                   ;
 
-event_param:        type TOK_IDENT          {   $$ = allocateVarNode($2, VariableEntry::VarKind::PARAM_VAR, $1, nullptr); prt("FormalParam");}
-                  | TOK_IDENT TOK_IDENT                                       {       prt("Type"); prt("FormalParam");  }
+event_param:        type TOK_IDENT          {   $$ = allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
+                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");  }
                   ;
 
 literal:          
@@ -337,7 +403,7 @@ literal:
                   | TOK_FALSE                                               {   $$ = new Value(false);          prt("Literal");    }
                   ;
 
-type:               baseType                                                {   $$ = $1;                        prt("Type");       }
+type:               baseType                                                {   $$ = curType = $1;        prt("Type");       }
                   ;
 
 baseType:           TOK_VOID                                                {   $$ = new Type(Type::VOID);    }
