@@ -14,43 +14,74 @@ extern const OpNode::OpInfo opInfo[];
 
 #define prt(x) cout << x << endl;
 
+Type                   *curType     = NULL;
+vector<ExprNode*>      *curExprList = NULL;
+list<StmtNode*>        *curStmtList = NULL;
+vector<Type*>          *curTypeList = NULL; 
+vector<VariableEntry*> *curVarList  = NULL; 
+FunctionEntry          *curFuncEnt  = NULL;
+EventEntry             *curEventEnt = NULL;
+
 static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type* type, ExprNode* init) {
-    return new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
+    VariableEntry *retVarEnt = new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
+    stm.insert(retVarEnt);
+
+    return retVarEnt;
 }
 
 static ClassEntry* allocClassEntry(char* name) {
     assert(name != NULL);
-    ClassEntry* classEnt = new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
-    SymTabEntry* sym = NULL; // symtab_lookup (name)
+    ClassEntry *retClassEnt = new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+    SymTabEntry *sym = NULL; // TODO: symtab_lookup (name)
     Type *te = new Type(sym, Type::CLASS);
-    classEnt->type(te);
+    retClassEnt->type(te);
+    stm.enterScope(retClassEnt);
 
-    return classEnt;
+    return retClassEnt;
 }
 
-static EventEntry* allocEventEntry(char* name, vector<Type*>* param_l) {
-    assert(name != NULL);
-    EventEntry* eventEnt = new EventEntry(string(name), yylineno, yycolumnno, string(yyfilename));
-    Type *te = new Type(param_l, Type::EVENT);
-    eventEnt->type(te);
+static EventEntry* allocEventEntry(char* name = NULL, vector<Type*>* param_l = NULL) {
+    EventEntry* retEventEnt = curEventEnt;
 
-    return eventEnt;
+    if (retEventEnt) {
+        assert(name != NULL);
+        Type *te = new Type(param_l, Type::EVENT);
+        retEventEnt->name(name);
+        retEventEnt->type(te);
+        curEventEnt = NULL;
+    } else {
+        retEventEnt = new EventEntry(string(""), yylineno, yycolumnno, string(yyfilename));
+        stm.enterScope(retEventEnt);
+    }
+
+    return retEventEnt;
 }
 
-static FunctionEntry* allocFuncEntry(char* name, Type* type, vector<Type*>* param_l) {
-    assert(name != NULL);
-    Type *te = new Type(param_l, type);
-    return new FunctionEntry(string(name), te, yylineno, yycolumnno, string(yyfilename));
+static FunctionEntry* allocFuncEntry(char* name = NULL, Type* rettype = NULL, vector<Type*>* param_l = NULL) {
+    FunctionEntry* retFuncEnt = curFuncEnt;
+
+    if (retFuncEnt) {
+        assert(name != NULL);
+        Type *te = new Type(param_l, rettype);
+        retFuncEnt->name(name);
+        retFuncEnt->type(te);
+        curFuncEnt = NULL;
+    } else {
+        retFuncEnt = new FunctionEntry(string(""), NULL, yylineno, yycolumnno, string(yyfilename));
+        stm.enterScope(retFuncEnt);
+    }
+    return retFuncEnt;
 }
 
 static RefExprNode* allocRefExprNode(char* str) {
     assert(str != NULL);
-    SymTabEntry* sym = NULL; // symtab_lookup (str)
+    SymTabEntry *sym = stm.lookUp(string(str));
     return new RefExprNode(string(str), sym, yylineno, yycolumnno, string(yyfilename));
 }
 
 static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
-    SymTabEntry* sym = NULL; // symtab_lookup (str)
+    assert(str != NULL);
+    SymTabEntry *sym = stm.lookUp(string(str));
     return new InvocationNode(sym, param_l, yylineno, yycolumnno, string(yyfilename));
 }
 
@@ -83,18 +114,16 @@ static PatNode* allocPatNode(BasePatNode::PatNodeKind pk, BasePatNode *p1, BaseP
 }
 
 static RuleNode* allocRuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction) {
-    return new RuleNode(re, pat, reaction, yylineno, yycolumnno, string(yyfilename));
+    RuleNode *retRuleNode = new RuleNode(re, pat, reaction, yylineno, yycolumnno, string(yyfilename));
+    GlobalEntry *globalSymEnt = (GlobalEntry*) stm.currentScope(SymTabEntry::Kind::GLOBAL_KIND);
+    globalSymEnt->addRule(retRuleNode);
+
+    return retRuleNode;
 }
 
 static RuleBlockEntry* allocRuleBlockEntry() {
     return new RuleBlockEntry(yylineno, yycolumnno, string(yyfilename));
 }
-
-Type*                   curType     = NULL;
-vector<ExprNode*>*      curExprList = NULL;
-list<StmtNode*>*        curStmtList = NULL;
-vector<Type*>*          curTypeList = NULL; 
-vector<VariableEntry*>* curVarList  = NULL; 
 
 %}
 
@@ -190,7 +219,7 @@ vector<VariableEntry*>* curVarList  = NULL;
 %type <exprList> caller_param_l
 %type <varList> event_aparam_l
 %type <ifVal> if_then_else_stmt 
-%type <stmtVal> simple_stmt basic_block 
+%type <stmtVal> simple_stmt basic_block TOK_SEMICOLON
 %type <compoundStmtVal> compoundStmt empty_block function_defn function_body
 
 %type <ruleNode> rule
@@ -243,9 +272,9 @@ specification:      specification declaration
                   |
                   ;
 
-declaration:        event_decl
-                  | function_proto
-                  | class_decl
+declaration:        event_decl                                              {   stm.leaveScope();       }
+                  | function_proto                                          {   stm.leaveScope();       }
+                  | class_decl                                              {   stm.leaveScope();       }
                   | global_decl
                   ;
 
@@ -259,9 +288,9 @@ rule_stmts:         TOK_LBRACE compoundStmt TOK_RBRACE TOK_SEMICOLON        {   
                   | expression TOK_SEMICOLON                                {   $$ = allocExprStmtNode($1); prt("AssignStmt");  }
                   ;
 
-primitive_all:      normal_event                                            {   $$ = allocPrimPatNode($1, curVarList, NULL);    prt("PrimitivePat"); }
-                  | any_event                                               {   $$ = allocPrimPatNode($1, curVarList, NULL);    prt("PrimitivePat"); }
-                  | normal_event TOK_BITOR expression                       {   $$ = allocPrimPatNode($1, curVarList, $3);      prt("PrimitivePatWithCond");  }
+primitive_all:      normal_event                                            {   $$ = allocPrimPatNode($1, curVarList, NULL);    curVarList = NULL;    prt("PrimitivePat"); }
+                  | any_event                                               {   $$ = allocPrimPatNode($1, curVarList, NULL);    curVarList = NULL;    prt("PrimitivePat"); }
+                  | normal_event TOK_BITOR expression                       {   $$ = allocPrimPatNode($1, curVarList, $3);      curVarList = NULL;    prt("PrimitivePatWithCond");  }
                   | binary_event_oprs                                       {   $$ = $1;                        }
                   | TOK_LPAREN primitive_all TOK_RPAREN                     {   $$ = $2;    prt("(EventPat)");  }
                   ;
@@ -401,30 +430,27 @@ function_decl:      type TOK_IDENT func_param_l                             {   
 function_proto:     function_decl TOK_SEMICOLON                             {   $$ = $1;                    }
                   | function_decl function_defn                             {   $1->body($2);   $$ = $1;    }
                   ;
- /*
- new SymTabEntry(string name, SymTabEntry::Kind k, int lineno, int columnno, string filename, Type *t)
- stm.enterScope(ste);
- */
+
 func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {   prt("FormalParamList");     }
                   | func_param_l TOK_COMMA func_param                       {   curTypeList->push_back($3); }
-                  | func_param                                              {   curTypeList = new vector<Type*>(); curTypeList->push_back($1);}
-                  | TOK_LPAREN TOK_RPAREN
+                  | func_param                                              {   curFuncEnt = allocFuncEntry();  curTypeList = new vector<Type*>(); curTypeList->push_back($1);  }
+                  | TOK_LPAREN TOK_RPAREN                                   {   curFuncEnt = allocFuncEntry();  }
                   ;
 func_param:         type TOK_IDENT                                          {   $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");  }
-                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");    }
+                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");}
                   ;
 
-event_decl:         TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON         {   $$ = allocEventEntry($2, curTypeList); curTypeList = NULL; prt("EventDecl");  }
+event_decl:         TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON         {   $$ = allocEventEntry($2, curTypeList);  curTypeList = NULL;     prt("EventDecl");   }
                   ;
 
-event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   prt("FormalParamList");     }
-                  | event_param_l TOK_COMMA event_param                     {   curTypeList->push_back($3);  }
-                  | event_param                                             {   curTypeList = new vector<Type*>(); curTypeList->push_back($1);}
-                  | TOK_LPAREN TOK_RPAREN
+event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   prt("FormalParamList");         }
+                  | event_param_l TOK_COMMA event_param                     {   curTypeList->push_back($3);     }
+                  | event_param                                             {   curEventEnt = allocEventEntry();  curTypeList = new vector<Type*>(); curTypeList->push_back($1);}
+                  | TOK_LPAREN TOK_RPAREN                                   {   curEventEnt = allocEventEntry();}
                   ;
 
 event_param:        type TOK_IDENT                                          {   $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
-                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");  }
+                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");}
                   ;
 
 literal:          
