@@ -15,23 +15,32 @@ extern const OpNode::OpInfo opInfo[];
 #define prt(x) cout << x << endl;
 
 static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type* type, ExprNode* init) {
-    assert(type != NULL);
     return new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
 }
 
 static ClassEntry* allocClassEntry(char* name) {
     assert(name != NULL);
-    return new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+    ClassEntry* classEnt = new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+    SymTabEntry* sym = NULL; // symtab_lookup (name)
+    Type *te = new Type(sym, Type::CLASS);
+    classEnt->type(te);
+
+    return classEnt;
 }
 
-static EventEntry* allocEventEntry(char* name) {
+static EventEntry* allocEventEntry(char* name, vector<Type*>* param_l) {
     assert(name != NULL);
-    return new EventEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+    EventEntry* eventEnt = new EventEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+    Type *te = new Type(param_l, Type::EVENT);
+    eventEnt->type(te);
+
+    return eventEnt;
 }
 
-static FunctionEntry* allocFuncEntry(char* name, Type* type) {
+static FunctionEntry* allocFuncEntry(char* name, Type* type, vector<Type*>* param_l) {
     assert(name != NULL);
-    return new FunctionEntry(string(name), type, yylineno, yycolumnno, string(yyfilename));
+    Type *te = new Type(param_l, type);
+    return new FunctionEntry(string(name), te, yylineno, yycolumnno, string(yyfilename));
 }
 
 static RefExprNode* allocRefExprNode(char* str) {
@@ -65,9 +74,27 @@ static CompoundStmtNode* allocCompStmtNode(list<StmtNode*> *Slist) {
     return new CompoundStmtNode(Slist, yylineno, yycolumnno, string(yyfilename));
 }
 
-Type*               curType     = NULL;
-vector<ExprNode*>*  curExprList = NULL;
-list<StmtNode*>*    curStmtList = NULL;
+static PrimitivePatNode* allocPrimPatNode(EventEntry* ee, vector<VariableEntry*>* params, ExprNode* c) {
+    return new PrimitivePatNode(ee, params, c, yylineno, yycolumnno, string(yyfilename));
+}
+
+static PatNode* allocPatNode(BasePatNode::PatNodeKind pk, BasePatNode *p1, BasePatNode *p2) {
+    return new PatNode(pk, p1, p2, yylineno, yycolumnno, string(yyfilename));
+}
+
+static RuleNode* allocRuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction) {
+    return new RuleNode(re, pat, reaction, yylineno, yycolumnno, string(yyfilename));
+}
+
+static RuleBlockEntry* allocRuleBlockEntry() {
+    return new RuleBlockEntry(yylineno, yycolumnno, string(yyfilename));
+}
+
+Type*                   curType     = NULL;
+vector<ExprNode*>*      curExprList = NULL;
+list<StmtNode*>*        curStmtList = NULL;
+vector<Type*>*          curTypeList = NULL; 
+vector<VariableEntry*>* curVarList  = NULL; 
 
 %}
 
@@ -86,21 +113,21 @@ list<StmtNode*>*    curStmtList = NULL;
     Type*              typeVal;
     vector<Type*>*     typeList; 
 
+    FunctionEntry*     functionEntry;
     EventEntry*        eventEntry;                        
     VariableEntry*     variableEntry;
-    FunctionEntry*     functionEntry;
+    vector<VariableEntry*>* varList;
 
-    BasePatNode*       patVal;
-    PrimitivePatNode*  primPatVal;
     StmtNode*          stmtVal;
     list<StmtNode*>*   stmtList;
     IfNode*            ifVal;
     CompoundStmtNode*  compoundStmtVal;
     RuleNode*          ruleNode;
 
+    BasePatNode*       patVal;
+    PrimitivePatNode*  primPatVal;
     vector<RuleNode*>* transList;
 
-    vector<Type*>*     formalTypeVal;
     const OpNode::OpInfo*    funIval;
 };
 
@@ -151,24 +178,25 @@ list<StmtNode*>*    curStmtList = NULL;
 */
 
 %type <functionEntry> function_decl
-%type <variableEntry> global_decl global_l global_init_l func_param event_param local_decl local_l local_init_l
+%type <variableEntry> global_decl global_l global_init_l local_decl local_l local_init_l
 %type <classEntry>  class_decl
-%type <eventEntry> event_decl 
+%type <eventEntry> event_decl any_event normal_event 
 
 %type <refexpVal> ref_expr
 %type <valVal> literal
 %type <exprVal> expression func_invocation assignment binary_operation unary_operation condition
-%type <typeList> func_param_l event_param_l event_aparam_l
+%type <typeVal> type baseType func_param event_param 
+%type <typeList> func_param_l event_param_l
 %type <exprList> caller_param_l
+%type <varList> event_aparam_l
 %type <ifVal> if_then_else_stmt 
 %type <stmtVal> simple_stmt basic_block 
 %type <compoundStmtVal> compoundStmt empty_block function_defn function_body
 
 %type <ruleNode> rule
-%type <patVal> rule_stmts
-%type <primPatVal> any_event normal_event primitive_all
+%type <stmtVal> rule_stmts
+%type <patVal> primitive_all binary_event_oprs
 
-%type <typeVal> type baseType
 %type <cVal> TOK_IDENT TOK_PRINT 
 %type <uVal> TOK_UINTNUM 
 %type <dVal> TOK_DOUBLENUM 
@@ -221,39 +249,39 @@ declaration:        event_decl
                   | global_decl
                   ;
 
-rule:               primitive_all TOK_ARROW rule_stmts                      {   prt("Rule");  }
+rule:               primitive_all TOK_ARROW rule_stmts                      {   $$ = allocRuleNode(allocRuleBlockEntry(), $1, $3); prt("Rule"); }
                   ;
 
-rule_stmts:         TOK_LBRACE compoundStmt TOK_RBRACE TOK_SEMICOLON        {   allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
-                  | TOK_LBRACE compoundStmt TOK_RBRACE                      {   allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
-                  | empty_block TOK_SEMICOLON
-                  | empty_block
-                  | expression TOK_SEMICOLON                                {   prt("AssignStmt");    }
+rule_stmts:         TOK_LBRACE compoundStmt TOK_RBRACE TOK_SEMICOLON        {   $$ = allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
+                  | TOK_LBRACE compoundStmt TOK_RBRACE                      {   $$ = allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
+                  | empty_block TOK_SEMICOLON                               {   $$ = $1;    }
+                  | empty_block                                             {   $$ = $1;    }
+                  | expression TOK_SEMICOLON                                {   $$ = allocExprStmtNode($1); prt("AssignStmt");  }
                   ;
 
-primitive_all:      normal_event                                            {   prt("PrimitivePat"); }
-                  | any_event                                               {   prt("PrimitivePat");  }
-                  | normal_event TOK_BITOR expression                       {   prt("PrimitivePatWithCond");  }
-                  | binary_event_oprs
-                  | TOK_LPAREN primitive_all TOK_RPAREN                     {   prt("(EventPat)");  }
+primitive_all:      normal_event                                            {   $$ = allocPrimPatNode($1, curVarList, NULL);    prt("PrimitivePat"); }
+                  | any_event                                               {   $$ = allocPrimPatNode($1, curVarList, NULL);    prt("PrimitivePat"); }
+                  | normal_event TOK_BITOR expression                       {   $$ = allocPrimPatNode($1, curVarList, $3);      prt("PrimitivePatWithCond");  }
+                  | binary_event_oprs                                       {   $$ = $1;                        }
+                  | TOK_LPAREN primitive_all TOK_RPAREN                     {   $$ = $2;    prt("(EventPat)");  }
                   ;
 
-binary_event_oprs:  primitive_all TOK_PAT_OR      primitive_all             {   prt("EventPat \\/ EventPat");     }
-                  | primitive_all TOK_COLON       primitive_all             {   prt("EventPat : EventPat");       }
-                  | primitive_all TOK_PAT_STAR    primitive_all             {   prt("EventPat **");      }
-                  | TOK_NOT   primitive_all                                 {   prt("!EventPat");     }
+binary_event_oprs:  primitive_all TOK_PAT_OR      primitive_all             {   $$ = allocPatNode(BasePatNode::PatNodeKind::OR  , $1, $3);   prt("EventPat \\/ EventPat");  }
+                  | primitive_all TOK_COLON       primitive_all             {   $$ = allocPatNode(BasePatNode::PatNodeKind::SEQ , $1, $3);   prt("EventPat : EventPat");    }
+                  | primitive_all TOK_PAT_STAR    primitive_all             {   $$ = allocPatNode(BasePatNode::PatNodeKind::STAR, $1, $3);   prt("EventPat **");            }
+                  | TOK_NOT   primitive_all                                 {   $$ = allocPatNode(BasePatNode::PatNodeKind::NEG , $2, NULL); prt("!EventPat");              }
                   |
                   ;
 
-any_event:          TOK_ANY                                                 {   prt("anyEvent");   }
+any_event:          TOK_ANY                                                 {   $$ = any; prt("anyEvent");   }
                   ;
 
-normal_event:       TOK_IDENT event_aparam_l                                {   prt("NormalEvent");   }
+normal_event:       TOK_IDENT event_aparam_l                                {   $$ = NULL; /*$$ = getEventEntry($1);*/ prt("NormalEvent");   }
                   ;
 
 event_aparam_l:     TOK_LPAREN event_aparam_l TOK_RPAREN                    
-                  | event_aparam_l TOK_COMMA TOK_IDENT                      {   prt("EventFormalParam");   }
-                  | TOK_IDENT                                               {   prt("EventFormalParam");   }
+                  | event_aparam_l TOK_COMMA TOK_IDENT                      {    curVarList->push_back(allocVarEntry($3, VariableEntry::PARAM_VAR, NULL, NULL)); prt("EventFormalParam");}
+                  | TOK_IDENT     {   curVarList = new vector<VariableEntry*>(); curVarList->push_back(allocVarEntry($1, VariableEntry::PARAM_VAR, NULL, NULL)); prt("EventFormalParam");}
                   | TOK_LPAREN TOK_RPAREN
                   ;
 
@@ -336,8 +364,8 @@ global_decl:        type global_l TOK_SEMICOLON
                   | type global_init_l TOK_SEMICOLON
                   ;
 
-global_l:           global_l TOK_COMMA TOK_IDENT        {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
-                  | TOK_IDENT                           {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
+global_l:           global_l TOK_COMMA TOK_IDENT                            {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
+                  | TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
                   ;
 
 global_init_l:      global_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, $5); prt("VariableDeclWithInit"); }
@@ -356,8 +384,8 @@ local_decl:         type local_l TOK_SEMICOLON
                   | type local_init_l TOK_SEMICOLON
                   ;
 
-local_l:            local_l TOK_COMMA TOK_IDENT         {   $$ = allocVarEntry($3, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
-                  | TOK_IDENT                           {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
+local_l:            local_l TOK_COMMA TOK_IDENT                             {   $$ = allocVarEntry($3, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
+                  | TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
                   ;
 
 local_init_l:       local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression  {   $$ = allocVarEntry($3, VariableEntry::LOCAL_VAR, curType, $5); prt("VariableDeclWithInit"); }
@@ -366,32 +394,32 @@ local_init_l:       local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression  {   
 
 function_defn:      TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON       {   prt("FunctionBody");  }
 
-function_decl:      type TOK_IDENT func_param_l                             {   allocFuncEntry($2, $1); prt("FunctionDecl");  }
+function_decl:      type TOK_IDENT func_param_l                             {   allocFuncEntry($2, $1, curTypeList); curTypeList = NULL; prt("FunctionDecl");  }
                   ;
 
 function_proto:     function_decl TOK_SEMICOLON
                   | function_decl function_defn
                   ;
 
-func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {   prt("FormalParamList");   }
-                  | func_param_l TOK_COMMA func_param
-                  | func_param
+func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {   prt("FormalParamList");     }
+                  | func_param_l TOK_COMMA func_param                       {   curTypeList->push_back($3);  }
+                  | func_param                                              {   curTypeList = new vector<Type*>(); curTypeList->push_back($1);}
                   | TOK_LPAREN TOK_RPAREN
                   ;
-func_param:         type TOK_IDENT          {   $$ = allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
-                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");  }
+func_param:         type TOK_IDENT                                          {   $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");  }
+                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");    }
                   ;
 
-event_decl:         TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON         {   $$ = allocEventEntry($2);   prt("EventDecl");   }
+event_decl:         TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON         {   $$ = allocEventEntry($2, curTypeList); curTypeList = NULL; prt("EventDecl");  }
                   ;
 
-event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   prt("FormalParamList");   }
-                  | event_param_l TOK_COMMA event_param
-                  | event_param
+event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   prt("FormalParamList");     }
+                  | event_param_l TOK_COMMA event_param                     {   curTypeList->push_back($3);  }
+                  | event_param                                             {   curTypeList = new vector<Type*>(); curTypeList->push_back($1);}
                   | TOK_LPAREN TOK_RPAREN
                   ;
 
-event_param:        type TOK_IDENT          {   $$ = allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
+event_param:        type TOK_IDENT                                          {   $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
                   | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");  }
                   ;
 

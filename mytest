@@ -1,9 +1,1 @@
-void fun(int c) {
-    int a = 20, b = 10, c = 30;
-    double aa, bb, cc;
-    logMessage("open: testing almost nothing", a + b, b); 
-    if ((a>b) && (b<c)) {
-        a = b+c;
-        a = b+c;
-    }
-};
+a(f) : (b(y, w, x)|w==f) -> z=w;

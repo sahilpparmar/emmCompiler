@@ -22,7 +22,7 @@ SymTabEntry::kindTag(SymTabEntry::Kind k){
 
 SymTabEntry::SymTabEntry(string name, SymTabEntry::Kind k, 
 			 int lineno, int columnno, string filename, Type *t) 
-  : ProgramElem(t,lineno,columnno,filename) {
+  : ProgramElem(t, lineno, columnno, filename) {
   name_ = name;
   kind_ = k;
   if (type() == NULL)

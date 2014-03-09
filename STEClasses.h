@@ -42,13 +42,13 @@ class BlockEntry: public SymTabEntry {
         BlockEntry(string name, int line=0, int column=0, string file=""):
             SymTabEntry(name, SymTabEntry::Kind::BLOCK_KIND, line, column, file, (Type*)&Type::voidType) {};
         ~BlockEntry() {};
-        void print(ostream& out, int indent=0) const; 
+        void print(ostream& out, int indent=0) const {}
 };
 
 class RuleBlockEntry: public BlockEntry {
     public:
         RuleBlockEntry(int line=0, int column=0, string file=""):
-            BlockEntry(newName("rule"), line,column, file) { kind(SymTabEntry::Kind::RULE_BLOCK_KIND);};
+            BlockEntry(newName("rule"), line, column, file) { kind(SymTabEntry::Kind::RULE_BLOCK_KIND);};
         ~RuleBlockEntry() {};
 };
 
@@ -102,7 +102,7 @@ class FunctionEntry: public SymTabEntry {
     public:
         FunctionEntry(string name, Type* type=nullptr,
                 int line=0, int column=0, string file=""):
-            SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line,column, file, type)
+            SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line, column, file, type)
         {
             body_ = nullptr;
         }
@@ -121,7 +121,7 @@ class FunctionEntry: public SymTabEntry {
 class EventEntry: public SymTabEntry {
     public:
         EventEntry(string name, int line=0, int column=0, string file=""):
-            SymTabEntry(name, SymTabEntry::Kind::EVENT_KIND, line,column, file) {};
+            SymTabEntry(name, SymTabEntry::Kind::EVENT_KIND, line, column, file) {};
         ~EventEntry() {};
 
         void print(ostream& out, int indent=0) const; 

@@ -23,10 +23,10 @@ class VariableEntry;
 /*****************************************************************************
    Here is the class hierarchy:
                                                ProgramElem
-											       |
+				                  |
                                                 AstNode
      +--------------------------------------------+----------------+
-     |		         |                 |                           | 
+     |		     |                 |                           | 
  BasePatNode      ExprNode          RuleNode                    StmtNode
      |               |                                             |
      |               |                                             |
@@ -272,10 +272,13 @@ class BasePatNode: public AstNode {
 
     public:
         BasePatNode(PatNodeKind pk, int ln=0, int col=0, string f=""):
-            AstNode(AstNode::NodeType::PAT_NODE, ln, col, f) {
-                parent_ = NULL; root_ = NULL; patKind_ = pk;};
+            AstNode(AstNode::NodeType::PAT_NODE, ln, col, f) 
+        {
+            parent_ = NULL; root_ = NULL; patKind_ = pk;
+        }
         BasePatNode(const BasePatNode& bpn): AstNode(bpn) {
-            patKind_ = bpn.patKind_; parent_ = bpn.parent_; root_ = bpn.root_;}
+            patKind_ = bpn.patKind_; parent_ = bpn.parent_; root_ = bpn.root_;
+        }
         ~BasePatNode() {};
         //virtual BasepatNode* clone() const { return new BasePatNode(*this);}	
 
@@ -289,7 +292,8 @@ class BasePatNode: public AstNode {
         virtual bool hasNeg() const=0;
         virtual bool hasAnyOrOther() const=0;
         virtual bool isNegatable() const {
-            return ((!hasSeqOps()) && (!hasNeg())); }
+            return ((!hasSeqOps()) && (!hasNeg())); 
+        }
 
     private:
         PatNodeKind patKind_;
@@ -303,7 +307,17 @@ class PrimitivePatNode: public BasePatNode {
     public:
         PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params, 
                 ExprNode* c=NULL,
-                int line=0, int column=0, string file="");
+                int line=0, int column=0, string file="") :
+            BasePatNode(PatNodeKind::PRIMITIVE, line, column, file)
+        {
+            ee_ = ee;
+            params_ = params;
+            /* cond_ may contain assignments as well as other expressions */
+            /* condition_ contains all expresions in cond_ other than assignments */
+            cond_= c;      
+            condition_ = c; 
+            //asgs_ = 
+        }
         //PrimitivePatNode(const PrimitivePatNode& ppn);
         ~PrimitivePatNode() {};
         //BasePatNode* clone() { return new PrimitivePatNode(*this); }
@@ -323,15 +337,24 @@ class PrimitivePatNode: public BasePatNode {
         const ExprNode* condition() const { return condition_; }
 
         const list<const OpNode*>& asgs() const { 
-            return (list<const OpNode*>&)asgs_; }  
+            return (list<const OpNode*>&)asgs_; 
+        } 
         list<OpNode*>& asgs() { return asgs_; }  
 
-        bool hasSeqOps() const;
-        bool hasNeg() const;
-        bool hasAnyOrOther() const;
-
+        // TODO
+        bool hasNeg() const {
+            if (kind() == BasePatNode::PatNodeKind::NEG)
+                return true;
+            return false;
+        }
+        bool hasSeqOps() const {
+            return false;
+        }
+        bool hasAnyOrOther() const {
+            return false;
+        }
         //-const Type* typeCheck();
-        void print(ostream& os, int indent=0) const; 
+        void print(ostream& os, int indent=0) const { }
 
     private:
 
@@ -347,8 +370,19 @@ class PrimitivePatNode: public BasePatNode {
 /****************************************************************/
 class PatNode: public BasePatNode {
     public: 
-        PatNode(int line=0, int column=0, string file="");
-        PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2=NULL, int line=0, int column=0, string file="");
+        PatNode(int line=0, int column=0, string file="") :
+            BasePatNode(PatNodeKind::EMPTY, line, column, file)
+        {
+            pat1_ = NULL;
+            pat2_ = NULL;
+        }
+
+        PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2 = NULL, int line = 0, int column = 0, string file = "") :
+            BasePatNode(pk, line, column, file)
+        {
+            pat1_ = p1;
+            pat2_ = p2;
+        }
 
         ~PatNode() {};
         //AstNode* clone() 
@@ -359,11 +393,19 @@ class PatNode: public BasePatNode {
         const BasePatNode* pat2() const { return pat2_; }
         BasePatNode* pat2() { return pat2_; }
 
-        bool hasNeg() const;
-        bool hasSeqOps() const;
-        bool hasAnyOrOther() const;
-
-        void print(ostream& os, int indent=0) const; 
+        // TODO
+        bool hasNeg() const {
+            if (kind() == BasePatNode::PatNodeKind::NEG)
+                return true;
+            return false;
+        }
+        bool hasSeqOps() const {
+            return true;
+        }
+        bool hasAnyOrOther() const {
+            return true;
+        }
+        void print(ostream& os, int indent=0) const { }
 
     private: 
         PatNode(const PatNode&);
@@ -495,8 +537,14 @@ class IfNode: public StmtNode {
 class RuleNode: public AstNode {
     public:
         RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, 
-                int line=0, int column=0, string file="");
-        ~RuleNode() {};
+                int line=0, int column=0, string file="") :
+            AstNode(AstNode::NodeType::RULE_NODE, line, column, file)
+        {
+            rste_ = re;
+            pat_ = pat;
+            reaction_ = reaction;
+        }
+        ~RuleNode() {}
         //AstNode* clone() 
         //  { return new RuleNode(*this); }
 
@@ -509,10 +557,10 @@ class RuleNode: public AstNode {
         const StmtNode* reaction() const { return reaction_; };   
         StmtNode* reaction() { return reaction_; };   
 
-        void print(ostream& os, int indent=0) const;
+        void print(ostream& os, int indent=0) const {}
 
     private:
-        BlockEntry    *rste_;
+        BlockEntry  *rste_;
         BasePatNode *pat_;
         StmtNode *reaction_;
 

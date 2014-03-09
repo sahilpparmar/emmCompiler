@@ -105,7 +105,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 74 "E--_parser.y++"
+#line 101 "E--_parser.y++"
 
     unsigned int       uVal;
     double             dVal;
@@ -121,21 +121,21 @@ typedef union YYSTYPE
     Type*              typeVal;
     vector<Type*>*     typeList; 
 
+    FunctionEntry*     functionEntry;
     EventEntry*        eventEntry;                        
     VariableEntry*     variableEntry;
-    FunctionEntry*     functionEntry;
+    vector<VariableEntry*>* varList;
 
-    BasePatNode*       patVal;
-    PrimitivePatNode*  primPatVal;
     StmtNode*          stmtVal;
     list<StmtNode*>*   stmtList;
     IfNode*            ifVal;
     CompoundStmtNode*  compoundStmtVal;
     RuleNode*          ruleNode;
 
+    BasePatNode*       patVal;
+    PrimitivePatNode*  primPatVal;
     vector<RuleNode*>* transList;
 
-    vector<Type*>*     formalTypeVal;
     const OpNode::OpInfo*    funIval;
 
 
