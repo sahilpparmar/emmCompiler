@@ -22,9 +22,20 @@ vector<VariableEntry*> *curVarList  = NULL;
 FunctionEntry          *curFuncEnt  = NULL;
 EventEntry             *curEventEnt = NULL;
 
+static Type* getUserType(char *typeName) {
+    SymTabEntry *sym = stm.lookUp(string(typeName));
+    if (sym && sym->type()->tag() == Type::CLASS) {
+        return sym->type();
+    }
+    return new Type(Type::ERROR);
+}
+
 static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type* type, ExprNode* init) {
     VariableEntry *retVarEnt = new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
-    stm.insert(retVarEnt);
+
+    if (type->tag() != Type::UNKNOWN && type->tag() != Type::ERROR) {
+        stm.insert(retVarEnt);
+    }
 
     return retVarEnt;
 }
@@ -32,9 +43,9 @@ static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type*
 static ClassEntry* allocClassEntry(char* name) {
     assert(name != NULL);
     ClassEntry *retClassEnt = new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
-    SymTabEntry *sym = NULL; // TODO: symtab_lookup (name)
-    Type *te = new Type(sym, Type::CLASS);
+    Type *te = new Type(retClassEnt, Type::CLASS);
     retClassEnt->type(te);
+    stm.insert(retClassEnt);
     stm.enterScope(retClassEnt);
 
     return retClassEnt;
@@ -50,7 +61,7 @@ static EventEntry* allocEventEntry(char* name = NULL, vector<Type*>* param_l = N
         retEventEnt->type(te);
         curEventEnt = NULL;
     } else {
-        retEventEnt = new EventEntry(string(""), yylineno, yycolumnno, string(yyfilename));
+        retEventEnt = new EventEntry(string("dummy_entry"), yylineno, yycolumnno, string(yyfilename));
         stm.enterScope(retEventEnt);
     }
 
@@ -67,7 +78,7 @@ static FunctionEntry* allocFuncEntry(char* name = NULL, Type* rettype = NULL, ve
         retFuncEnt->type(te);
         curFuncEnt = NULL;
     } else {
-        retFuncEnt = new FunctionEntry(string(""), NULL, yylineno, yycolumnno, string(yyfilename));
+        retFuncEnt = new FunctionEntry(string("dummy_func"), NULL, yylineno, yycolumnno, string(yyfilename));
         stm.enterScope(retFuncEnt);
     }
     return retFuncEnt;
@@ -160,6 +171,8 @@ static RuleBlockEntry* allocRuleBlockEntry() {
     const OpNode::OpInfo*   funIval;
 };
 
+%expect 1
+
 /* Operators */
 
 %token TOK_LEX_ERROR TOK_PAT_STAR TOK_PAT_OR TOK_PAT_NOT
@@ -234,8 +247,6 @@ static RuleBlockEntry* allocRuleBlockEntry() {
 
 /*********************   Precedence and Associativity    ********************/
 
-%expect 1
-
 %nonassoc TOK_ASSIGN
 %left  TOK_PAT_OR 
 %left  TOK_COLON
@@ -272,20 +283,20 @@ specification:      specification declaration
                   |
                   ;
 
-declaration:        event_decl                                              {   stm.leaveScope();       }
-                  | function_proto                                          {   stm.leaveScope();       }
-                  | class_decl                                              {   stm.leaveScope();       }
+declaration:        event_decl                                              {   stm.leaveScope();   stm.insert($1); }
+                  | function_proto                                          {   stm.leaveScope();   stm.insert($1); }
+                  | class_decl                                              {   stm.leaveScope();                           }
                   | global_decl
                   ;
 
 rule:               primitive_all TOK_ARROW rule_stmts                      {   $$ = allocRuleNode(allocRuleBlockEntry(), $1, $3); prt("Rule"); }
                   ;
 
-rule_stmts:         TOK_LBRACE compoundStmt TOK_RBRACE TOK_SEMICOLON        {   $$ = allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
+rule_stmts:         TOK_LBRACE compoundStmt TOK_RBRACE semi_colon           {   $$ = allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
                   | TOK_LBRACE compoundStmt TOK_RBRACE                      {   $$ = allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
-                  | empty_block TOK_SEMICOLON                               {   $$ = $1;    }
+                  | empty_block semi_colon                                  {   $$ = $1;    }
                   | empty_block                                             {   $$ = $1;    }
-                  | expression TOK_SEMICOLON                                {   $$ = allocExprStmtNode($1); prt("AssignStmt");  }
+                  | expression semi_colon                                   {   $$ = allocExprStmtNode($1); prt("AssignStmt");  }
                   ;
 
 primitive_all:      normal_event                                            {   $$ = allocPrimPatNode($1, curVarList, NULL);    curVarList = NULL;    prt("PrimitivePat"); }
@@ -305,13 +316,13 @@ binary_event_oprs:  primitive_all TOK_PAT_OR      primitive_all             {   
 any_event:          TOK_ANY                                                 {   $$ = any; prt("anyEvent");   }
                   ;
 
-normal_event:       TOK_IDENT event_aparam_l                                {   $$ = NULL; /*$$ = getEventEntry($1);*/ prt("NormalEvent");   }
+normal_event:       TOK_IDENT TOK_LPAREN event_aparam_l TOK_RPAREN          {   $$ = NULL; /*$$ = getEventEntry($1);*/ prt("NormalEvent");   }
                   ;
 
-event_aparam_l:     TOK_LPAREN event_aparam_l TOK_RPAREN                    
-                  | event_aparam_l TOK_COMMA TOK_IDENT                      {    curVarList->push_back(allocVarEntry($3, VariableEntry::PARAM_VAR, NULL, NULL)); prt("EventFormalParam");}
-                  | TOK_IDENT     {   curVarList = new vector<VariableEntry*>(); curVarList->push_back(allocVarEntry($1, VariableEntry::PARAM_VAR, NULL, NULL)); prt("EventFormalParam");}
-                  | TOK_LPAREN TOK_RPAREN
+event_aparam_l:   
+                    event_aparam_l TOK_COMMA TOK_IDENT                      {    curVarList->push_back(allocVarEntry($3, VariableEntry::PARAM_VAR, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
+                  | TOK_IDENT     {   curVarList = new vector<VariableEntry*>(); curVarList->push_back(allocVarEntry($1, VariableEntry::PARAM_VAR, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
+                  |
                   ;
 
 
@@ -321,8 +332,8 @@ compoundStmt:       TOK_LBRACE compoundStmt TOK_RBRACE                      {   
                   |
                   ;
 
-simple_stmt:        func_invocation TOK_SEMICOLON                           {   $$ = allocExprStmtNode($1); prt("FunctionInvocationStmt");  }
-                  | assignment TOK_SEMICOLON                                {   $$ = allocExprStmtNode($1); prt("AssignStmt");              }
+simple_stmt:        func_invocation semi_colon                              {   $$ = allocExprStmtNode($1); prt("FunctionInvocationStmt");  }
+                  | assignment semi_colon                                   {   $$ = allocExprStmtNode($1); prt("AssignStmt");              }
                   | if_then_else_stmt                                       {   $$ = $1;                                                    }
                   ;
 
@@ -333,10 +344,10 @@ if_then_else_stmt:  TOK_IF condition basic_block                            {   
 basic_block:        TOK_LBRACE compoundStmt TOK_RBRACE                      {   $$ = allocCompStmtNode(curStmtList); curStmtList = NULL; prt("CompoundStmt");   }
                   | empty_block                                             {   $$ = $1;                                                    }
                   | simple_stmt                                             {   $$ = $1;                                                    }
-                  | TOK_SEMICOLON
+                  | semi_colon
                   ;
 
-empty_block:        TOK_LBRACE TOK_SEMICOLON TOK_RBRACE                     {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
+empty_block:        TOK_LBRACE semi_colon TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
                   ;
 
 condition:          TOK_LPAREN expression TOK_RPAREN                        {   $$ = $2;    prt("(Expr)"); }
@@ -389,8 +400,8 @@ binary_operation:   expression TOK_OR          expression                   {   
 ref_expr:           TOK_IDENT                                               {   $$ = allocRefExprNode($1); prt("RefExpr"); }
                   ;
 
-global_decl:        type global_l TOK_SEMICOLON     
-                  | type global_init_l TOK_SEMICOLON
+global_decl:        type global_l semi_colon
+                  | type global_init_l semi_colon
                   ;
 
 global_l:           global_l TOK_COMMA TOK_IDENT                            {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
@@ -400,8 +411,7 @@ global_l:           global_l TOK_COMMA TOK_IDENT                            {   
 global_init_l:      global_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, $5); prt("VariableDeclWithInit"); }
                   | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, $3); prt("VariableDeclWithInit"); }
                             
-class_decl:         TOK_CLASS TOK_IDENT TOK_SEMICOLON TOK_SEMICOLON         {   $$ = allocClassEntry($2); prt("ClassDecl");  }
-                  | TOK_CLASS TOK_IDENT TOK_SEMICOLON                       {   $$ = allocClassEntry($2); prt("ClassDecl");  }
+class_decl:         TOK_CLASS TOK_IDENT semi_colon                          {   $$ = allocClassEntry($2); prt("ClassDecl");  }
                   ;
 
 function_body:      function_body local_decl
@@ -409,8 +419,8 @@ function_body:      function_body local_decl
                   |
                   ;
 
-local_decl:         type local_l TOK_SEMICOLON
-                  | type local_init_l TOK_SEMICOLON
+local_decl:         type local_l semi_colon
+                  | type local_init_l semi_colon
                   ;
 
 local_l:            local_l TOK_COMMA TOK_IDENT                             {   $$ = allocVarEntry($3, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
@@ -421,36 +431,40 @@ local_init_l:       local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression  {   
                   | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, $3); prt("VariableDeclWithInit"); }
                   ;
 
-function_defn:      TOK_LBRACE function_body TOK_RBRACE TOK_SEMICOLON       {   $$ = allocCompStmtNode(curStmtList);        curStmtList = NULL;     prt("FunctionBody");  }
+function_defn:      TOK_LBRACE function_body TOK_RBRACE semi_colon          {   $$ = allocCompStmtNode(curStmtList);        curStmtList = NULL;     prt("FunctionBody");  }
                   ;
 
 function_decl:      type TOK_IDENT func_param_l                             {   $$ = allocFuncEntry($2, $1, curTypeList);   curTypeList = NULL;     prt("FunctionDecl");  }
                   ;
 
-function_proto:     function_decl TOK_SEMICOLON                             {   $$ = $1;                    }
+function_proto:     function_decl semi_colon                                {   $$ = $1;                    }
                   | function_decl function_defn                             {   $1->body($2);   $$ = $1;    }
                   ;
 
 func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {   prt("FormalParamList");     }
                   | func_param_l TOK_COMMA func_param                       {   curTypeList->push_back($3); }
-                  | func_param                                              {   curFuncEnt = allocFuncEntry();  curTypeList = new vector<Type*>(); curTypeList->push_back($1);  }
+                  | func_param                                              {   curTypeList = new vector<Type*>(); curTypeList->push_back($1);  }
                   | TOK_LPAREN TOK_RPAREN                                   {   curFuncEnt = allocFuncEntry();  }
                   ;
-func_param:         type TOK_IDENT                                          {   $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");  }
-                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");}
+func_param:         type TOK_IDENT                                          {   if (!curFuncEnt) curFuncEnt = allocFuncEntry();  
+                                                                                $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr);  prt("FormalParam"); }
                   ;
 
-event_decl:         TOK_EVENT TOK_IDENT event_param_l TOK_SEMICOLON         {   $$ = allocEventEntry($2, curTypeList);  curTypeList = NULL;     prt("EventDecl");   }
+event_decl:         TOK_EVENT TOK_IDENT event_param_l semi_colon            {   $$ = allocEventEntry($2, curTypeList);  curTypeList = NULL;     prt("EventDecl");   }
                   ;
 
 event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   prt("FormalParamList");         }
                   | event_param_l TOK_COMMA event_param                     {   curTypeList->push_back($3);     }
-                  | event_param                                             {   curEventEnt = allocEventEntry();  curTypeList = new vector<Type*>(); curTypeList->push_back($1);}
+                  | event_param                                             {   curTypeList = new vector<Type*>(); curTypeList->push_back($1);}
                   | TOK_LPAREN TOK_RPAREN                                   {   curEventEnt = allocEventEntry();}
                   ;
 
-event_param:        type TOK_IDENT                                          {   $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
-                  | TOK_IDENT TOK_IDENT                                     {   prt("Type"); prt("FormalParam");}
+event_param:        type TOK_IDENT                                          {   if (!curEventEnt) curEventEnt = allocEventEntry();  
+                                                                                $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
+                  ;
+
+semi_colon:         semi_colon TOK_SEMICOLON
+                  | TOK_SEMICOLON
                   ;
 
 literal:          
@@ -461,7 +475,8 @@ literal:
                   | TOK_FALSE                                               {   $$ = new Value(false);          prt("Literal");    }
                   ;
 
-type:               baseType                                                {   $$ = curType = $1;        prt("Type");       }
+type:               baseType                                                {   $$ = curType = $1;                  prt("Type");       }
+                  | TOK_IDENT                                               {   $$ = curType = getUserType($1);     prt("Type");       }
                   ;
 
 baseType:           TOK_VOID                                                {   $$ = new Type(Type::VOID);    }

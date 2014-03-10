@@ -134,7 +134,7 @@ class RefExprNode: public ExprNode {
         const SymTabEntry* symTabEntry() const { return sym_;};
         void symTabEntry(const SymTabEntry *ste)  { sym_ = ste;};
 
-        void print(ostream& os, int indent=0) const { }
+        void print(ostream& os, int indent=0) const;
 
     private:
         string ext_;
@@ -210,7 +210,7 @@ class ValueNode: public ExprNode {
         ExprNode* clone() const { return new ValueNode(*this); }
         ~ValueNode() {};
 
-        void print(ostream& os, int indent=0) const {}
+        void print(ostream& os, int indent=0) const;
 
     private:
         /* val_ field is already included in ExprNode, so no new data members */
@@ -465,7 +465,9 @@ class ExprStmtNode: public StmtNode {
         //  { return new ExprStmtNode(*this); }
 
         void print(ostream& os, int indent) const { 
-            if (expr_ != NULL) { expr_->print(os, indent);}
+            if (expr_ != NULL) { 
+                expr_->print(os, indent);
+            }
         }
 
     private:
@@ -491,7 +493,7 @@ class CompoundStmtNode: public StmtNode {
         }
 
         void  printWithoutBraces(ostream& os, int indent) const;
-        void  print(ostream& os, int indent) const {}
+        void  print(ostream& os, int indent) const;
 
     private:
         CompoundStmtNode(const CompoundStmtNode&);
@@ -537,13 +539,7 @@ class IfNode: public StmtNode {
 class RuleNode: public AstNode {
     public:
         RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, 
-                int line=0, int column=0, string file="") :
-            AstNode(AstNode::NodeType::RULE_NODE, line, column, file)
-        {
-            rste_ = re;
-            pat_ = pat;
-            reaction_ = reaction;
-        }
+                int line=0, int column=0, string file="");
         ~RuleNode() {}
         //AstNode* clone() 
         //  { return new RuleNode(*this); }
@@ -557,7 +553,7 @@ class RuleNode: public AstNode {
         const StmtNode* reaction() const { return reaction_; };   
         StmtNode* reaction() { return reaction_; };   
 
-        void print(ostream& os, int indent=0) const {}
+        void print(ostream& os, int indent=0) const;
 
     private:
         BlockEntry  *rste_;

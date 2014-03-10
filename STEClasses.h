@@ -42,7 +42,7 @@ class BlockEntry: public SymTabEntry {
         BlockEntry(string name, int line=0, int column=0, string file=""):
             SymTabEntry(name, SymTabEntry::Kind::BLOCK_KIND, line, column, file, (Type*)&Type::voidType) {};
         ~BlockEntry() {};
-        void print(ostream& out, int indent=0) const {}
+        void print(ostream& out, int indent=0) const;
 };
 
 class RuleBlockEntry: public BlockEntry {
@@ -81,7 +81,7 @@ class VariableEntry: public SymTabEntry {
         ExprNode* initVal() { return initVal_;};
         void initVal(ExprNode *init) { initVal_ = init;};
 
-        void print(ostream& os, int indent=0) const { }
+        void print(ostream& os, int indent=0) const;
 
     private:
         VarKind vkind_;
@@ -95,7 +95,7 @@ class ClassEntry: public SymTabEntry {
             : SymTabEntry(name, SymTabEntry::Kind::CLASS_KIND, line, column, file) {}
         ~ClassEntry() {};
 
-        void print(ostream& os, int indent) const { }
+        void print(ostream& os, int indent) const;
 };
 
 class FunctionEntry: public SymTabEntry {
@@ -112,7 +112,7 @@ class FunctionEntry: public SymTabEntry {
         CompoundStmtNode* body() {return body_;}
         void body(CompoundStmtNode* n) { body_ = n;}
 
-        void print(ostream& os, int indent) const { }
+        void print(ostream& os, int indent) const;
 
     private:
         CompoundStmtNode* body_;
