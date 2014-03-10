@@ -59,13 +59,41 @@ void ValueNode::print(ostream& os, int indent) const
 
 /****************************************************************/
 
+void ExprStmtNode::print(ostream& os, int indent) const { 
+    if (expr_ != NULL) { 
+        prtSpace(os, indent);
+        expr_->print(os, indent);
+    }
+}
+
+/****************************************************************/
+
+void IfNode::print(ostream& os, int indent) const
+{
+//ExprNode *cond_;
+//StmtNode *then_, *else_;
+
+    prtSpace(os, indent);
+    os << "if (";
+    cond_->print(os, indent);
+    os << ") ";
+    then_->print(os, indent);
+    if (else_) {
+        os << "else ";
+        else_->print(os, indent);
+    }
+        
+
+}
+
+/****************************************************************/
+
 void CompoundStmtNode::printWithoutBraces(ostream& os, int indent) const
 {
-    int i = 0;
     if (stmts_ == NULL || stmts_->size() == 0) return;
 
-    for (std::list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); i++, it++) {
-        prtSpace(os, i ? indent : indent-STEP_INDENT);
+    cout << endl;
+    for (std::list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); it++) {
         (*it)->print(os, indent+STEP_INDENT);
         os << ";" << endl;
     }
@@ -73,9 +101,10 @@ void CompoundStmtNode::printWithoutBraces(ostream& os, int indent) const
 
 void CompoundStmtNode::print(ostream& os, int indent) const
 {
-    os << "{"  << endl;
+    os << "{";
     printWithoutBraces(os, indent);
-    os << "};" << endl;
+    prtSpace(os, indent);
+    os << "};";
 }
 
 /****************************************************************/
@@ -93,7 +122,21 @@ InvocationNode::InvocationNode(const InvocationNode& ref) : ExprNode(ref)
 
 }
 
+void InvocationNode::print(ostream& out, int indent) const
+{
+    out << ste_->name() << "(";
+    if (params_) {
+        unsigned int i = 0; 
+        for (std::vector<ExprNode*>::iterator it = params_->begin(); it != params_->end(); i++, it++) {
+            if (i > 0) out << ", ";
+            (*it)->print(out, indent);
+        }
+    }
+    out << ")";
+}
+
 /****************************************************************/
+
 RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, 
         int line, int column, string file) :
     AstNode(AstNode::NodeType::RULE_NODE, line, column, file)
@@ -103,12 +146,74 @@ RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction,
     reaction_ = reaction;
 }
 
-void RuleNode::print(ostream& out, int indent) const {
+void RuleNode::print(ostream& out, int indent) const 
+{
+    prtSpace(out, indent);
+    out << "(";
+
+    pat_->print(out, indent);
+    out << ")--> ";
+    reaction_->print(out, indent);
+
+    out << endl;
+    prtSpace(out, indent);
+    out << ";;";
+}
+
+/****************************************************************/
+
+bool PrimitivePatNode::hasAnyOrOther() const 
+{
+    string ee_name = ee_->name();
+    if (ee_name.compare ("any") == 0 || ee_name.compare("other") == 0)
+        return true;
+    return false;
+}
+
+void PrimitivePatNode::print(ostream& out, int indent) const 
+{
+    out << ee_->name();
+
+    if (!hasAnyOrOther()) {
+        vector<Type*>* argtype_l = ee_->type()->argTypes();
+
+        if (params_->size() != argtype_l->size()) {
+            errMsg("Invalid event parameters");
+            return;
+        }
+
+        unsigned int size = params_->size();
+        if (size > 0) {
+            unsigned int i;
+            std::vector<Type*>::iterator          type_it = argtype_l->begin();
+            std::vector<VariableEntry*>::iterator var_it  = params_->begin();
+
+            out << "(";
+            for (i = 0; i < size; i++) {
+                if (i > 0) out << ", ";
+                out << (*type_it)->fullName() << " " << (*var_it)->name();
+                type_it++; var_it++;
+            }
+            out << ")";
+        }
+    }
+
+    if (cond_) {
+        out << "|";
+        cond_->print(out, indent); 
+    }
+}
+
+/****************************************************************/
+
+void PatNode::print(ostream& out, int indent) const 
+{
+
 
 }
 
-
 /****************************************************************/
+
 extern const OpNode::OpInfo opInfo[] = {
     // print name, arity, paren_flag, fixity, arg types, out type, constraints
     //

@@ -248,7 +248,7 @@ class InvocationNode: public ExprNode {
                 (*params_)[i] = arg;
         }
 
-        void print(ostream& os, int indent=0) const {}
+        void print(ostream& os, int indent=0) const;
 
     private:
         vector<ExprNode*>* params_;
@@ -350,11 +350,10 @@ class PrimitivePatNode: public BasePatNode {
         bool hasSeqOps() const {
             return false;
         }
-        bool hasAnyOrOther() const {
-            return false;
-        }
+        bool hasAnyOrOther() const;
+
         //-const Type* typeCheck();
-        void print(ostream& os, int indent=0) const { }
+        void print(ostream& os, int indent=0) const;
 
     private:
 
@@ -405,7 +404,7 @@ class PatNode: public BasePatNode {
         bool hasAnyOrOther() const {
             return true;
         }
-        void print(ostream& os, int indent=0) const { }
+        void print(ostream& os, int indent=0) const;
 
     private: 
         PatNode(const PatNode&);
@@ -464,11 +463,7 @@ class ExprStmtNode: public StmtNode {
         //AstNode* clone() 
         //  { return new ExprStmtNode(*this); }
 
-        void print(ostream& os, int indent) const { 
-            if (expr_ != NULL) { 
-                expr_->print(os, indent);
-            }
-        }
+        void print(ostream& os, int indent) const;
 
     private:
         ExprNode* expr_;
@@ -525,7 +520,7 @@ class IfNode: public StmtNode {
         StmtNode* elseStmt() { return else_;};
         StmtNode* thenStmt() { return then_;};
 
-        void print(ostream& os, int indent) const {}
+        void print(ostream& os, int indent) const;
 
     private: 
         ExprNode *cond_;

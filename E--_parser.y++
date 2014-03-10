@@ -12,7 +12,7 @@ extern void yyerror(const char *s);
 int offSet;
 extern const OpNode::OpInfo opInfo[];
 
-#define prt(x) cout << x << endl;
+#define prt(x) ;//cout << x << endl;
 
 Type                   *curType     = NULL;
 vector<ExprNode*>      *curExprList = NULL;
@@ -21,6 +21,14 @@ vector<Type*>          *curTypeList = NULL;
 vector<VariableEntry*> *curVarList  = NULL; 
 FunctionEntry          *curFuncEnt  = NULL;
 EventEntry             *curEventEnt = NULL;
+
+static EventEntry* getEventEntry(char *eventName) {
+    SymTabEntry *sym = stm.lookUp(string(eventName));
+    if (sym && sym->type()->tag() == Type::EVENT) {
+        return (EventEntry*) sym;
+    }
+    return NULL;
+}
 
 static Type* getUserType(char *typeName) {
     SymTabEntry *sym = stm.lookUp(string(typeName));
@@ -220,7 +228,7 @@ static RuleBlockEntry* allocRuleBlockEntry() {
 */
 
 %type <functionEntry> function_decl function_proto
-%type <variableEntry> global_decl global_l global_init_l local_decl local_l local_init_l
+%type <variableEntry> global_decl global_l global_var local_decl local_l local_var
 %type <classEntry>  class_decl
 %type <eventEntry> event_decl any_event normal_event 
 
@@ -316,7 +324,7 @@ binary_event_oprs:  primitive_all TOK_PAT_OR      primitive_all             {   
 any_event:          TOK_ANY                                                 {   $$ = any; prt("anyEvent");   }
                   ;
 
-normal_event:       TOK_IDENT TOK_LPAREN event_aparam_l TOK_RPAREN          {   $$ = NULL; /*$$ = getEventEntry($1);*/ prt("NormalEvent");   }
+normal_event:       TOK_IDENT TOK_LPAREN event_aparam_l TOK_RPAREN          {   $$ = getEventEntry($1);     prt("NormalEvent");   }
                   ;
 
 event_aparam_l:   
@@ -401,16 +409,16 @@ ref_expr:           TOK_IDENT                                               {   
                   ;
 
 global_decl:        type global_l semi_colon
-                  | type global_init_l semi_colon
                   ;
 
-global_l:           global_l TOK_COMMA TOK_IDENT                            {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
-                  | TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl"); }
+global_l:           global_l TOK_COMMA global_var
+                  | global_var
                   ;
 
-global_init_l:      global_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression {   $$ = allocVarEntry($3, VariableEntry::GLOBAL_VAR, curType, $5); prt("VariableDeclWithInit"); }
-                  | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, $3); prt("VariableDeclWithInit"); }
-                            
+global_var:         TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl");   }
+                  | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, $3); prt("VariableDeclWithInit");}
+                  ;
+
 class_decl:         TOK_CLASS TOK_IDENT semi_colon                          {   $$ = allocClassEntry($2); prt("ClassDecl");  }
                   ;
 
@@ -420,14 +428,13 @@ function_body:      function_body local_decl
                   ;
 
 local_decl:         type local_l semi_colon
-                  | type local_init_l semi_colon
                   ;
 
-local_l:            local_l TOK_COMMA TOK_IDENT                             {   $$ = allocVarEntry($3, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
-                  | TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl"); }
+local_l:            local_l TOK_COMMA local_var
+                  | local_var
                   ;
 
-local_init_l:       local_init_l TOK_COMMA TOK_IDENT TOK_ASSIGN expression  {   $$ = allocVarEntry($3, VariableEntry::LOCAL_VAR, curType, $5); prt("VariableDeclWithInit"); }
+local_var:          TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl");    }
                   | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, $3); prt("VariableDeclWithInit"); }
                   ;
 

@@ -6,10 +6,11 @@ void GlobalEntry::print(ostream& out, int indent) const
 {
     printST(out, indent, ' ', ' ');
     
+    out << endl;
     for (unsigned int  ii = 0; ii < rules_.size(); ii++) {
-        rules_[ii]->print(out, indent);
+        rules_[ii]->print(out, indent+STEP_INDENT);
+        out << endl;
     }
-    // Add your code
 }
 
 void EventEntry::print(ostream& out, int indent) const
@@ -23,9 +24,6 @@ void ClassEntry::print(ostream& out, int indent) const
 {
     out << type()->name() << " " << name() << ";";
 }
-
-//SymTab::printST(ostream& os, int indent, char leftdelim, char rightdelim, 
-//        bool linebreak, int first, int last) const {
 
 void FunctionEntry::print(ostream& out, int indent) const
 {
@@ -49,7 +47,7 @@ void FunctionEntry::print(ostream& out, int indent) const
         // Local Declarations
         printST(out, indent, '\0', '\0', true, numParams, 100000);
         // Function Body
-        body_->printWithoutBraces(out, indent+STEP_INDENT);
+        body_->printWithoutBraces(out, indent);
 
         prtSpace(out, indent);
         out << "}";
