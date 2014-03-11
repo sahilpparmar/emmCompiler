@@ -140,6 +140,12 @@ static CompoundStmtNode* allocCompStmtNode(list<StmtNode*> *Slist) {
     return new CompoundStmtNode(Slist, yylineno, yycolumnno, string(yyfilename));
 }
 
+static CompoundStmtNode* allocScopeNode(CompoundStmtNode* node) {
+    CompoundStmtNode *retCompNode = allocCompStmtNode(new list<StmtNode*>);
+    retCompNode->add(node);
+    return retCompNode;
+}
+
 static PrimitivePatNode* allocPrimPatNode(EventEntry* ee, vector<VariableEntry*>* params, ExprNode* c) {
     return new PrimitivePatNode(ee, params, c, yylineno, yycolumnno, string(yyfilename));
 }
@@ -195,6 +201,8 @@ static RuleBlockEntry* allocRuleBlockEntry() {
     const OpNode::OpInfo*   funIval;
 };
 
+%expect 1
+
 /* Operators */
 
 %token TOK_LEX_ERROR TOK_PAT_STAR TOK_PAT_OR TOK_PAT_NOT
@@ -212,34 +220,6 @@ static RuleBlockEntry* allocRuleBlockEntry() {
 %token TOK_TRUE TOK_FALSE TOK_IDENT
 
 /******************************** Type Info ********************************/
-/* Uncomment types below as you start adding rules.
-   They are commented right now to prevent compile errors.
-%type <functionEntry> function_header function_decl
-%type <variableEntry> variable_decl formal_param variable_decl1
-%type <typeList> formal_param_list formal_param_plus 
-%type <eventEntry> event_decl_hdr event_decl
-%type <patVal> event_pattern rule_body1
-%type <primPatVal> event primitive_pat 
-%type <typeVal> type baseType 
-%type <exprList> expr_list expr_plus
-%type <exprVal> expr function_invocation asg_stmt
-%type <refexpVal> ref_expr
-%type <ruleNode> rule
-%type <strVector> id_list id_plus
-
-%type <cVal> TOK_IDENT TOK_PRINT 
-%type <funIval> ev_or_fun
-%type <uVal> TOK_UINTNUM 
-%type <dVal> TOK_DOUBLENUM 
-%type <cVal> TOK_STRCONST
-
-%type <valVal> literal
-
-%type <stmtList> stmt_plus
-%type <stmtVal> stmt simple_stmt
-%type <stmt_plusVal> stmt_plus fun_rest
-%type <ifVal>  if_then_else_stmt 
-*/
 
 %type <functionEntry> function_decl function_proto
 %type <variableEntry> global_decl global_l global_var local_decl local_l local_var
@@ -255,7 +235,7 @@ static RuleBlockEntry* allocRuleBlockEntry() {
 %type <varList> event_aparam_l
 %type <ifVal> if_then_else_stmt 
 %type <stmtVal> simple_stmt basic_block TOK_SEMICOLON
-%type <stmt_plusVal> stmt_plus1 stmt_plus2 empty_block function_defn function_body 
+%type <stmt_plusVal> compound_stmt1 compound_stmt2 stmt_plus1 stmt_plus2 empty_block function_defn function_body 
 
 %type <ruleNode> rule
 %type <stmtVal> rule_stmts
@@ -314,11 +294,18 @@ declaration:        event_decl                                              {   
 rule:               primitive_all TOK_ARROW rule_stmts                      {   $$ = allocRuleNode(allocRuleBlockEntry(), $1, $3); prt("Rule"); }
                   ;
 
-rule_stmts:         TOK_LBRACE stmt_plus1 TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(curStmtList1); curStmtList1 = NULL; prt("CompoundStmt");   }
-                  | TOK_LBRACE stmt_plus1 TOK_RBRACE                        {   $$ = allocCompStmtNode(curStmtList1); curStmtList1 = NULL; prt("CompoundStmt");   }
-                  | empty_block semi_colon                                  {   $$ = $1;    }
-                  | empty_block                                             {   $$ = $1;    }
+rule_stmts:         compound_stmt2 semi_colon                               {   $$ = $1;    }
+                  | compound_stmt2                                          {   $$ = $1;    }
                   | expression semi_colon                                   {   $$ = allocExprStmtNode($1); prt("AssignStmt");  }
+                  ;
+
+compound_stmt2:     TOK_LBRACE compound_stmt2            TOK_RBRACE         {   $$ = allocScopeNode($2);    prt("CompoundStmt2a");   }
+                  | TOK_LBRACE compound_stmt2 semi_colon TOK_RBRACE         {   $$ = allocScopeNode($2);    prt("CompoundStmt2b");   }
+                  | compound_stmt1                                          {   $$ = $1;                    prt("CompoundStmt1c");   }
+                  ;
+
+compound_stmt1:     TOK_LBRACE stmt_plus1 TOK_RBRACE                        {   $$ = allocCompStmtNode(curStmtList1); curStmtList1 = NULL;  prt("CompoundStmt1a");  }
+                  | TOK_LBRACE semi_colon TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>);                prt("CompoundStmt1b");  }
                   ;
 
 stmt_plus1:         stmt_plus1 simple_stmt                                  {   if (!curStmtList1) curStmtList1 = new list<StmtNode*>; curStmtList1->push_back($2);}

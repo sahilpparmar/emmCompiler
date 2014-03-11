@@ -5,12 +5,12 @@
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) 
 {
-    // Add your code here
+
 }
 
 AstNode::AstNode(const AstNode& ast): ProgramElem(ast) 
 {
-    // Add your code here
+
 }
 
 /****************************************************************/
@@ -21,13 +21,12 @@ ExprNode::ExprNode(ExprNodeType et, const Value* val, int line, int column,
 {
     exprType_ = et;
     val_ = val;
-    //coercedType =
 }
 
 
 ExprNode::ExprNode(const ExprNode& e) : AstNode(e)
 {
-    // Add your code here
+
 }
 
 /****************************************************************/
@@ -116,6 +115,7 @@ void CompoundStmtNode::printWithoutBraces(ostream& os, int indent) const
 
 void CompoundStmtNode::print(ostream& os, int indent) const
 {
+    prtSpace(os, indent);
     os << "{";
     printWithoutBraces(os, indent);
     prtSpace(os, indent);
