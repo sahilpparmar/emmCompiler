@@ -9,14 +9,4 @@
     open(file, flags, mode) -> {
     if (condition);
 	else;
-
-    if (condition)
-		if (condition) ;
-		else;		
-
-    if (condition)
-		if (condition) ;
-		else;
-	else if (condition) ;
-	else ;
     };

@@ -105,7 +105,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 149 "E--_parser.y++"
+#line 165 "E--_parser.y++"
 
     unsigned int        uVal;
     double              dVal;
@@ -129,7 +129,7 @@ typedef union YYSTYPE
     StmtNode*           stmtVal;
     list<StmtNode*>*    stmtList;
     IfNode*             ifVal;
-    CompoundStmtNode*   compoundStmtVal;
+    CompoundStmtNode*   stmt_plusVal;
     RuleNode*           ruleNode;
 
     BasePatNode*        patVal;

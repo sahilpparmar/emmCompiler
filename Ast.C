@@ -63,6 +63,7 @@ void ExprStmtNode::print(ostream& os, int indent) const {
     if (expr_ != NULL) { 
         prtSpace(os, indent);
         expr_->print(os, indent);
+        os << ";"; 
     }
 }
 
@@ -70,20 +71,34 @@ void ExprStmtNode::print(ostream& os, int indent) const {
 
 void IfNode::print(ostream& os, int indent) const
 {
-//ExprNode *cond_;
-//StmtNode *then_, *else_;
-
     prtSpace(os, indent);
+
+    // If (condition)
     os << "if (";
     cond_->print(os, indent);
     os << ") ";
+
+    // then
     then_->print(os, indent);
+
+    // else
     if (else_) {
+        os << endl;
+        prtSpace(os, indent);
         os << "else ";
         else_->print(os, indent);
     }
-        
+}
 
+/****************************************************************/
+
+void ReturnStmtNode::print(ostream& os, int indent) const 
+{
+    prtSpace(os, indent);
+    os << "return ";
+    if (expr_ != NULL) expr_->print(os, indent);
+    else os << "NULL";
+    os << ";";
 }
 
 /****************************************************************/
@@ -95,7 +110,7 @@ void CompoundStmtNode::printWithoutBraces(ostream& os, int indent) const
     cout << endl;
     for (std::list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); it++) {
         (*it)->print(os, indent+STEP_INDENT);
-        os << ";" << endl;
+        os << endl;
     }
 }
 
@@ -113,6 +128,7 @@ InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param,
         int line, int column, string file):
     ExprNode(ExprNode::ExprNodeType::INV_NODE, 0, line, column, file)
 {
+    assert(ste);
     ste_ = ste;
     params_ = param;
 }
@@ -124,6 +140,7 @@ InvocationNode::InvocationNode(const InvocationNode& ref) : ExprNode(ref)
 
 void InvocationNode::print(ostream& out, int indent) const
 {
+    assert(ste_);
     out << ste_->name() << "(";
     if (params_) {
         unsigned int i = 0; 
@@ -149,10 +166,9 @@ RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction,
 void RuleNode::print(ostream& out, int indent) const 
 {
     prtSpace(out, indent);
-    out << "(";
 
     pat_->print(out, indent);
-    out << ")--> ";
+    out << "--> ";
     reaction_->print(out, indent);
 
     out << endl;
@@ -172,44 +188,74 @@ bool PrimitivePatNode::hasAnyOrOther() const
 
 void PrimitivePatNode::print(ostream& out, int indent) const 
 {
+    out << "(";
     out << ee_->name();
 
     if (!hasAnyOrOther()) {
         vector<Type*>* argtype_l = ee_->type()->argTypes();
 
-        if (params_->size() != argtype_l->size()) {
-            errMsg("Invalid event parameters");
-            return;
-        }
-
-        unsigned int size = params_->size();
-        if (size > 0) {
-            unsigned int i;
-            std::vector<Type*>::iterator          type_it = argtype_l->begin();
-            std::vector<VariableEntry*>::iterator var_it  = params_->begin();
-
-            out << "(";
-            for (i = 0; i < size; i++) {
-                if (i > 0) out << ", ";
-                out << (*type_it)->fullName() << " " << (*var_it)->name();
-                type_it++; var_it++;
+        out << "(";
+        if (params_) {
+            if (params_->size() != argtype_l->size()) {
+                errMsg("Invalid event parameters");
+                return;
             }
-            out << ")";
+
+            unsigned int size = params_->size();
+            if (size > 0) {
+                unsigned int i;
+                std::vector<Type*>::iterator          type_it = argtype_l->begin();
+                std::vector<VariableEntry*>::iterator var_it  = params_->begin();
+
+                for (i = 0; i < size; i++) {
+                    if (i > 0) out << ", ";
+                    out << (*type_it)->fullName() << " " << (*var_it)->name();
+                    type_it++; var_it++;
+                }
+            }
         }
+        out << ")";
     }
 
     if (cond_) {
         out << "|";
         cond_->print(out, indent); 
     }
+    out << ")";
 }
 
 /****************************************************************/
 
 void PatNode::print(ostream& out, int indent) const 
 {
-
-
+    out << "(";
+    if (hasNeg()) {
+        out << "!";
+    }
+    pat1_->print(out, indent);
+    if (!hasNeg() && kind() != PatNodeKind::STAR) {
+        switch (kind()) {
+            default:
+            case PatNodeKind::PRIMITIVE: 
+            case PatNodeKind::UNDEFINED:
+            case PatNodeKind::EMPTY:
+            case PatNodeKind::NEG:
+                errMsg("Invalid PatNodeKind");
+                break;
+            case PatNodeKind::SEQ:
+                out << ":";
+                break;
+            case PatNodeKind::OR:
+                out << " \\/ ";
+                break;
+                out << "**";
+                break;
+        }
+        pat2_->print(out, indent);
+    }
+    if (kind() == PatNodeKind::STAR)
+        out << "**";
+    out << ")";
 }
 
 /****************************************************************/
