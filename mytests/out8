@@ -1,5 +1,5 @@
 Finished parsing, here is the AST
- 
+
   int isInFile(string x, string y);
   int isInt(int i);
   unsigned int isUInt(unsigned int i);
@@ -20,8 +20,8 @@ Finished parsing, here is the AST
   int l;
   double f;
   byte b;
- 
-  (open(string file, int flags, unsigned int mode))--> {
+
+  (open(string file, int flags, unsigned int mode))-->  {
     y("checking function invocation", "for open event");
     isInFile(file, "abc");
     isInFile(file, "1");
@@ -67,4 +67,4 @@ Finished parsing, here is the AST
     isLong(f);
   };
   ;;
-
+  

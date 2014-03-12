@@ -7,7 +7,7 @@ do
     echo;echo "---->Running in$i"
     ./demo mytests/in$i >myoutputs/myout$i;
     echo;echo "---->Diff"
-    #diff -w ntest/out$i myoutputs/myout$i
+    diff -w mytests/out$i myoutputs/myout$i
     echo;
 done  
 
