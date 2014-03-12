@@ -23,12 +23,22 @@ static vector<Type*>          *curTypeList  = NULL;
 static vector<VariableEntry*> *curVarList   = NULL; 
 static FunctionEntry          *curFuncEnt   = NULL;
 static EventEntry             *curEventEnt  = NULL;
+static RuleBlockEntry         *curRBlkNode  = NULL;
 
 static EventEntry* getEventEntry(char *eventName) {
     SymTabEntry *sym = stm.lookUp(string(eventName));
     if (sym && sym->type()->tag() == Type::EVENT) {
-        return (EventEntry*) sym;
+        int caller_param = curVarList ? curVarList->size() : 0;
+        int callee_param = sym->type()->argTypes() ? sym->type()->argTypes()->size() : 0;
+
+        if (caller_param == callee_param) {
+            return (EventEntry*) sym;
+        } else {
+            errMsg((string)eventName + (string)": mismatch in the number of arguments");
+            return NULL;
+        }
     }
+    errMsg((string)"Expected an event name, but got \"" + (string)eventName + (string)"\"");
     return NULL;
 }
 
@@ -36,15 +46,42 @@ static Type* getUserType(char *typeName) {
     SymTabEntry *sym = stm.lookUp(string(typeName));
     if (sym && sym->type()->tag() == Type::CLASS) {
         return sym->type();
+    } else {
+        errMsg((string)"Undeclared type \"" + (string)typeName + (string)"\"");
+        return new Type(Type::VOID);
     }
-    return new Type(Type::ERROR);
+}
+
+static bool IsFuncSymEntry(SymTabEntry *sym) {
+    if (sym && sym->kind() == SymTabEntry::Kind::FUNCTION_KIND)
+        return true;
+    return false;
+}
+
+static bool IsEventSymEntry(SymTabEntry *sym) {
+    if (sym && sym->kind() == SymTabEntry::Kind::EVENT_KIND)
+        return true;
+    return false;
+}
+
+static bool IsCurRuleBlockEntry() {
+    return curRBlkNode ? true : false;
 }
 
 static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type* type, ExprNode* init) {
-    VariableEntry *retVarEnt = new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
+    VariableEntry *retVarEnt = NULL;
 
-    if (type->tag() != Type::UNKNOWN && type->tag() != Type::ERROR) {
+    if (v == VariableEntry::UNDEFINED) {
+        retVarEnt = new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
         stm.insert(retVarEnt);
+    } else {
+        VariableEntry *retVarEnt = (VariableEntry*)stm.lookUpInScope(name, stm.currentScope()->kind());
+        if (retVarEnt) {
+            errMsg((string)"Redefinition of name " + name);
+        } else {
+            retVarEnt = new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
+            stm.insert(retVarEnt);
+        }
     }
 
     return retVarEnt;
@@ -52,12 +89,17 @@ static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type*
 
 static ClassEntry* allocClassEntry(char* name) {
     assert(name != NULL);
-    ClassEntry *retClassEnt = new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
-    Type *te = new Type(retClassEnt, Type::CLASS);
-    retClassEnt->type(te);
-    stm.insert(retClassEnt);
-    stm.enterScope(retClassEnt);
+    ClassEntry *retClassEnt = (ClassEntry*)stm.lookUpInScope(name, stm.currentScope()->kind());
 
+    if (retClassEnt) {
+        errMsg((string)"Redefinition of name " + name);
+    } else {
+        retClassEnt = new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+        Type *te = new Type(retClassEnt, Type::CLASS);
+        retClassEnt->type(te);
+        stm.insert(retClassEnt);
+        stm.enterScope(retClassEnt);
+    }
     return retClassEnt;
 }
 
@@ -66,6 +108,9 @@ static EventEntry* allocEventEntry(char* name = NULL, vector<Type*>* param_l = N
 
     if (retEventEnt) {
         assert(name != NULL);
+        if (IsEventSymEntry(stm.lookUp(string(name)))) {
+            errMsg((string)"Redefinition of name " + name);
+        }
         Type *te = new Type(param_l, Type::EVENT);
         retEventEnt->name(name);
         retEventEnt->type(te);
@@ -83,6 +128,9 @@ static FunctionEntry* allocFuncEntry(char* name = NULL, Type* rettype = NULL, ve
 
     if (retFuncEnt) {
         assert(name != NULL);
+        if (IsFuncSymEntry(stm.lookUp(string(name)))) {
+            errMsg((string)"Redefinition of name " + name);
+        }
         Type *te = new Type(param_l, rettype);
         retFuncEnt->name(name);
         retFuncEnt->type(te);
@@ -97,19 +145,21 @@ static FunctionEntry* allocFuncEntry(char* name = NULL, Type* rettype = NULL, ve
 static RefExprNode* allocRefExprNode(char* str) {
     assert(str != NULL);
     SymTabEntry *sym = stm.lookUp(string(str));
-    //if (sym == NULL) {
-    //    cout << "Error: Invalid Var Symbol '" << str << "'" <<  endl;
-    //    assert(0);
-    //}
+    if (sym == NULL) {
+        errMsg((string)"Undeclared identifier \"" + (string)str + (string)"\"");
+    }
     return new RefExprNode(string(str), sym, yylineno, yycolumnno, string(yyfilename));
 }
 
 static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
     assert(str != NULL);
     SymTabEntry *sym = stm.lookUp(string(str));
-    if (sym == NULL) {
-        cout << "Error: Invalid Func Symbol '" << str << "'" << endl;
-        assert(0);
+
+    if (strcmp(str, "print") == 0) {
+        sym = new FunctionEntry(string("print"), NULL);
+    } else if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
+        errMsg((string)"\"" + (string)str + (string)"\" is not a function or module name");
+        return NULL;
     }
     return new InvocationNode(sym, param_l, yylineno, yycolumnno, string(yyfilename));
 }
@@ -128,6 +178,8 @@ static ExprStmtNode* allocExprStmtNode(ExprNode* e) {
 }
 
 static ReturnStmtNode* allocReturnNode(ExprNode* e) {
+    if (IsCurRuleBlockEntry())
+        errMsg((string)"Return statement is valid only within a function");
     return new ReturnStmtNode(e, (FunctionEntry*)stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND));
 }
 
@@ -147,23 +199,61 @@ static CompoundStmtNode* allocScopeNode(CompoundStmtNode* node) {
 }
 
 static PrimitivePatNode* allocPrimPatNode(EventEntry* ee, vector<VariableEntry*>* params, ExprNode* c) {
-    return new PrimitivePatNode(ee, params, c, yylineno, yycolumnno, string(yyfilename));
+    if (ee)
+        return new PrimitivePatNode(ee, params, c, yylineno, yycolumnno, string(yyfilename));
+    return NULL;
 }
 
+static int hasInvalidOps = 0;
 static PatNode* allocPatNode(BasePatNode::PatNodeKind pk, BasePatNode *p1, BasePatNode *p2) {
-    return new PatNode(pk, p1, p2, yylineno, yycolumnno, string(yyfilename));
+    if (p1 && 
+        ((pk == BasePatNode::PatNodeKind::NEG || pk == BasePatNode::PatNodeKind::STAR) ||
+        ((pk == BasePatNode::PatNodeKind::OR  || pk == BasePatNode::PatNodeKind::SEQ) && p2)))
+    {
+        // To handle valid combination of operations
+        if (pk == BasePatNode::PatNodeKind::NEG) {
+            if (hasInvalidOps > 0) {
+                hasInvalidOps = -2;
+                errMsg((string)"Only simple patterns without `.', `*', and `!' operatorscan be negated");
+            } else if (hasInvalidOps == 0) {
+                hasInvalidOps = -1;
+            } 
+        } else if (pk == BasePatNode::PatNodeKind::STAR) {
+            if (hasInvalidOps == -1) {
+                hasInvalidOps = -2;
+                errMsg((string)"Only simple patterns without `.', `*', and `!' operatorscan be negated");
+            } else if (hasInvalidOps != -2) {
+                hasInvalidOps++;
+            }
+        } else if (pk == BasePatNode::PatNodeKind::SEQ) {
+            hasInvalidOps = 0;
+        }
+        return new PatNode(pk, p1, p2, yylineno, yycolumnno, string(yyfilename));
+    }
+    return NULL;
 }
 
-static RuleNode* allocRuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction) {
-    RuleNode *retRuleNode = new RuleNode(re, pat, reaction, yylineno, yycolumnno, string(yyfilename));
-    GlobalEntry *globalSymEnt = (GlobalEntry*) stm.currentScope(SymTabEntry::Kind::GLOBAL_KIND);
-    globalSymEnt->addRule(retRuleNode);
+static RuleNode* allocRuleNode(BasePatNode* pat, StmtNode* reaction) {
+    RuleNode *retRuleNode = NULL;
+
+    if (pat) {
+        retRuleNode = new RuleNode(curRBlkNode, pat, reaction, yylineno, yycolumnno, string(yyfilename));
+        GlobalEntry *globalSymEnt = (GlobalEntry*) stm.currentScope(SymTabEntry::Kind::GLOBAL_KIND);
+        globalSymEnt->addRule(retRuleNode);
+    }
+    stm.leaveScope();
+    curRBlkNode = NULL;
 
     return retRuleNode;
 }
 
-static RuleBlockEntry* allocRuleBlockEntry() {
-    return new RuleBlockEntry(yylineno, yycolumnno, string(yyfilename));
+static RuleBlockEntry* allocRuleBlockNode() {
+    if (!curRBlkNode) {
+        hasInvalidOps = 0;
+        curRBlkNode = new RuleBlockEntry(yylineno, yycolumnno, string(yyfilename));
+        stm.enterScope(curRBlkNode);
+    }
+    return curRBlkNode;
 }
 
 %}
@@ -229,7 +319,7 @@ static RuleBlockEntry* allocRuleBlockEntry() {
 %type <refexpVal> ref_expr
 %type <valVal> literal
 %type <exprVal> expression func_invocation assignment binary_operation unary_operation condition
-%type <typeVal> type baseType func_param event_param 
+%type <typeVal> type intType baseType func_param event_param 
 %type <typeList> func_param_l event_param_l
 %type <exprList> caller_param_l
 %type <varList> event_aparam_l
@@ -241,7 +331,7 @@ static RuleBlockEntry* allocRuleBlockEntry() {
 %type <stmtVal> rule_stmts
 %type <patVal> primitive_all binary_event_oprs
 
-%type <cVal> TOK_IDENT TOK_PRINT 
+%type <cVal> TOK_IDENT TOK_PRINT func_name
 %type <uVal> TOK_UINTNUM 
 %type <dVal> TOK_DOUBLENUM 
 %type <cVal> TOK_STRCONST
@@ -274,10 +364,7 @@ static RuleBlockEntry* allocRuleBlockEntry() {
 %start s_specification
 %%
 
-s_specification:    program                                                 {   prt("Spec");    }
-                  ;
-
-program:            specification
+s_specification:    specification                                           {   prt("Spec");    }
                   ;
 
 specification:      specification declaration
@@ -287,11 +374,11 @@ specification:      specification declaration
 
 declaration:        event_decl                                              {   stm.leaveScope();   stm.insert($1); }
                   | function_proto                                          {   stm.leaveScope();   stm.insert($1); }
-                  | class_decl                                              {   stm.leaveScope();                           }
+                  | class_decl                                              {   stm.leaveScope();                   }
                   | global_decl
                   ;
 
-rule:               primitive_all TOK_ARROW rule_stmts                      {   $$ = allocRuleNode(allocRuleBlockEntry(), $1, $3); prt("Rule"); }
+rule:               primitive_all TOK_ARROW rule_stmts                      {   $$ = allocRuleNode($1, $3); prt("Rule");   }
                   ;
 
 rule_stmts:         compound_stmt2 semi_colon                               {   $$ = $1;    }
@@ -299,13 +386,13 @@ rule_stmts:         compound_stmt2 semi_colon                               {   
                   | expression semi_colon                                   {   $$ = allocExprStmtNode($1); prt("AssignStmt");  }
                   ;
 
-compound_stmt2:     TOK_LBRACE compound_stmt2            TOK_RBRACE         {   $$ = allocScopeNode($2);    prt("CompoundStmt2a");   }
-                  | TOK_LBRACE compound_stmt2 semi_colon TOK_RBRACE         {   $$ = allocScopeNode($2);    prt("CompoundStmt2b");   }
-                  | compound_stmt1                                          {   $$ = $1;                    prt("CompoundStmt1c");   }
+compound_stmt2:     TOK_LBRACE compound_stmt2            TOK_RBRACE         {   $$ = allocScopeNode($2);    prt("CompoundStmt");   }
+                  | TOK_LBRACE compound_stmt2 semi_colon TOK_RBRACE         {   $$ = allocScopeNode($2);    prt("CompoundStmt");   }
+                  | compound_stmt1                                          {   $$ = $1;    } 
                   ;
 
-compound_stmt1:     TOK_LBRACE stmt_plus1 TOK_RBRACE                        {   $$ = allocCompStmtNode(curStmtList1); curStmtList1 = NULL;  prt("CompoundStmt1a");  }
-                  | TOK_LBRACE semi_colon TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>);                prt("CompoundStmt1b");  }
+compound_stmt1:     TOK_LBRACE stmt_plus1 TOK_RBRACE                        {   $$ = allocCompStmtNode(curStmtList1); curStmtList1 = NULL;  prt("CompoundStmt");  }
+                  | TOK_LBRACE semi_colon TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>);                prt("CompoundStmt");  }
                   ;
 
 stmt_plus1:         stmt_plus1 simple_stmt                                  {   if (!curStmtList1) curStmtList1 = new list<StmtNode*>; curStmtList1->push_back($2);}
@@ -325,15 +412,16 @@ binary_event_oprs:  primitive_all   TOK_PAT_OR      primitive_all           {   
                   |                 TOK_NOT         primitive_all           {   $$ = allocPatNode(BasePatNode::PatNodeKind::NEG , $2, NULL); prt("!EventPat");              }
                   ;
 
-any_event:          TOK_ANY                                                 {   $$ = any; prt("anyEvent");   }
+any_event:          TOK_ANY                                                 {   allocRuleBlockNode();   $$ = any;   prt("anyEvent");    }
                   ;
 
-normal_event:       TOK_IDENT TOK_LPAREN event_aparam_l TOK_RPAREN          {   $$ = getEventEntry($1);     prt("NormalEvent");   }
+normal_event:       TOK_IDENT TOK_LPAREN event_aparam_l TOK_RPAREN          {   $$ = getEventEntry($1);             prt("NormalEvent"); }
                   ;
 
 event_aparam_l:   
-                    event_aparam_l TOK_COMMA TOK_IDENT                      {    curVarList->push_back(allocVarEntry($3, VariableEntry::PARAM_VAR, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
-                  | TOK_IDENT     {   curVarList = new vector<VariableEntry*>(); curVarList->push_back(allocVarEntry($1, VariableEntry::PARAM_VAR, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
+                    event_aparam_l TOK_COMMA TOK_IDENT                      {   curVarList->push_back(allocVarEntry($3, VariableEntry::UNDEFINED, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
+                  | TOK_IDENT                                               {   allocRuleBlockNode(); curVarList = new vector<VariableEntry*>(); 
+                                                                                curVarList->push_back(allocVarEntry($1, VariableEntry::UNDEFINED, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
                   |
                   ;
 
@@ -355,6 +443,7 @@ simple_stmt:        func_invocation semi_colon                              {   
                   | assignment semi_colon                                   {   $$ = allocExprStmtNode($1); prt("AssignStmt");              }
                   | if_then_else_stmt                                       {   $$ = $1;                                                    }
                   | TOK_RETURN expression semi_colon                        {   $$ = allocReturnNode($2);   prt("ReturnStmt");              }
+                  | TOK_RETURN semi_colon                                   {   $$ = allocReturnNode(NULL); prt("ReturnStmt");              }
                   ;
 
 empty_block:        TOK_LBRACE semi_colon TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
@@ -363,8 +452,12 @@ empty_block:        TOK_LBRACE semi_colon TOK_RBRACE                        {   
 condition:          TOK_LPAREN expression TOK_RPAREN                        {   $$ = $2;    prt("(Expr)"); }
                   ;
 
-func_invocation:    TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocInvNode($1, curExprList); curExprList = NULL; prt("FunctionInvocation"); }
-                  | TOK_IDENT TOK_LPAREN TOK_RPAREN                         {   $$ = allocInvNode($1, NULL); prt("FunctionInvocation"); }
+func_invocation:    func_name TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocInvNode($1, curExprList); curExprList = NULL; prt("FunctionInvocation"); }
+                  | func_name TOK_LPAREN TOK_RPAREN                         {   $$ = allocInvNode($1, NULL);                            prt("FunctionInvocation"); }
+                  ;
+
+func_name:          TOK_IDENT                                               {   $$ = $1;                }
+                  | TOK_PRINT                                               {   $$ = (char*)"print";    }
                   ;
 
 caller_param_l:     caller_param_l TOK_COMMA expression                     {   curExprList->push_back($3);                                             }
@@ -372,6 +465,7 @@ caller_param_l:     caller_param_l TOK_COMMA expression                     {   
                   ;
 
 assignment:         ref_expr TOK_ASSIGN expression                          {   $$ = allocOpNode(OpNode::OpCode::ASSIGN, $1, $3); prt("Assignment");    }
+                  ;
 
 expression:         literal                                                 {   $$ = allocValueNode($1);    }
                   | ref_expr                                                {   $$ = $1;                    }
@@ -477,23 +571,28 @@ semi_colon:         semi_colon TOK_SEMICOLON
                   ;
 
 literal:          
-                    TOK_UINTNUM                                             {   $$ = new Value($1, Type::UINT); prt("Literal");    }
-                  | TOK_DOUBLENUM                                           {   $$ = new Value($1);             prt("Literal");    }
-                  | TOK_STRCONST                                            {   $$ = new Value($1);             prt("Literal");    }
-                  | TOK_TRUE                                                {   $$ = new Value(true);           prt("Literal");    }
-                  | TOK_FALSE                                               {   $$ = new Value(false);          prt("Literal");    }
+                    TOK_UINTNUM                                             {   $$ = new Value($1, Type::UINT); prt("Literal");     }
+                  | TOK_DOUBLENUM                                           {   $$ = new Value($1);             prt("Literal");     }
+                  | TOK_STRCONST                                            {   $$ = new Value($1);             prt("Literal");     }
+                  | TOK_TRUE                                                {   $$ = new Value(true);           prt("Literal");     }
+                  | TOK_FALSE                                               {   $$ = new Value(false);          prt("Literal");     }
                   ;
 
-type:               baseType                                                {   $$ = curType = $1;                  prt("Type");       }
-                  | TOK_IDENT                                               {   $$ = curType = getUserType($1);     prt("Type");       }
+type:               baseType                                                {   $$ = curType = $1;                  prt("Type");    }
+                  | intType                                                 {   $$ = curType = $1;                  prt("Type");    }
+                  | TOK_IDENT                                               {   $$ = curType = getUserType($1);     prt("Type");    }
+                  | TOK_UNSIGNED baseType                                   {   $$ = curType = new Type(Type::VOID);prt("Type");
+                                                                                errMsg("Invalid use of keyword \"unsigned\"");      }
                   ;
 
 baseType:           TOK_VOID                                                {   $$ = new Type(Type::VOID);    }
                   | TOK_BOOL                                                {   $$ = new Type(Type::BOOL);    }
                   | TOK_BYTE                                                {   $$ = new Type(Type::BYTE);    }
                   | TOK_STRING                                              {   $$ = new Type(Type::STRING);  }
-                  | TOK_INT                                                 {   $$ = new Type(Type::INT);     }
                   | TOK_DOUBLE                                              {   $$ = new Type(Type::DOUBLE);  }
+                  ;
+
+intType:            TOK_INT                                                 {   $$ = new Type(Type::INT);     }
                   | TOK_UNSIGNED TOK_INT                                    {   $$ = new Type(Type::UINT);    }
                   ;
 

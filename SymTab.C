@@ -30,7 +30,7 @@ SymTab::lookUp(string name) const {
 ErrorST 
 SymTab::insert(SymTabEntry* se) {
     if (map_.count(se->name()) > 0) {
-        errMsg("Duplicate Symbol " + se->name());
+        //errMsg("Duplicate Symbol " + se->name());
         return DUPLICATE_SYM;
     } 
     else {

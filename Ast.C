@@ -58,7 +58,7 @@ void ValueNode::print(ostream& os, int indent) const
 
 /****************************************************************/
 
-void ExprStmtNode::print(ostream& os, int indent) const { 
+void ExprStmtNode::print(ostream& os, int indent) const {
     if (expr_ != NULL) { 
         prtSpace(os, indent);
         expr_->print(os, indent);
@@ -239,7 +239,6 @@ void PatNode::print(ostream& out, int indent) const
             case PatNodeKind::PRIMITIVE: 
             case PatNodeKind::UNDEFINED:
             case PatNodeKind::EMPTY:
-            case PatNodeKind::NEG:
                 errMsg("Invalid PatNodeKind");
                 break;
             case PatNodeKind::SEQ:
@@ -247,8 +246,6 @@ void PatNode::print(ostream& out, int indent) const
                 break;
             case PatNodeKind::OR:
                 out << " \\/ ";
-                break;
-                out << "**";
                 break;
         }
         pat2_->print(out, indent);

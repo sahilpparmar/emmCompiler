@@ -105,7 +105,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 171 "E--_parser.y++"
+#line 261 "E--_parser.y++"
 
     unsigned int        uVal;
     double              dVal;
