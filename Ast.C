@@ -62,8 +62,8 @@ void ExprStmtNode::print(ostream& os, int indent) const {
     if (expr_ != NULL) { 
         prtSpace(os, indent);
         expr_->print(os, indent);
-        os << ";"; 
     }
+    os << ";"; 
 }
 
 /****************************************************************/

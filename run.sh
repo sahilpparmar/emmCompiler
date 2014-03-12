@@ -2,12 +2,12 @@
 make
 rm -rf myoutputs
 mkdir myoutputs
-for i in `seq 1 17`;
+for i in `seq 1 23`;
 do
     echo;echo "---->Running in$i"
-    ./demo test/in$i >myoutputs/myout$i;
+    ./demo mytests/in$i >myoutputs/myout$i;
     echo;echo "---->Diff"
-    diff test/out$i myoutputs/myout$i
+    #diff -w ntest/out$i myoutputs/myout$i
     echo;
 done  
 

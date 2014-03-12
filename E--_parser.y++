@@ -69,19 +69,13 @@ static bool IsCurRuleBlockEntry() {
 }
 
 static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type* type, ExprNode* init) {
-    VariableEntry *retVarEnt = NULL;
+    VariableEntry *retVarEnt = (VariableEntry*)stm.lookUpInScope(name, stm.currentScope()->kind());
 
-    if (v == VariableEntry::UNDEFINED) {
+    if (retVarEnt) {
+        errMsg((string)"Redefinition of name " + name);
+    } else {
         retVarEnt = new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
         stm.insert(retVarEnt);
-    } else {
-        VariableEntry *retVarEnt = (VariableEntry*)stm.lookUpInScope(name, stm.currentScope()->kind());
-        if (retVarEnt) {
-            errMsg((string)"Redefinition of name " + name);
-        } else {
-            retVarEnt = new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
-            stm.insert(retVarEnt);
-        }
     }
 
     return retVarEnt;
@@ -384,6 +378,7 @@ rule:               primitive_all TOK_ARROW rule_stmts                      {   
 rule_stmts:         compound_stmt2 semi_colon                               {   $$ = $1;    }
                   | compound_stmt2                                          {   $$ = $1;    }
                   | expression semi_colon                                   {   $$ = allocExprStmtNode($1); prt("AssignStmt");  }
+                  |            semi_colon                                   {   $$ = allocExprStmtNode(NULL);   }
                   ;
 
 compound_stmt2:     TOK_LBRACE compound_stmt2            TOK_RBRACE         {   $$ = allocScopeNode($2);    prt("CompoundStmt");   }

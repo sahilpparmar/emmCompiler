@@ -1,6 +1,0 @@
-roid fun1();
-void fun(int i) {
-    int a;
-
-    a = fun1() + i;
-};
