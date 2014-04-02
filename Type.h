@@ -46,6 +46,7 @@ class Type {
     doubleType;
   
   static const Type* type[];
+  static bool isClass(TypeTag t) { return (t == CLASS); }
   static bool isString(TypeTag t) { return (t==STRING);}
   static bool isNumeric(TypeTag t) { return ((t >= BYTE) && (t <= DOUBLE));}
   static bool isBool(TypeTag t) { return (t == BOOL); }
@@ -89,6 +90,7 @@ class Type {
 
   string name() const {return name(tag_); }
   string fullName() const;
+  bool isSubType(TypeTag t) const;
 
   TypeTag tag() const { return tag_; }
   const SymTabEntry* typeDesc() const {
