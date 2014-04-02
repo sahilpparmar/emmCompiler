@@ -68,11 +68,11 @@ void VariableEntry::print(ostream& out, int indent) const
     }   
 }
 
-Type* GlobalEntry::typeCheck() const
+const Type* GlobalEntry::typeCheck() const
 {
     typeCheckST(); 
 
-    vector<RuleNode*>::iterator it; 
+    vector<RuleNode*>::const_iterator it; 
     for (it = rules_.begin(); it != rules_.end(); ++it) {
         (*it)->typeCheck();    
     }
@@ -80,10 +80,10 @@ Type* GlobalEntry::typeCheck() const
 }
 
 
-Type* VariableEntry::typeCheck() const
+const Type* VariableEntry::typeCheck() const
 {
     if (initVal()) {
-        if (initVal_->type()->isSubType(type()) == false) {
+        if (initVal_->type()->isSubType(type()->tag()) == false) {
            errMsg("Error:Assignment between incompatible types"); 
         }
     }
@@ -91,7 +91,7 @@ Type* VariableEntry::typeCheck() const
     return type(); 
 }
 
-Type* FunctionEntry::typeCheck() const
+const Type* FunctionEntry::typeCheck() const
 {
     const vector<const Type*>* param_l = type()->argTypes();
     int numParams = param_l ? param_l->size() : 0;
@@ -103,7 +103,7 @@ Type* FunctionEntry::typeCheck() const
     return type();
 }    
 
-Type* EventEntry::typeCheck() const
+const Type* EventEntry::typeCheck() const
 {
     typeCheckST();
     return type();
