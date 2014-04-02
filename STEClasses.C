@@ -68,7 +68,49 @@ void VariableEntry::print(ostream& out, int indent) const
     }   
 }
 
+Type* GlobalEntry::typeCheck() const
+{
+    typeCheckST(); 
+
+    vector<RuleNode*>::iterator it; 
+    for (it = rules_.begin(); it != rules_.end(); ++it) {
+        (*it)->typeCheck();    
+    }
+    return type();
+}
+
+
+Type* VariableEntry::typeCheck() const
+{
+    if (initVal()) {
+        if (initVal_->type()->isSubType(type()) == false) {
+           errMsg("Error:Assignment between incompatible types"); 
+        }
+    }
+    
+    return type(); 
+}
+
+Type* FunctionEntry::typeCheck() const
+{
+    const vector<const Type*>* param_l = type()->argTypes();
+    int numParams = param_l ? param_l->size() : 0;
+
+    if (body_) {
+        typeCheckST(numParams, 10000); 
+    }
+    
+    return type();
+}    
+
+Type* EventEntry::typeCheck() const
+{
+    typeCheckST();
+    return type();
+}
+
 void BlockEntry::print(ostream& out, int indent) const
 {
+
 }
 
