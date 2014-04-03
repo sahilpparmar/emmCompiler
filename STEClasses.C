@@ -84,8 +84,8 @@ const Type* VariableEntry::typeCheck() const
 {
     const Type* t1 = type();
     if (initVal()) {
-        // TODO: Need to change for "int i = j;"
-        const Type* t2 = initVal_->type();
+        const Type* t2 = initVal_->typeCheck();
+        assert(t2 && "Invalid rvalue type");
 
         if (!t1->isSubType(t2->tag())) {
             errMsg("Error:Assignment between incompatible types"); 

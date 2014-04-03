@@ -60,7 +60,7 @@ void ValueNode::print(ostream& os, int indent) const
 }
 
 const Type* ValueNode::typeCheck() const {
-    cout<<"\n valnode";
+    //cout<<"\n valnode";
     return value()->type(); 
 }
 
@@ -435,53 +435,54 @@ void OpNode::print(ostream& os, int indent) const {
 const Type* OpNode::typeCheck() const {
 
     int iopcode = static_cast<int>(opCode_);
-    const Type* targ1, *targ2;
-    targ1 = arg_[0]->typeCheck();
+
     //cout << "OPNODE!!";
     if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
-        cout << "PREFIX";
-/*
-        switch(iopcode) {
-            case 0: 
-                if (arity_ > 0) {
-                    for (unsigned i=0; i < arity_-1; i++) {
-                        if (arg_[i]) {
-                            if(arg_[i]->typeCheck()->tag() == Type::TypeTag::DOUBLE 
-                                    || arg_[i]->typeCheck()->tag() == Type::TypeTag::INT)
-                            { 
-                                cout<<"\n matched";   return arg_[i]->typeCheck();
-                            } else
-                                cout<<"\n not matching";
-                        }
-                               else os << "NULL";
-                                    os << ", "; 
-                    }
+        //cout << "PREFIX";
+        const Type *targ = NULL;
 
+        if (arity_ > 0) {
+            for (unsigned i = 0; i < arity_; i++) {
+                if (arg_[i]) {
+                    targ = arg_[i]->typeCheck();
+
+                    if (targ->tag() == Type::TypeTag::DOUBLE 
+                     || targ->tag() == Type::TypeTag::INT
+                     || targ->tag() == Type::TypeTag::UINT)
+                    ;
+                    else
+                        errMsg("Not matching");
                 }
-
-        } */
-
-
+            }
+        }
+        // TODO: For now returning signed integer return type "INT"
+        return new Type(Type::INT);
     }
 
     else if ((opInfo[iopcode].prtType_ == OpNode::OpPrintType::INFIX) && (arity_ == 2)) {
+        const Type* targ1, *targ2;
+
+        targ1 = arg_[0]->typeCheck();
         targ2 = arg_[1]->typeCheck();
 
         assert(arg_[0] && arg_[1] && "Invalid args");
 
-        if(targ1->tag() == Type::TypeTag::DOUBLE 
-                || targ1->tag() == Type::TypeTag::INT)
-        { 
-            cout<<"\n type satisfied op1";
-        } else
+        if (targ1->tag() == Type::TypeTag::DOUBLE 
+         || targ1->tag() == Type::TypeTag::INT
+         || targ1->tag() == Type::TypeTag::UINT)
+        ;
+        else
             cout<<"\n type not satisfied op1";
 
-        if(targ2->tag() == Type::TypeTag::DOUBLE 
-                || targ2->tag() == Type::TypeTag::INT)
-        { 
-            cout<<"\n type satisfied op2";
-        } else
+        if (targ2->tag() == Type::TypeTag::DOUBLE 
+         || targ2->tag() == Type::TypeTag::INT
+         || targ2->tag() == Type::TypeTag::UINT)
+        ;
+        else
             cout<<"\n type not satisfied op2";
+
+        // TODO: For now returning targ1
+        return targ1;
     }
-    return targ1;
+    return NULL;
 }
