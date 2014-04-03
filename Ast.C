@@ -50,7 +50,6 @@ void RefExprNode::print(ostream& os, int indent) const
 }
 
 const Type* RefExprNode::typeCheck() const {
-    cout<<"\n from refex: "<<ext_;
     return sym_->type();
 }
 /****************************************************************/
@@ -76,7 +75,6 @@ void ExprStmtNode::print(ostream& os, int indent) const {
 }
 
 const Type* ExprStmtNode::typeCheck() const {
-    cout << "EXPRSTMTNODE!!";
     if (expr_ != NULL) { 
         return expr_->typeCheck();
     }
@@ -437,11 +435,12 @@ void OpNode::print(ostream& os, int indent) const {
 const Type* OpNode::typeCheck() const {
 
     int iopcode = static_cast<int>(opCode_);
-    
+    const Type* targ1, *targ2;
+    targ1 = arg_[0]->typeCheck();
     //cout << "OPNODE!!";
     if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
-        //cout << "PREFIX";
-
+        cout << "PREFIX";
+/*
         switch(iopcode) {
             case 0: 
                 if (arity_ > 0) {
@@ -454,14 +453,35 @@ const Type* OpNode::typeCheck() const {
                             } else
                                 cout<<"\n not matching";
                         }
-                        /*          else os << "NULL";
-                                    os << ", "; */
+                               else os << "NULL";
+                                    os << ", "; 
                     }
 
                 }
 
-        }
+        } */
+
+
     }
 
-    return NULL;
+    else if ((opInfo[iopcode].prtType_ == OpNode::OpPrintType::INFIX) && (arity_ == 2)) {
+        targ2 = arg_[1]->typeCheck();
+
+        assert(arg_[0] && arg_[1] && "Invalid args");
+
+        if(targ1->tag() == Type::TypeTag::DOUBLE 
+                || targ1->tag() == Type::TypeTag::INT)
+        { 
+            cout<<"\n type satisfied op1";
+        } else
+            cout<<"\n type not satisfied op1";
+
+        if(targ2->tag() == Type::TypeTag::DOUBLE 
+                || targ2->tag() == Type::TypeTag::INT)
+        { 
+            cout<<"\n type satisfied op2";
+        } else
+            cout<<"\n type not satisfied op2";
+    }
+    return targ1;
 }
