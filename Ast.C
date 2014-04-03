@@ -49,11 +49,20 @@ void RefExprNode::print(ostream& os, int indent) const
     os << ext_;
 }
 
+const Type* RefExprNode::typeCheck() const {
+    cout<<"\n from refex: "<<ext_;
+    return sym_->type();
+}
 /****************************************************************/
 
 void ValueNode::print(ostream& os, int indent) const
 {
     value()->print(os, indent); 
+}
+
+const Type* ValueNode::typeCheck() const {
+    cout<<"\n valnode";
+    return value()->type(); 
 }
 
 /****************************************************************/
@@ -64,6 +73,14 @@ void ExprStmtNode::print(ostream& os, int indent) const {
         expr_->print(os, indent);
     }
     os << ";"; 
+}
+
+const Type* ExprStmtNode::typeCheck() const {
+    cout << "EXPRSTMTNODE!!";
+    if (expr_ != NULL) { 
+        return expr_->typeCheck();
+    }
+    return NULL;
 }
 
 /****************************************************************/
@@ -122,6 +139,15 @@ void CompoundStmtNode::print(ostream& os, int indent) const
     os << "};";
 }
 
+const Type* CompoundStmtNode::typeCheck() const {
+    
+    if (stmts_ == NULL || stmts_->size() == 0) return NULL;
+
+    for (std::list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); it++) {
+        (*it)->typeCheck();
+    }
+    return NULL;
+}
 /****************************************************************/
 
 InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param, 
@@ -408,3 +434,34 @@ void OpNode::print(ostream& os, int indent) const {
     else internalErr("Unhandled case in OpNode::print");
 }
 
+const Type* OpNode::typeCheck() const {
+
+    int iopcode = static_cast<int>(opCode_);
+    
+    //cout << "OPNODE!!";
+    if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
+        //cout << "PREFIX";
+
+        switch(iopcode) {
+            case 0: 
+                if (arity_ > 0) {
+                    for (unsigned i=0; i < arity_-1; i++) {
+                        if (arg_[i]) {
+                            if(arg_[i]->typeCheck()->tag() == Type::TypeTag::DOUBLE 
+                                    || arg_[i]->typeCheck()->tag() == Type::TypeTag::INT)
+                            { 
+                                cout<<"\n matched";   return arg_[i]->typeCheck();
+                            } else
+                                cout<<"\n not matching";
+                        }
+                        /*          else os << "NULL";
+                                    os << ", "; */
+                    }
+
+                }
+
+        }
+    }
+
+    return NULL;
+}

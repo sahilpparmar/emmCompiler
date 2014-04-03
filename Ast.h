@@ -65,7 +65,7 @@ class AstNode: public ProgramElem {
 
         NodeType nodeType() const { return nodeType_;}
 
-        virtual const Type* typeCheck() {return NULL;};
+        virtual const Type* typeCheck() const {return NULL;};
         virtual void print(ostream& os, int indent=0) const=0;
         virtual EFSA* codeGen() {return NULL;};
 
@@ -135,6 +135,7 @@ class RefExprNode: public ExprNode {
         void symTabEntry(const SymTabEntry *ste)  { sym_ = ste;};
 
         void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
 
     private:
         string ext_;
@@ -191,6 +192,7 @@ class OpNode: public ExprNode {
         { return &arg_; }
 
         void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
 
     private: 
         unsigned int arity_;
@@ -211,6 +213,7 @@ class ValueNode: public ExprNode {
         ~ValueNode() {};
 
         void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
 
     private:
         /* val_ field is already included in ExprNode, so no new data members */
@@ -352,7 +355,6 @@ class PrimitivePatNode: public BasePatNode {
         }
         bool hasAnyOrOther() const;
 
-        //-const Type* typeCheck();
         void print(ostream& os, int indent=0) const;
 
     private:
@@ -460,6 +462,7 @@ class ExprStmtNode: public StmtNode {
         //  { return new ExprStmtNode(*this); }
 
         void print(ostream& os, int indent) const;
+        const Type* typeCheck() const;
 
     private:
         ExprNode* expr_;
@@ -485,7 +488,7 @@ class CompoundStmtNode: public StmtNode {
 
         void  printWithoutBraces(ostream& os, int indent) const;
         void  print(ostream& os, int indent) const;
-
+        const Type* typeCheck() const;
     private:
         CompoundStmtNode(const CompoundStmtNode&);
         list<StmtNode*>   *stmts_;

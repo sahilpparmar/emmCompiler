@@ -102,6 +102,7 @@ const Type* FunctionEntry::typeCheck() const
 
     if (body_) {
         typeCheckST(numParams, 10000); 
+        body_->typeCheck();
     }
     
     return type();
