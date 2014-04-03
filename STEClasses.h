@@ -43,7 +43,7 @@ class BlockEntry: public SymTabEntry {
         BlockEntry(string name, int line=0, int column=0, string file=""):
             SymTabEntry(name, SymTabEntry::Kind::BLOCK_KIND, line, column, file, (Type*)&Type::voidType) {};
         ~BlockEntry() {};
-        const Type* typeCheck() const;
+        const Type* typeCheck() const {return NULL;}
         void print(ostream& out, int indent=0) const;
 };
 
@@ -99,7 +99,7 @@ class ClassEntry: public SymTabEntry {
         ~ClassEntry() {};
 
         void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck() const {return NULL;}
 };
 
 class FunctionEntry: public SymTabEntry {

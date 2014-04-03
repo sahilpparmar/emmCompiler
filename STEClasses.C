@@ -82,13 +82,17 @@ const Type* GlobalEntry::typeCheck() const
 
 const Type* VariableEntry::typeCheck() const
 {
+    const Type* t1 = type();
     if (initVal()) {
-        if (initVal_->type()->isSubType(type()->tag()) == false) {
-           errMsg("Error:Assignment between incompatible types"); 
+        // TODO: Need to change for "int i = j;"
+        const Type* t2 = initVal_->type();
+
+        if (!t1->isSubType(t2->tag())) {
+            errMsg("Error:Assignment between incompatible types"); 
         }
     }
-    
-    return type(); 
+
+    return t1; 
 }
 
 const Type* FunctionEntry::typeCheck() const

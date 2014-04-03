@@ -211,6 +211,8 @@ main(int argc, char *argv[], char *envp[]) {
   if (ge != NULL) {
 	cout << "Finished parsing, here is the AST\n";
         ge->print(cout, 0);
+	cout << "Type Checking Errors:\n";
+        ge->typeCheck();
         cout << endl;
   }
 #endif

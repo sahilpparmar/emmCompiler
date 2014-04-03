@@ -108,16 +108,13 @@ SymTab::typeCheckST(int first, int last) const {
     if ((first == 0) && (last == 0))
         last = 1000000;
 
-        //cout << "Step1\n";
     for (i=0, it=begin(); (it != end()) && (i < last); i++, ++it)  {
         SymTabEntry *ste = (SymTabEntry *)(*it);
-        //cout << "Step1a\n";
         if (i >= first) {
-        //cout << "Step1b\n";
             if ((ste->kind() != SymTabEntry::Kind::RULE_BLOCK_KIND) && 
                     (ste->kind() != SymTabEntry::Kind::EVENT_BLOCK_KIND) && 
                     (ste->name() != "any")) {
-        //cout << "Step2 " << ste->kindTag(ste->kind()) << " "<< ste->name() << endl;
+        //cout << "[TYPECHECKST] " << ste->kindTag(ste->kind()) << " "<< ste->name() << endl;
                 ste->typeCheck();
             }
         }
