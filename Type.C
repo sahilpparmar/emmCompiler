@@ -153,35 +153,35 @@ bool
 Type::isSubType(TypeTag t2) const {
     TypeTag t1 = tag();
 
-    //errMsg("bool");
+    //cout << "bool";
     // Both t1 and t2 should be bool
     if (isBool(t1) && isBool(t2)) return true;
     else if (isBool(t1)) return false;
     else if (isBool(t2)) return false;
 
-    //errMsg("string");
+    //cout << "string";
     // Both t1 and t2 should be string
     if (isString(t1) && isString(t2)) return true;
     else if (isString(t1)) return false;
     else if (isString(t2)) return false;
 
-    //errMsg("class");
+    //cout << "class";
     // Both t1 and t2 should be class
     if (isClass(t1) && isClass(t2)) return true;
     else if (isClass(t1)) return false;
     else if (isClass(t2)) return false;
 
-    //errMsg("byte");
-    if (t1 == BYTE && t2 == BYTE) return true;
+    //cout << "byte";
+    if (t1 == BYTE && isIntegral(t2)) return true;
     else if (t1 == BYTE) return false;
 
-    //errMsg("float");
+    //cout << "float;
     if (isFloat(t1)) {
         if (isNumeric(t2)) return true;
         else return false;
     } else if (isFloat(t2)) return false;
 
-    //errMsg("int");
+    //cout << "int";
     if (isUnsigned(t1)) {
         if (isUnsigned(t2)) return true;
         else return false;
