@@ -473,7 +473,7 @@ void OpNode::print(ostream& os, int indent) const {
     }
     else internalErr("Unhandled case in OpNode::print");
 }
-
+/*
 const Type* OpNode::typeCheck() const {
 
     int iopcode = static_cast<int>(opCode_);
@@ -527,4 +527,196 @@ const Type* OpNode::typeCheck() const {
         return targ1;
     }
     return NULL;
+}
+*/
+
+
+
+const Type* OpNode::typeCheck() const {
+
+    int iopcode = static_cast<int>(opCode_);
+    const Type* targ1, *targ2;
+    targ1 = arg_[0]->typeCheck();
+    //cout << "OPNODE!!";
+/*    if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
+        cout << "PREFIX";
+
+        switch(iopcode) {
+            case 0: 
+                if (arity_ > 0) {
+                    for (unsigned i=0; i < arity_-1; i++) {
+                        if (arg_[i]) {
+                            if(arg_[i]->typeCheck()->tag() == Type::TypeTag::DOUBLE 
+                                    || arg_[i]->typeCheck()->tag() == Type::TypeTag::INT)
+                            { 
+                                cout<<"\n matched";   return arg_[i]->typeCheck();
+                            } else
+                                cout<<"\n not matching";
+                        }
+                               else os << "NULL";
+                                    os << ", "; 
+                    }
+
+                }
+
+        } 
+
+
+    } */
+
+    if(iopcode == 0)
+    {
+        cout<<"\n in uminus";
+        assert(arg_[0] && "Invalid args");
+        if(targ1->isSigned(targ1->tag()))
+        {
+            cout<<"\n unary minus operand satisfied";
+            return (new Type(opInfo[iopcode].outType_)); 
+        }
+        else
+       {
+           errMsg("Error:invalid unary minus argument");
+        //   return NULL;
+       }
+    }
+    else if((iopcode >= 1 && iopcode <= 5) )
+    {
+        targ2 = arg_[1]->typeCheck();
+        assert(arg_[0] && arg_[1] && "Invalid args");
+
+/*************** For MOD Operator: both i/p Integer ****************/
+        if(opCode_ == OpNode::OpCode::MOD)
+        {
+
+        if(targ1->isIntegral(targ1->tag()) && targ2->isIntegral(targ2->tag())) 
+        {
+            cout<<"\n mod operands satisfied ";
+            if(targ1->tag() == targ2->tag())
+                cout<<"\n types same";
+            else if(targ1->isSubType(targ2->tag()))
+            {
+                arg_[0]->coercedType(new Type(targ2->tag()));
+
+            }
+            else if(targ2->isSubType(targ1->tag()))
+            {
+                arg_[1]->coercedType(new Type(targ1->tag()));
+
+            }
+        }
+
+        }
+        else
+        {
+        if(targ1->isNumeric(targ1->tag()) && targ2->isNumeric(targ2->tag())) 
+          cout<<"\n arith operands satisfied";
+            if(targ1->tag() == targ2->tag())
+                cout<<"\n types same";
+            else if(targ1->isSubType(targ2->tag()))
+            {
+                cout<<"\n diff arith args";
+                arg_[0]->coercedType(new Type(targ2->tag()));
+
+            }
+            else if(targ2->isSubType(targ1->tag()))
+            {
+                cout<<"\n diff arith args";
+                arg_[1]->coercedType(new Type(targ1->tag()));
+
+            }
+        }
+    }
+    else if((iopcode >= 6 && iopcode <= 11))
+    {
+        targ2 = arg_[1]->typeCheck();
+        assert(arg_[0] && arg_[1] && "Invalid args");
+       
+        if(targ1->isBool(targ1->tag()) || targ2->isBool(targ2->tag()))
+            cout<<"\n Bool operands not allowed";
+        else if(targ1->isNumeric(targ1->tag()) && targ2->isNumeric(targ2->tag())) 
+            cout<<"\n relational operands satisfied";
+            if(targ1->tag() == targ2->tag())
+                cout<<"\n types same";
+            else if(targ1->isSubType(targ2->tag()))
+            {
+               arg_[0]->coercedType(new Type(targ2->tag()));
+               cout<<"\n diff args";
+
+            }
+            else if(targ2->isSubType(targ1->tag()))
+            {
+               arg_[1]->coercedType(new Type(targ1->tag()));
+               cout<<"\n diff args";
+
+            }
+       return (new Type(opInfo[iopcode].outType_)); 
+    }
+    else if((iopcode >= 12 && iopcode <= 13))
+    {
+        targ2 = arg_[1]->typeCheck();
+        assert(arg_[0] && arg_[1] && "Invalid args");
+        if(targ1->isBool(targ1->tag()) && targ2->isBool(targ2->tag()))
+            cout<<"\n logical operands satisfied";
+        else
+            cout<<"\n invalid logical args";
+    }
+    else if(iopcode == 14)
+    {
+        assert(arg_[0] && "Invalid args");
+        if(targ1->isBool(targ1->tag()))
+            cout<<"\n logical NOT, operands satisfied";
+        else
+            cout<<"\n invalid logical args";
+    }
+    else if(iopcode == 15)
+    {
+
+        assert(arg_[0] && "Invalid args");
+        if(targ1->isIntegral(targ1->tag()))
+            cout<<"\n bit NOT operands satisfied";
+        else
+            cout<<"\n invalid logical args";
+    }
+    else if((iopcode >= 16 && iopcode <= 20))
+    {
+        targ2 = arg_[1]->typeCheck();
+        assert(arg_[0] && arg_[1] && "Invalid args");
+        
+        if(targ1->isIntegral(targ1->tag()) && targ2->isIntegral(targ2->tag())) 
+          cout<<"\n bit operands satisfied";
+            if(targ1->tag() == targ2->tag())
+                cout<<"\n types same";
+            else if(targ1->isSubType(targ2->tag()))
+            {
+                arg_[0]->coercedType(new Type(targ2->tag()));
+
+            }
+            else if(targ2->isSubType(targ1->tag()))
+            {
+                arg_[1]->coercedType(new Type(targ1->tag()));
+
+            }
+    }
+    else if(iopcode==21)
+    {
+        targ2 = arg_[1]->typeCheck();
+        assert(arg_[0] && arg_[1] && "Invalid args");
+        
+        if(targ1->isNative(targ1->tag()) && targ2->isNative(targ2->tag())) 
+          cout<<"\n assign operands satisfied";
+        if(targ1->tag() == targ2->tag())
+          cout<<"\n types same";
+        else if(targ1->isSubType(targ2->tag()))
+          {
+              arg_[0]->coercedType(new Type(targ2->tag()));
+
+          }
+          else if(targ2->isSubType(targ1->tag()))
+          {
+              arg_[1]->coercedType(new Type(targ1->tag()));
+
+          }
+        
+        }
+return targ1;
 }
