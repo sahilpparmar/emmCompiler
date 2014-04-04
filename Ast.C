@@ -104,6 +104,23 @@ void IfNode::print(ostream& os, int indent) const
     }
 }
 
+const Type* IfNode::typeCheck() const 
+{
+    if (cond_) {
+        const Type* cond_type = cond_->typeCheck();
+
+        if (cond_type && cond_type->tag() != Type::TypeTag::BOOL) {
+            errMsg("Error:Boolean argument expected");
+        }
+
+        if (then_)
+            then_->typeCheck();
+
+        if(else_)
+            else_->typeCheck();
+    }
+    //TODO: resolve return here
+}
 /****************************************************************/
 
 void ReturnStmtNode::print(ostream& os, int indent) const 
@@ -115,6 +132,29 @@ void ReturnStmtNode::print(ostream& os, int indent) const
     os << ";";
 }
 
+const Type* ReturnStmtNode::typeCheck() const 
+{   
+    const Type* return_type = NULL;
+    const Type* func_type   = NULL;
+
+    if (expr_) {
+        return_type = expr_->typeCheck(); 
+
+        if (fun_)
+            func_type = fun_->type()->retType();        
+
+        if (return_type && func_type) {
+
+            if (func_type->tag() == Type::TypeTag::VOID) {
+                errMsg("Function does not expect any return statement");
+
+            } else if (!return_type->isSubType(func_type->tag())) {
+                errMsg("Type of return statement does not match with function type");
+            }
+        }
+    }
+    return return_type;
+}
 /****************************************************************/
 
 void CompoundStmtNode::printWithoutBraces(ostream& os, int indent) const
@@ -138,7 +178,7 @@ void CompoundStmtNode::print(ostream& os, int indent) const
 }
 
 const Type* CompoundStmtNode::typeCheck() const {
-    
+
     if (stmts_ == NULL || stmts_->size() == 0) return NULL;
 
     for (std::list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); it++) {
@@ -199,6 +239,8 @@ void RuleNode::print(ostream& out, int indent) const
     prtSpace(out, indent);
     out << ";;";
 }
+
+
 
 /****************************************************************/
 
@@ -447,9 +489,9 @@ const Type* OpNode::typeCheck() const {
                     targ = arg_[i]->typeCheck();
 
                     if (targ->tag() == Type::TypeTag::DOUBLE 
-                     || targ->tag() == Type::TypeTag::INT
-                     || targ->tag() == Type::TypeTag::UINT)
-                    ;
+                            || targ->tag() == Type::TypeTag::INT
+                            || targ->tag() == Type::TypeTag::UINT)
+                        ;
                     else
                         errMsg("Not matching");
                 }
@@ -468,16 +510,16 @@ const Type* OpNode::typeCheck() const {
         assert(arg_[0] && arg_[1] && "Invalid args");
 
         if (targ1->tag() == Type::TypeTag::DOUBLE 
-         || targ1->tag() == Type::TypeTag::INT
-         || targ1->tag() == Type::TypeTag::UINT)
-        ;
+                || targ1->tag() == Type::TypeTag::INT
+                || targ1->tag() == Type::TypeTag::UINT)
+            ;
         else
             cout<<"\n type not satisfied op1";
 
         if (targ2->tag() == Type::TypeTag::DOUBLE 
-         || targ2->tag() == Type::TypeTag::INT
-         || targ2->tag() == Type::TypeTag::UINT)
-        ;
+                || targ2->tag() == Type::TypeTag::INT
+                || targ2->tag() == Type::TypeTag::UINT)
+            ;
         else
             cout<<"\n type not satisfied op2";
 

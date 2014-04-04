@@ -1,0 +1,6 @@
+void get() {
+    int i = 0.5;
+    return i;
+}
+
+get(4);

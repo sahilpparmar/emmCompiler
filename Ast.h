@@ -445,6 +445,9 @@ class ReturnStmtNode: public StmtNode {
         ~ReturnStmtNode() {};
 
         void print(ostream& os, int indent) const;
+        const Type* typeCheck() const;
+
+
 
     private:
         ExprNode* expr_;
@@ -520,6 +523,7 @@ class IfNode: public StmtNode {
         StmtNode* thenStmt() { return then_;};
 
         void print(ostream& os, int indent) const;
+        const Type* typeCheck() const;
 
     private: 
         ExprNode *cond_;
