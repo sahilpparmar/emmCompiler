@@ -123,7 +123,7 @@ const Type* IfNode::typeCheck() const
         if(else_)
             else_->typeCheck();
     }
-    //TODO: resolve return here
+    return NULL;
 }
 /****************************************************************/
 
@@ -293,6 +293,8 @@ const Type* RuleNode::typeCheck() const
 
     if (reaction_)
         reaction_->typeCheck();
+    
+    return NULL;
 }
 
 /****************************************************************/
@@ -361,7 +363,7 @@ const Type* PrimitivePatNode::typeCheck() const
 
             for (; var_it != params_->end(); ++var_it) {
                 VariableEntry* var_entry = *var_it; 
-                const Type* param_type   = var_entry->typeCheck(); 
+                var_entry->typeCheck(); 
                 
                 var_entry->type(*type_it);
                 type_it++;
@@ -372,6 +374,7 @@ const Type* PrimitivePatNode::typeCheck() const
     if (cond_) {
         cond_->typeCheck();
     }
+    return NULL;
 }
 /****************************************************************/
 
@@ -420,6 +423,7 @@ const Type* PatNode::typeCheck() const
         pat1_->typeCheck();
         break;
   }
+  return NULL;
 }
 
 bool PatNode::hasSeqOps() const 
