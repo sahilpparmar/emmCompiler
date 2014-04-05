@@ -87,7 +87,7 @@ const Type* VariableEntry::typeCheck() const
         const Type* t2 = initVal_->typeCheck();
         assert(t2 && "Invalid rvalue type");
 
-        if (!t1->isSubType(t2->tag())) {
+        if (!t1->isSubType(t2->tag(), t2)) {
             errMsg("Assignment between incompatible types", initVal_);
         }
     }

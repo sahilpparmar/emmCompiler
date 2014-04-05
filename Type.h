@@ -90,8 +90,8 @@ class Type {
 
   string name() const {return name(tag_); }
   string fullName() const;
-  bool isSubType(TypeTag t) const;
 
+  bool isSubType(TypeTag t2, const Type* param_type = NULL) const;
   TypeTag tag() const { return tag_; }
   const SymTabEntry* typeDesc() const {
     if ((tag_ != CLASS)) return NULL;

@@ -31,12 +31,15 @@ static EventEntry* getEventEntry(char *eventName) {
         int caller_param = curVarList ? curVarList->size() : 0;
         int callee_param = sym->type()->argTypes() ? sym->type()->argTypes()->size() : 0;
 
-        if (caller_param == callee_param) {
+        return (EventEntry*) sym;
+       
+       /* if (caller_param == callee_param) {
             return (EventEntry*) sym;
         } else {
             errMsg((string)eventName + (string)": mismatch in the number of arguments");
             return NULL;
-        }
+        } 
+       */
     }
     errMsg((string)"Expected an event name, but got \"" + (string)eventName + (string)"\"");
     return NULL;

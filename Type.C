@@ -150,7 +150,7 @@ Type::print(ostream& os, int indent) const {
 }
 
 bool
-Type::isSubType(TypeTag t2) const {
+Type::isSubType(TypeTag t2, const Type* param_type) const {
     TypeTag t1 = tag();
 
     //cout << " isSubType() ";
@@ -168,7 +168,13 @@ Type::isSubType(TypeTag t2) const {
 
     //cout << "class";
     // Both t1 and t2 should be class
-    if (isClass(t1) && isClass(t2)) return true;
+    if (isClass(t1) && isClass(t2)) {
+
+        if(param_type->typeDesc()->name().compare(this->typeDesc()->name()) != 0)
+            return false; 
+        
+        return true;
+    }
     else if (isClass(t1)) return false;
     else if (isClass(t2)) return false;
 
