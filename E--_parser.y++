@@ -74,7 +74,7 @@ static VariableEntry* allocVarEntry(string name, VariableEntry::VarKind v, Type*
     if (retVarEnt) {
         errMsg((string)"Redefinition of name " + name);
     } else {
-        retVarEnt = new VariableEntry(name, v, type, init, yylineno, yycolumnno, string(yyfilename));
+        retVarEnt = new VariableEntry(name, v, type, init, yylinenum, yycolumnno, string(yyfilename));
         stm.insert(retVarEnt);
     }
 
@@ -88,7 +88,7 @@ static ClassEntry* allocClassEntry(char* name) {
     if (retClassEnt) {
         errMsg((string)"Redefinition of name " + name);
     } else {
-        retClassEnt = new ClassEntry(string(name), yylineno, yycolumnno, string(yyfilename));
+        retClassEnt = new ClassEntry(string(name), yylinenum, yycolumnno, string(yyfilename));
         Type *te = new Type(retClassEnt, Type::CLASS);
         retClassEnt->type(te);
         stm.insert(retClassEnt);
@@ -110,7 +110,7 @@ static EventEntry* allocEventEntry(char* name = NULL, vector<Type*>* param_l = N
         retEventEnt->type(te);
         curEventEnt = NULL;
     } else {
-        retEventEnt = new EventEntry(string("dummy_entry"), yylineno, yycolumnno, string(yyfilename));
+        retEventEnt = new EventEntry(string("dummy_entry"), yylinenum, yycolumnno, string(yyfilename));
         stm.enterScope(retEventEnt);
     }
 
@@ -130,7 +130,7 @@ static FunctionEntry* allocFuncEntry(char* name = NULL, Type* rettype = NULL, ve
         retFuncEnt->type(te);
         curFuncEnt = NULL;
     } else {
-        retFuncEnt = new FunctionEntry(string("dummy_func"), NULL, yylineno, yycolumnno, string(yyfilename));
+        retFuncEnt = new FunctionEntry(string("dummy_func"), NULL, yylinenum, yycolumnno, string(yyfilename));
         stm.enterScope(retFuncEnt);
     }
     return retFuncEnt;
@@ -142,7 +142,7 @@ static RefExprNode* allocRefExprNode(char* str) {
     if (sym == NULL) {
         errMsg((string)"Undeclared identifier \"" + (string)str + (string)"\"");
     }
-    return new RefExprNode(string(str), sym, yylineno, yycolumnno, string(yyfilename));
+    return new RefExprNode(string(str), sym, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
@@ -155,20 +155,20 @@ static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
         errMsg((string)"\"" + (string)str + (string)"\" is not a function or module name");
         return NULL;
     }
-    return new InvocationNode(sym, param_l, yylineno, yycolumnno, string(yyfilename));
+    return new InvocationNode(sym, param_l, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static ValueNode* allocValueNode(Value* val) {
-    return new ValueNode(val, yylineno, yycolumnno, string(yyfilename));
+    return new ValueNode(val, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static OpNode* allocOpNode(OpNode::OpCode op, ExprNode *l, ExprNode *r) {
     assert(l);
-    return new OpNode(op, l, r, yylineno, yycolumnno, string(yyfilename));
+    return new OpNode(op, l, r, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static ExprStmtNode* allocExprStmtNode(ExprNode* e) {
-    return new ExprStmtNode(e, yylineno, yycolumnno, string(yyfilename));
+    return new ExprStmtNode(e, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static ReturnStmtNode* allocReturnNode(ExprNode* e) {
@@ -178,12 +178,12 @@ static ReturnStmtNode* allocReturnNode(ExprNode* e) {
 }
 
 static IfNode* allocIfNode(ExprNode* cond, StmtNode* thenStmt, StmtNode* elseStmt) {
-    return new IfNode(cond, thenStmt, elseStmt, yylineno, yycolumnno, string(yyfilename));
+    return new IfNode(cond, thenStmt, elseStmt, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static CompoundStmtNode* allocCompStmtNode(list<StmtNode*> *Slist) {
     if (!Slist) Slist = new list<StmtNode*>;
-    return new CompoundStmtNode(Slist, yylineno, yycolumnno, string(yyfilename));
+    return new CompoundStmtNode(Slist, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static CompoundStmtNode* allocScopeNode(CompoundStmtNode* node) {
@@ -194,7 +194,7 @@ static CompoundStmtNode* allocScopeNode(CompoundStmtNode* node) {
 
 static PrimitivePatNode* allocPrimPatNode(EventEntry* ee, vector<VariableEntry*>* params, ExprNode* c) {
     if (ee)
-        return new PrimitivePatNode(ee, params, c, yylineno, yycolumnno, string(yyfilename));
+        return new PrimitivePatNode(ee, params, c, yylinenum, yycolumnno, string(yyfilename));
     return NULL;
 }
 
@@ -203,7 +203,7 @@ static PatNode* allocPatNode(BasePatNode::PatNodeKind pk, BasePatNode *p1, BaseP
         ((pk == BasePatNode::PatNodeKind::NEG || pk == BasePatNode::PatNodeKind::STAR) ||
         ((pk == BasePatNode::PatNodeKind::OR  || pk == BasePatNode::PatNodeKind::SEQ) && p2)))
     {
-        return new PatNode(pk, p1, p2, yylineno, yycolumnno, string(yyfilename));
+        return new PatNode(pk, p1, p2, yylinenum, yycolumnno, string(yyfilename));
     }
     return NULL;
 }
@@ -212,7 +212,7 @@ static RuleNode* allocRuleNode(BasePatNode* pat, StmtNode* reaction) {
     RuleNode *retRuleNode = NULL;
 
     if (pat) {
-        retRuleNode = new RuleNode(curRBlkNode, pat, reaction, yylineno, yycolumnno, string(yyfilename));
+        retRuleNode = new RuleNode(curRBlkNode, pat, reaction, yylinenum, yycolumnno, string(yyfilename));
         GlobalEntry *globalSymEnt = (GlobalEntry*) stm.currentScope(SymTabEntry::Kind::GLOBAL_KIND);
         globalSymEnt->addRule(retRuleNode);
     }
@@ -224,7 +224,7 @@ static RuleNode* allocRuleNode(BasePatNode* pat, StmtNode* reaction) {
 
 static RuleBlockEntry* allocRuleBlockNode() {
     if (!curRBlkNode) {
-        curRBlkNode = new RuleBlockEntry(yylineno, yycolumnno, string(yyfilename));
+        curRBlkNode = new RuleBlockEntry(yylinenum, yycolumnno, string(yyfilename));
         stm.enterScope(curRBlkNode);
     }
     return curRBlkNode;

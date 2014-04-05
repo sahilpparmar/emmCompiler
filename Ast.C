@@ -114,7 +114,7 @@ const Type* IfNode::typeCheck() const
         const Type* cond_type = cond_->typeCheck();
         
         if (cond_type && cond_type->tag() != Type::TypeTag::BOOL) {
-            errMsg("Error:Boolean argument expected");
+            errMsg("Boolean argument expected", cond_);
         }
 
         if (then_)
@@ -153,10 +153,10 @@ const Type* ReturnStmtNode::typeCheck() const
                 expr_->coercedType(func_type); 
 
             } else if (func_type->tag() == Type::TypeTag::VOID) {
-                errMsg("No return value expected for void a function");
+                errMsg("No return value expected for void a function", expr_);
 
             } else {
-                errMsg("Return value incompatible with current function type");
+                errMsg("Return value incompatible with current function type", expr_);
             }
         }
     }
@@ -189,7 +189,6 @@ const Type* CompoundStmtNode::typeCheck() const {
     if (stmts_ == NULL || stmts_->size() == 0) return NULL;
 
     for (std::list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); it++) {
-        //errMsg("Inside compound stmt node"); 
         (*it)->typeCheck();
     }
     return NULL;
@@ -226,12 +225,11 @@ void InvocationNode::print(ostream& out, int indent) const
 
 const Type* InvocationNode::typeCheck() const
 {
-    //errMsg("InvocationNode errormsg");
     FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
     vector<Type*>* argtypes    = func_entry->type()->argTypes();
     
     if ((params_ == NULL && argtypes->size() > 0) || (params_ && params_->size() != argtypes->size())) {
-        errMsg((string)itoa(argtypes->size()) + " arguments expected for " + func_entry->name());
+        errMsg((string)itoa(argtypes->size()) + " arguments expected for " + func_entry->name(), this);
         return NULL; 
     
     } else if (params_) {
@@ -248,7 +246,7 @@ const Type* InvocationNode::typeCheck() const
                 expr_node->coercedType (*t_iter);
             
             } else {
-               errMsg("Type Mismatch for argument " + (string)itoa(i) + " to " + func_entry->name()); 
+               errMsg("Type Mismatch for argument " + (string)itoa(i) + " to " + func_entry->name(), expr_node); 
             }
             ++i;
             ++p_iter;
@@ -318,7 +316,7 @@ void PrimitivePatNode::print(ostream& out, int indent) const
         out << "(";
         if (params_) {
             if (params_->size() != argtype_l->size()) {
-                errMsg("Invalid event parameters");
+                errMsg("Invalid event parameters", this);
                 return;
             }
 
@@ -353,7 +351,7 @@ const Type* PrimitivePatNode::typeCheck() const
 
     if (params_) {
         if (params_->size() != argtype_l->size()) {
-            errMsg("Event " + ee_->name() + " requires " + (string)itoa(params_->size()) + "arguments");
+            errMsg("Event " + ee_->name() + " requires " + (string)itoa(params_->size()) + "arguments", this);
         }
 
         unsigned int size = params_->size();
@@ -391,7 +389,7 @@ void PatNode::print(ostream& out, int indent) const
             case PatNodeKind::PRIMITIVE: 
             case PatNodeKind::UNDEFINED:
             case PatNodeKind::EMPTY:
-                errMsg("Invalid PatNodeKind");
+                errMsg("Invalid PatNodeKind", this);
                 break;
             case PatNodeKind::SEQ:
                 out << ":";
@@ -418,7 +416,7 @@ const Type* PatNode::typeCheck() const
     case PatNodeKind::OR:           pat1_->typeCheck(); pat2_->typeCheck(); break;
     case PatNodeKind::NEG:
         if (hasSeqOps()) {
-            errMsg("Only simple patterns without `.', `*', and `!' operatorscan be negated");
+            errMsg("Only simple patterns without `.', `*', and `!' operatorscan be negated", this);
         }
         pat1_->typeCheck();
         break;
@@ -589,63 +587,6 @@ void OpNode::print(ostream& os, int indent) const {
     }
     else internalErr("Unhandled case in OpNode::print");
 }
-/*
-const Type* OpNode::typeCheck() const {
-
-    int iopcode = static_cast<int>(opCode_);
-
-    //cout << "OPNODE!!";
-    if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
-        //cout << "PREFIX";
-        const Type *targ = NULL;
-
-        if (arity_ > 0) {
-            for (unsigned i = 0; i < arity_; i++) {
-                if (arg_[i]) {
-                    targ = arg_[i]->typeCheck();
-
-                    if (targ->tag() == Type::TypeTag::DOUBLE 
-                            || targ->tag() == Type::TypeTag::INT
-                            || targ->tag() == Type::TypeTag::UINT)
-                        ;
-                    else
-                        errMsg("Not matching");
-                }
-            }
-        }
-        // TODO: For now returning signed integer return type "INT"
-        return new Type(Type::INT);
-    }
-
-    else if ((opInfo[iopcode].prtType_ == OpNode::OpPrintType::INFIX) && (arity_ == 2)) {
-        const Type* targ1, *targ2;
-
-        targ1 = arg_[0]->typeCheck();
-        targ2 = arg_[1]->typeCheck();
-
-        assert(arg_[0] && arg_[1] && "Invalid args");
-
-        if (targ1->tag() == Type::TypeTag::DOUBLE 
-                || targ1->tag() == Type::TypeTag::INT
-                || targ1->tag() == Type::TypeTag::UINT)
-            ;
-        else
-            cout<<"\n type not satisfied op1";
-
-        if (targ2->tag() == Type::TypeTag::DOUBLE 
-                || targ2->tag() == Type::TypeTag::INT
-                || targ2->tag() == Type::TypeTag::UINT)
-            ;
-        else
-            cout<<"\n type not satisfied op2";
-
-        // TODO: For now returning targ1
-        return targ1;
-    }
-    return NULL;
-}
-*/
-
 
 
 const Type* OpNode::typeCheck() const {
@@ -653,32 +594,6 @@ const Type* OpNode::typeCheck() const {
     int iopcode = static_cast<int>(opCode_);
     const Type* targ1, *targ2;
     targ1 = arg_[0]->typeCheck();
-    //cout << "OPNODE!!";
-/*    if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
-        cout << "PREFIX";
-
-        switch(iopcode) {
-            case 0: 
-                if (arity_ > 0) {
-                    for (unsigned i=0; i < arity_-1; i++) {
-                        if (arg_[i]) {
-                            if(arg_[i]->typeCheck()->tag() == Type::TypeTag::DOUBLE 
-                                    || arg_[i]->typeCheck()->tag() == Type::TypeTag::INT)
-                            { 
-                                cout<<"\n matched";   return arg_[i]->typeCheck();
-                            } else
-                                cout<<"\n not matching";
-                        }
-                               else os << "NULL";
-                                    os << ", "; 
-                    }
-
-                }
-
-        } 
-
-
-    } */
 
     if(iopcode == 0)
     {
@@ -691,7 +606,7 @@ const Type* OpNode::typeCheck() const {
         }
         else
        {
-           errMsg("Error:invalid unary minus argument");
+           errMsg("Error:invalid unary minus argument", this);
         //   return NULL;
        }
     }
