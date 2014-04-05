@@ -198,30 +198,11 @@ static PrimitivePatNode* allocPrimPatNode(EventEntry* ee, vector<VariableEntry*>
     return NULL;
 }
 
-static int hasInvalidOps = 0;
 static PatNode* allocPatNode(BasePatNode::PatNodeKind pk, BasePatNode *p1, BasePatNode *p2) {
     if (p1 && 
         ((pk == BasePatNode::PatNodeKind::NEG || pk == BasePatNode::PatNodeKind::STAR) ||
         ((pk == BasePatNode::PatNodeKind::OR  || pk == BasePatNode::PatNodeKind::SEQ) && p2)))
     {
-        // To handle valid combination of operations
-        if (pk == BasePatNode::PatNodeKind::NEG) {
-            if (hasInvalidOps > 0) {
-                hasInvalidOps = -2;
-                errMsg((string)"Only simple patterns without `.', `*', and `!' operatorscan be negated");
-            } else if (hasInvalidOps == 0) {
-                hasInvalidOps = -1;
-            } 
-        } else if (pk == BasePatNode::PatNodeKind::STAR) {
-            if (hasInvalidOps == -1) {
-                hasInvalidOps = -2;
-                errMsg((string)"Only simple patterns without `.', `*', and `!' operatorscan be negated");
-            } else if (hasInvalidOps != -2) {
-                hasInvalidOps++;
-            }
-        } else if (pk == BasePatNode::PatNodeKind::SEQ) {
-            hasInvalidOps = 0;
-        }
         return new PatNode(pk, p1, p2, yylineno, yycolumnno, string(yyfilename));
     }
     return NULL;
@@ -243,7 +224,6 @@ static RuleNode* allocRuleNode(BasePatNode* pat, StmtNode* reaction) {
 
 static RuleBlockEntry* allocRuleBlockNode() {
     if (!curRBlkNode) {
-        hasInvalidOps = 0;
         curRBlkNode = new RuleBlockEntry(yylineno, yycolumnno, string(yyfilename));
         stm.enterScope(curRBlkNode);
     }
@@ -518,6 +498,7 @@ function_proto:     function_decl semi_colon                                {   
                   ;
 
 function_defn:      TOK_LBRACE function_body TOK_RBRACE semi_colon          {   $$ = allocCompStmtNode(curStmtList3);        curStmtList3 = NULL;     prt("FunctionBody");  }
+                  | TOK_LBRACE function_body TOK_RBRACE                     {   $$ = allocCompStmtNode(curStmtList3);        curStmtList3 = NULL;     prt("FunctionBody");  }
                   ;
 
 function_body:      function_body local_decl
