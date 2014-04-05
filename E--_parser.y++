@@ -404,7 +404,8 @@ if_then_else_stmt:  TOK_IF condition basic_block                            {   
                   | TOK_IF condition basic_block TOK_ELSE basic_block       {   $$ = allocIfNode($2, $3, $5);   prt("IfThenElseStmt");      }
                   ;
 
-basic_block:        TOK_LBRACE stmt_plus2 TOK_RBRACE                        {   $$ = allocCompStmtNode(curStmtList2); curStmtList2 = NULL; prt("CompoundStmt");   }
+basic_block:        TOK_LBRACE stmt_plus2 TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(curStmtList2); curStmtList2 = NULL; prt("CompoundStmt");   }
+                  | TOK_LBRACE stmt_plus2 TOK_RBRACE                        {   $$ = allocCompStmtNode(curStmtList2); curStmtList2 = NULL; prt("CompoundStmt");   }
                   | empty_block                                             {   $$ = $1;                                                    }
                   | simple_stmt                                             {   $$ = $1;                                                    }
                   | semi_colon                                              {   $$ = allocExprStmtNode(NULL);                               }
@@ -421,7 +422,8 @@ simple_stmt:        func_invocation semi_colon                              {   
                   | TOK_RETURN semi_colon                                   {   $$ = allocReturnNode(NULL); prt("ReturnStmt");              }
                   ;
 
-empty_block:        TOK_LBRACE semi_colon TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
+empty_block:        TOK_LBRACE semi_colon TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
+                  | TOK_LBRACE semi_colon TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
                   ;
 
 condition:          TOK_LPAREN expression TOK_RPAREN                        {   $$ = $2;    prt("(Expr)"); }
