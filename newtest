@@ -1,6 +1,29 @@
-void get() {
-    int i = 0.5;
-    return i;
-}
+Finished parsing, here is the AST
+ 
+  event a(int x);
+  event b(double y, double z);
+  int z;
+  int f;
+  int g;
+  int w;
+  int j;
+  int y;
+ 
+  (a(int e))-->   z=(z+1);
+  ;;
+  ((a(int f)):(b(double y, double w)|w==f))-->   z=w;
+  ;;
+  ((a(int f)):(b(double y, double w)|w==f))-->   z=f;
+  ;;
+  ((a(int f)):(b(double y, double w)|z=(f+1)))-->   z=f;
+  ;;
+  ((a(int g)):(b(double y, double w)|f==w))-->   z=g;
+  ;;
+  ((a(int h)) \/ (b(double y, double w)|h==w))-->   z=1;
+  ;;
+  ((a(int j)) \/ (b(double y, double w)|j==w))-->   z=j;
+  ;;
+  (a(int k))-->   z=(k+y);
+  ;;
+Type Checking Errors:
 
-get(4);

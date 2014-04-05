@@ -5,7 +5,7 @@
 void GlobalEntry::print(ostream& out, int indent) const
 {
     printST(out, indent, ' ', ' ');
-    
+
     out << endl;
     for (unsigned int  ii = 0; ii < rules_.size(); ii++) {
         rules_[ii]->print(out, indent+STEP_INDENT);
@@ -99,12 +99,15 @@ const Type* FunctionEntry::typeCheck() const
 {
     const vector<const Type*>* param_l = type()->argTypes();
     int numParams = param_l ? param_l->size() : 0;
-
+    
+    if(numParams) {
+        typeCheckST(0, numParams);
+    } 
     if (body_) {
         typeCheckST(numParams, 10000); 
         body_->typeCheck();
     }
-    
+
     return type();
 }    
 

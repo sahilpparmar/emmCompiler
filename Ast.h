@@ -252,6 +252,7 @@ class InvocationNode: public ExprNode {
         }
 
         void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
 
     private:
         vector<ExprNode*>* params_;
@@ -356,6 +357,7 @@ class PrimitivePatNode: public BasePatNode {
         bool hasAnyOrOther() const;
 
         void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
 
     private:
 
@@ -400,14 +402,13 @@ class PatNode: public BasePatNode {
                 return true;
             return false;
         }
-        bool hasSeqOps() const {
-            return true;
-        }
+        bool hasSeqOps() const;
+
         bool hasAnyOrOther() const {
             return true;
         }
         void print(ostream& os, int indent=0) const;
-
+        const Type* typeCheck() const;
     private: 
         PatNode(const PatNode&);
 
@@ -552,6 +553,7 @@ class RuleNode: public AstNode {
         StmtNode* reaction() { return reaction_; };   
 
         void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
 
     private:
         BlockEntry  *rste_;

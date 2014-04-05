@@ -50,7 +50,11 @@ void RefExprNode::print(ostream& os, int indent) const
 }
 
 const Type* RefExprNode::typeCheck() const {
-    return sym_->type();
+    const Type* typ = NULL; 
+    if (symTabEntry())    
+        typ = sym_->type();
+
+    return typ;
 }
 /****************************************************************/
 
@@ -108,7 +112,7 @@ const Type* IfNode::typeCheck() const
 {
     if (cond_) {
         const Type* cond_type = cond_->typeCheck();
-
+        
         if (cond_type && cond_type->tag() != Type::TypeTag::BOOL) {
             errMsg("Error:Boolean argument expected");
         }
@@ -145,11 +149,14 @@ const Type* ReturnStmtNode::typeCheck() const
 
         if (return_type && func_type) {
 
-            if (func_type->tag() == Type::TypeTag::VOID) {
-                errMsg("Function does not expect any return statement");
+            if (func_type->isSubType(return_type->tag())) {
+                expr_->coercedType(func_type); 
 
-            } else if (!return_type->isSubType(func_type->tag())) {
-                errMsg("Type of return statement does not match with function type");
+            } else if (func_type->tag() == Type::TypeTag::VOID) {
+                errMsg("No return value expected for void a function");
+
+            } else {
+                errMsg("Return value incompatible with current function type");
             }
         }
     }
@@ -182,6 +189,7 @@ const Type* CompoundStmtNode::typeCheck() const {
     if (stmts_ == NULL || stmts_->size() == 0) return NULL;
 
     for (std::list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); it++) {
+        //errMsg("Inside compound stmt node"); 
         (*it)->typeCheck();
     }
     return NULL;
@@ -216,6 +224,43 @@ void InvocationNode::print(ostream& out, int indent) const
     out << ")";
 }
 
+const Type* InvocationNode::typeCheck() const
+{
+    //errMsg("InvocationNode errormsg");
+    FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
+    vector<Type*>* argtypes    = func_entry->type()->argTypes();
+    
+    if ((params_ == NULL && argtypes->size() > 0) || (params_ && params_->size() != argtypes->size())) {
+        errMsg((string)itoa(argtypes->size()) + " arguments expected for " + func_entry->name());
+        return NULL; 
+    
+    } else if (params_) {
+        unsigned int i = 1; 
+        vector<Type*>::iterator t_iter    = argtypes->begin();
+        vector<ExprNode*>::iterator p_iter = params_->begin();
+         
+        for (; t_iter != argtypes->end(); ++t_iter) {
+            
+            ExprNode* expr_node    = *p_iter; 
+            const Type* param_type = expr_node->typeCheck(); 
+            
+            if (*t_iter && param_type && (*t_iter)->isSubType (param_type->tag())) {
+                expr_node->coercedType (*t_iter);
+            
+            } else {
+               errMsg("Type Mismatch for argument " + (string)itoa(i) + " to " + func_entry->name()); 
+            }
+            ++i;
+            ++p_iter;
+        }
+    }
+
+    if (func_entry)
+        return func_entry->type()->retType();
+    
+    return NULL;
+}
+
 /****************************************************************/
 
 RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, 
@@ -241,6 +286,14 @@ void RuleNode::print(ostream& out, int indent) const
 }
 
 
+const Type* RuleNode::typeCheck() const 
+{
+    if (pat_)
+        pat_->typeCheck();
+
+    if (reaction_)
+        reaction_->typeCheck();
+}
 
 /****************************************************************/
 
@@ -290,6 +343,36 @@ void PrimitivePatNode::print(ostream& out, int indent) const
     out << ")";
 }
 
+const Type* PrimitivePatNode::typeCheck() const 
+{   //TODO: Blindly copied from print, need to check for segfaults. code seems bit susceptible to segfaults
+    //TODO: type mismatch condition is not there in any input files. need to look into if correct.
+
+    vector<Type*>* argtype_l = ee_->type()->argTypes();
+
+    if (params_) {
+        if (params_->size() != argtype_l->size()) {
+            errMsg("Event " + ee_->name() + " requires " + (string)itoa(params_->size()) + "arguments");
+        }
+
+        unsigned int size = params_->size();
+        if (size > 0) {
+            std::vector<Type*>::iterator type_it          = argtype_l->begin();
+            std::vector<VariableEntry*>::iterator var_it  = params_->begin();
+
+            for (; var_it != params_->end(); ++var_it) {
+                VariableEntry* var_entry = *var_it; 
+                const Type* param_type   = var_entry->typeCheck(); 
+                
+                var_entry->type(*type_it);
+                type_it++;
+            }
+        }
+    }
+
+    if (cond_) {
+        cond_->typeCheck();
+    }
+}
 /****************************************************************/
 
 void PatNode::print(ostream& out, int indent) const 
@@ -319,6 +402,35 @@ void PatNode::print(ostream& out, int indent) const
     if (kind() == PatNodeKind::STAR)
         out << "**";
     out << ")";
+}
+
+const Type* PatNode::typeCheck() const 
+{
+  switch(kind()) {
+    case PatNodeKind::PRIMITIVE:    break;
+    case PatNodeKind::UNDEFINED:    break;
+    case PatNodeKind::EMPTY:        break;
+    case PatNodeKind::STAR:         pat1_->typeCheck(); break;
+    case PatNodeKind::SEQ:          pat1_->typeCheck(); pat2_->typeCheck(); break;
+    case PatNodeKind::OR:           pat1_->typeCheck(); pat2_->typeCheck(); break;
+    case PatNodeKind::NEG:
+        if (hasSeqOps()) {
+            errMsg("Only simple patterns without `.', `*', and `!' operatorscan be negated");
+        }
+        pat1_->typeCheck();
+        break;
+  }
+}
+
+bool PatNode::hasSeqOps() const 
+{
+    if (pat1_ && pat2_ && kind() == PatNodeKind::SEQ)
+        return true;
+    if ((pat1_ || pat2_) && kind() == PatNodeKind::STAR)
+        return true;
+    if ((pat1_ && pat1_->hasSeqOps()) || (pat2_ && pat2_->hasSeqOps()))
+        return true;
+    return false;
 }
 
 /****************************************************************/
