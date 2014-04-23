@@ -2,9 +2,16 @@ Terminals unused in grammar
 
    TOK_LEX_ERROR
    TOK_PAT_NOT
-   TOK_SHORT
-   TOK_DOUBLE_COLON
+   TOK_QMARK
    TOK_LBRACK
+   TOK_RBRACK
+   TOK_WHILE
+   TOK_BREAK
+   TOK_SHORT
+   TOK_LONG
+   TOK_BIT
+   TOK_ENUM
+   TOK_DOUBLE_COLON
    TOK_DOT
 
 
@@ -233,139 +240,146 @@ TOK_ASSIGN (284) 58 92 105
 TOK_SEMICOLON (285) 118 119
 TOK_COLON (286) 27
 TOK_ARROW (287) 9
-TOK_LBRACE (288) 14 15 17 18 37 38 49 50 96 97
-TOK_RBRACE (289) 14 15 17 18 37 38 49 50 96 97
-TOK_LPAREN (290) 25 31 51 52 53 65 107 110 113 116
-TOK_RPAREN (291) 25 31 51 52 53 65 107 110 113 116
-TOK_IF (292) 35 36
-TOK_ELSE (293) 36
-TOK_CLASS (294) 93
-TOK_RETURN (295) 47 48
-TOK_EVENT (296) 112
-TOK_ANY (297) 30
-TOK_PRINT (298) 55
-TOK_UINTNUM (299) 120
-TOK_DOUBLENUM (300) 121
-TOK_VOID (301) 129
-TOK_STRING (302) 132
-TOK_STRCONST (303) 122
-TOK_INT (304) 134 135
-TOK_UNSIGNED (305) 128 135
-TOK_BOOL (306) 130
-TOK_BYTE (307) 131
-TOK_DOUBLE (308) 133
-TOK_SHORT (309)
-TOK_TRUE (310) 123
-TOK_FALSE (311) 124
-TOK_IDENT (312) 31 32 33 54 87 91 92 93 104 105 106 111 112 117 127
-TOK_DOUBLE_COLON (313)
-TOK_LBRACK (314)
-TOK_DOT (315)
+TOK_QMARK (288)
+TOK_LBRACE (289) 14 15 17 18 37 38 49 50 96 97
+TOK_RBRACE (290) 14 15 17 18 37 38 49 50 96 97
+TOK_LPAREN (291) 25 31 51 52 53 65 107 110 113 116
+TOK_RPAREN (292) 25 31 51 52 53 65 107 110 113 116
+TOK_LBRACK (293)
+TOK_RBRACK (294)
+TOK_IF (295) 35 36
+TOK_ELSE (296) 36
+TOK_CLASS (297) 93
+TOK_RETURN (298) 47 48
+TOK_EVENT (299) 112
+TOK_ANY (300) 30
+TOK_PRINT (301) 55
+TOK_WHILE (302)
+TOK_BREAK (303)
+TOK_UINTNUM (304) 120
+TOK_DOUBLENUM (305) 121
+TOK_VOID (306) 129
+TOK_STRING (307) 132
+TOK_STRCONST (308) 122
+TOK_INT (309) 134 135
+TOK_UNSIGNED (310) 128 135
+TOK_BOOL (311) 130
+TOK_BYTE (312) 131
+TOK_DOUBLE (313) 133
+TOK_SHORT (314)
+TOK_LONG (315)
+TOK_BIT (316)
+TOK_ENUM (317)
+TOK_TRUE (318) 123
+TOK_FALSE (319) 124
+TOK_IDENT (320) 31 32 33 54 87 91 92 93 104 105 106 111 112 117 127
+TOK_DOUBLE_COLON (321)
+TOK_DOT (322)
 
 
 Nonterminals, with rules where they appear
 
-$accept (61)
+$accept (68)
     on left: 0
-s_specification (62)
+s_specification (69)
     on left: 1, on right: 0
-specification (63)
+specification (70)
     on left: 2 3 4, on right: 1 2 3
-declaration (64)
+declaration (71)
     on left: 5 6 7 8, on right: 2
-rule (65)
+rule (72)
     on left: 9, on right: 3
-rule_stmts (66)
+rule_stmts (73)
     on left: 10 11 12 13, on right: 9
-compound_stmt2 (67)
+compound_stmt2 (74)
     on left: 14 15 16, on right: 10 11 14 15
-compound_stmt1 (68)
+compound_stmt1 (75)
     on left: 17 18, on right: 16
-stmt_plus1 (69)
+stmt_plus1 (76)
     on left: 19 20, on right: 17 19
-primitive_all (70)
+primitive_all (77)
     on left: 21 22 23 24 25, on right: 9 25 26 27 28 29
-binary_event_oprs (71)
+binary_event_oprs (78)
     on left: 26 27 28 29, on right: 24
-any_event (72)
+any_event (79)
     on left: 30, on right: 22
-normal_event (73)
+normal_event (80)
     on left: 31, on right: 21 23
-event_aparam_l (74)
+event_aparam_l (81)
     on left: 32 33 34, on right: 31 32
-if_then_else_stmt (75)
+if_then_else_stmt (82)
     on left: 35 36, on right: 46
-basic_block (76)
+basic_block (83)
     on left: 37 38 39 40 41, on right: 35 36
-stmt_plus2 (77)
+stmt_plus2 (84)
     on left: 42 43, on right: 37 38 42
-simple_stmt (78)
+simple_stmt (85)
     on left: 44 45 46 47 48, on right: 19 40 42 99
-empty_block (79)
+empty_block (86)
     on left: 49 50, on right: 39
-condition (80)
+condition (87)
     on left: 51, on right: 35 36
-func_invocation (81)
+func_invocation (88)
     on left: 52 53, on right: 44 61
-func_name (82)
+func_name (89)
     on left: 54 55, on right: 52 53
-caller_param_l (83)
+caller_param_l (90)
     on left: 56 57, on right: 52 56
-assignment (84)
+assignment (91)
     on left: 58, on right: 45 62
-expression (85)
+expression (92)
     on left: 59 60 61 62 63 64 65, on right: 12 23 47 51 56 57 58 65
     66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86
     92 105
-unary_operation (86)
+unary_operation (93)
     on left: 66 67 68, on right: 63
-binary_operation (87)
+binary_operation (94)
     on left: 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86,
     on right: 64
-ref_expr (88)
+ref_expr (95)
     on left: 87, on right: 58 60
-global_decl (89)
+global_decl (96)
     on left: 88, on right: 8
-global_l (90)
+global_l (97)
     on left: 89 90, on right: 88 89
-global_var (91)
+global_var (98)
     on left: 91 92, on right: 89 90
-class_decl (92)
+class_decl (99)
     on left: 93, on right: 7
-function_proto (93)
+function_proto (100)
     on left: 94 95, on right: 6
-function_defn (94)
+function_defn (101)
     on left: 96 97, on right: 95
-function_body (95)
+function_body (102)
     on left: 98 99 100, on right: 96 97 98 99
-local_decl (96)
+local_decl (103)
     on left: 101, on right: 98
-local_l (97)
+local_l (104)
     on left: 102 103, on right: 101 102
-local_var (98)
+local_var (105)
     on left: 104 105, on right: 102 103
-function_decl (99)
+function_decl (106)
     on left: 106, on right: 94 95
-func_param_l (100)
+func_param_l (107)
     on left: 107 108 109 110, on right: 106 107 108
-func_param (101)
+func_param (108)
     on left: 111, on right: 108 109
-event_decl (102)
+event_decl (109)
     on left: 112, on right: 5
-event_param_l (103)
+event_param_l (110)
     on left: 113 114 115 116, on right: 112 113 114
-event_param (104)
+event_param (111)
     on left: 117, on right: 114 115
-semi_colon (105)
+semi_colon (112)
     on left: 118 119, on right: 10 12 13 15 18 37 41 44 45 47 48 49
     50 88 93 94 96 101 112 118
-literal (106)
+literal (113)
     on left: 120 121 122 123 124, on right: 59
-type (107)
+type (114)
     on left: 125 126 127 128, on right: 88 101 106 111 117
-baseType (108)
+baseType (115)
     on left: 129 130 131 132 133, on right: 125 128
-intType (109)
+intType (116)
     on left: 134 135, on right: 126
 
 

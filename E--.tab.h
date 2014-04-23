@@ -67,34 +67,41 @@
      TOK_SEMICOLON = 285,
      TOK_COLON = 286,
      TOK_ARROW = 287,
-     TOK_LBRACE = 288,
-     TOK_RBRACE = 289,
-     TOK_LPAREN = 290,
-     TOK_RPAREN = 291,
-     TOK_IF = 292,
-     TOK_ELSE = 293,
-     TOK_CLASS = 294,
-     TOK_RETURN = 295,
-     TOK_EVENT = 296,
-     TOK_ANY = 297,
-     TOK_PRINT = 298,
-     TOK_UINTNUM = 299,
-     TOK_DOUBLENUM = 300,
-     TOK_VOID = 301,
-     TOK_STRING = 302,
-     TOK_STRCONST = 303,
-     TOK_INT = 304,
-     TOK_UNSIGNED = 305,
-     TOK_BOOL = 306,
-     TOK_BYTE = 307,
-     TOK_DOUBLE = 308,
-     TOK_SHORT = 309,
-     TOK_TRUE = 310,
-     TOK_FALSE = 311,
-     TOK_IDENT = 312,
-     TOK_DOUBLE_COLON = 313,
-     TOK_LBRACK = 314,
-     TOK_DOT = 315
+     TOK_QMARK = 288,
+     TOK_LBRACE = 289,
+     TOK_RBRACE = 290,
+     TOK_LPAREN = 291,
+     TOK_RPAREN = 292,
+     TOK_LBRACK = 293,
+     TOK_RBRACK = 294,
+     TOK_IF = 295,
+     TOK_ELSE = 296,
+     TOK_CLASS = 297,
+     TOK_RETURN = 298,
+     TOK_EVENT = 299,
+     TOK_ANY = 300,
+     TOK_PRINT = 301,
+     TOK_WHILE = 302,
+     TOK_BREAK = 303,
+     TOK_UINTNUM = 304,
+     TOK_DOUBLENUM = 305,
+     TOK_VOID = 306,
+     TOK_STRING = 307,
+     TOK_STRCONST = 308,
+     TOK_INT = 309,
+     TOK_UNSIGNED = 310,
+     TOK_BOOL = 311,
+     TOK_BYTE = 312,
+     TOK_DOUBLE = 313,
+     TOK_SHORT = 314,
+     TOK_LONG = 315,
+     TOK_BIT = 316,
+     TOK_ENUM = 317,
+     TOK_TRUE = 318,
+     TOK_FALSE = 319,
+     TOK_IDENT = 320,
+     TOK_DOUBLE_COLON = 321,
+     TOK_DOT = 322
    };
 #endif
 
@@ -105,7 +112,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 238 "E--_parser.y++"
+#line 227 "E--_parser.y++"
 
     unsigned int        uVal;
     double              dVal;
@@ -141,7 +148,7 @@ typedef union YYSTYPE
 
 
 /* Line 2068 of yacc.c  */
-#line 145 "E--_parser.H"
+#line 152 "E--_parser.H"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
