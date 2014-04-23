@@ -228,10 +228,13 @@ const Type* InvocationNode::typeCheck() const
     FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
     vector<Type*>* argtypes    = func_entry->type()->argTypes();
     
-    if ((params_ == NULL && argtypes->size() > 0) || (params_ && params_->size() != argtypes->size())) {
-        errMsg((string)itoa(argtypes->size()) + " arguments expected for " + func_entry->name(), this);
+    int caller_param = params_ ? params_->size() : 0;
+    int callee_param = argtypes ? argtypes->size() : 0;
+       
+    if (caller_param != callee_param) {
+        errMsg((string)itoa(callee_param) + " arguments expected for " + func_entry->name(), this);
         return NULL; 
-    
+
     } else if (params_) {
         unsigned int i = 1; 
         vector<Type*>::iterator t_iter    = argtypes->begin();

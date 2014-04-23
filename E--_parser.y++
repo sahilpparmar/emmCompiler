@@ -28,18 +28,7 @@ static RuleBlockEntry         *curRBlkNode  = NULL;
 static EventEntry* getEventEntry(char *eventName) {
     SymTabEntry *sym = stm.lookUp(string(eventName));
     if (sym && sym->type()->tag() == Type::EVENT) {
-        int caller_param = curVarList ? curVarList->size() : 0;
-        int callee_param = sym->type()->argTypes() ? sym->type()->argTypes()->size() : 0;
-
         return (EventEntry*) sym;
-       
-       /* if (caller_param == callee_param) {
-            return (EventEntry*) sym;
-        } else {
-            errMsg((string)eventName + (string)": mismatch in the number of arguments");
-            return NULL;
-        } 
-       */
     }
     errMsg((string)"Expected an event name, but got \"" + (string)eventName + (string)"\"");
     return NULL;
