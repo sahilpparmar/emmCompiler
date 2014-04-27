@@ -421,7 +421,7 @@ class PatNode: public BasePatNode {
 
 class StmtNode: public AstNode {
     public:
-        enum class StmtNodeKind { ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN};
+        enum class StmtNodeKind { ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE};
     public: 
         StmtNode(StmtNodeKind skm, int line=0, int column=0, string file=""):
             AstNode(AstNode::NodeType::STMT_NODE, line, column, file) { skind_ = skm; };
@@ -531,6 +531,38 @@ class IfNode: public StmtNode {
         StmtNode *then_, *else_;
 
         IfNode(const IfNode&);
+};
+
+/****************************************************************/
+
+class WhileNode: public StmtNode {
+    public: 
+
+        WhileNode(ExprNode* cond, StmtNode* bodyStmt, 
+                int line = 0, int column = 0, string file = "") :
+            StmtNode(StmtNode::StmtNodeKind::WHILE, line, column, file)
+        {
+            cond_ = cond;
+            body_ = bodyStmt;
+        }
+        ~WhileNode() {};
+        //AstNode* clone() 
+        //  { return new IfNode(*this); }
+
+        const ExprNode* cond() const {return cond_;}
+        const StmtNode* bodyStmt() const { return body_;};
+
+        ExprNode* cond() {return cond_;}      
+        StmtNode* bodyStmt() { return body_;};
+
+        void print(ostream& os, int indent) const;
+        const Type* typeCheck() const;
+
+    private: 
+        ExprNode *cond_;
+        StmtNode *body_;
+
+        WhileNode(const WhileNode&);
 };
 
 /****************************************************************/

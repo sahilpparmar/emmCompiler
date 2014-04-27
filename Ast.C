@@ -164,6 +164,37 @@ const Type* ReturnStmtNode::typeCheck() const
 }
 /****************************************************************/
 
+void WhileNode::print(ostream& os, int indent) const
+{
+    prtSpace(os, indent);
+
+    // While (condition)
+    os << "while (";
+    cond_->print(os, indent);
+    os << ") ";
+
+    // while body
+    body_->print(os, indent);
+
+}
+
+const Type* WhileNode::typeCheck() const 
+{
+    if (cond_) {
+        const Type* cond_type = cond_->typeCheck();
+        
+        if (cond_type && cond_type->tag() != Type::TypeTag::BOOL) {
+            errMsg("Boolean argument expected", cond_);
+        }
+
+        if (body_)
+            body_->typeCheck();
+
+    }
+    return NULL;
+}
+
+/****************************************************************/
 void CompoundStmtNode::printWithoutBraces(ostream& os, int indent) const
 {
     if (stmts_ == NULL || stmts_->size() == 0) return;

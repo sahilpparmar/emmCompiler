@@ -1,0 +1,48 @@
+/* 
+ * Tests: Empty if-then-else stmt
+ */
+
+    int logMessage(string x) ;	
+    int a = 5, b, c;
+    event open (string a1 , int a2 , unsigned int a3);
+	bool condition;
+
+    open(file, flags, mode) -> {
+    if (a == 0)
+    {
+	
+        logMessage("Assignment in condition") ; 
+        if ( a < 5 )
+        {
+            b = 3;
+        }
+    	else;
+
+    }
+    	else;
+    
+
+/*    if (condition)
+		if (condition) ;
+		else;		
+
+    if (condition)
+		if (condition) ;
+		else;
+	else if (condition) ;
+	else ;
+  */  
+    while (a < 3) 
+    {
+                a = 10;
+		logMessage("Assignment in condition") ; 
+
+                while (a > 10)
+                {
+                    a = b + c;
+                }
+
+                }
+    
+	};
+
