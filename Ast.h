@@ -421,7 +421,7 @@ class PatNode: public BasePatNode {
 
 class StmtNode: public AstNode {
     public:
-        enum class StmtNodeKind { ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE};
+        enum class StmtNodeKind { ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE, BREAK};
     public: 
         StmtNode(StmtNodeKind skm, int line=0, int column=0, string file=""):
             AstNode(AstNode::NodeType::STMT_NODE, line, column, file) { skind_ = skm; };
@@ -453,6 +453,23 @@ class ReturnStmtNode: public StmtNode {
     private:
         ExprNode* expr_;
         FunctionEntry* fun_;
+};
+
+/****************************************************************/
+
+class BreakStmtNode: public StmtNode {
+    public:
+        BreakStmtNode(ExprNode *e, //FunctionEntry* fe, 
+                int line=0, int column=0, string file=""):
+            StmtNode(StmtNode::StmtNodeKind::BREAK,line,column,file) { expr_ = e; };//fun_ = fe;};
+        ~BreakStmtNode() {};
+
+        void print(ostream& os, int indent) const;
+        const Type* typeCheck() const;
+
+    private:
+        ExprNode* expr_;
+        // FunctionEntry* fun_;
 };
 
 /****************************************************************/

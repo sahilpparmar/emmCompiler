@@ -169,6 +169,13 @@ static ReturnStmtNode* allocReturnNode(ExprNode* e) {
     return new ReturnStmtNode(e, (FunctionEntry*)stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND));
 }
 
+static BreakStmtNode* allocBreakNode(ExprNode* e) {
+    //if (IsCurRuleBlockEntry())
+    //    errMsg((string)"Return statement is valid only within a function");
+    //return new BreakStmtNode(e, (FunctionEntry*)stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND));
+    return new BreakStmtNode(e);
+}
+
 static IfNode* allocIfNode(ExprNode* cond, StmtNode* thenStmt, StmtNode* elseStmt) {
     return new IfNode(cond, thenStmt, elseStmt, yylinenum, yycolumnno, string(yyfilename));
 }
@@ -406,7 +413,6 @@ while_body:        TOK_LBRACE stmt_plus2 TOK_RBRACE semi_colon              {   
                   | empty_block                                             {   $$ = $1;                                                    }
                   | simple_stmt                                             {   $$ = $1;                                                    }
                   | semi_colon                                              {   $$ = allocExprStmtNode(NULL);                               }
-		  | TOK_BREAK						    {								    }
                   ;
 
 if_then_else_stmt:  TOK_IF condition basic_block                            {   $$ = allocIfNode($2, $3, NULL); prt("IfThenStmt");          }
@@ -430,6 +436,8 @@ simple_stmt:        func_invocation semi_colon                              {   
                   | TOK_RETURN expression semi_colon                        {   $$ = allocReturnNode($2);   prt("ReturnStmt");              }
                   | TOK_RETURN semi_colon                                   {   $$ = allocReturnNode(NULL); prt("ReturnStmt");              }
 		  | while_stmt  					    {   $$ = $1;								    }
+		  | TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(NULL);   prt("BreakStmt");		    }
+		  | TOK_BREAK expression semi_colon			    {   $$ = allocBreakNode($2);   prt("BreakStmt");		    }
                   ;
 
 empty_block:        TOK_LBRACE semi_colon TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }

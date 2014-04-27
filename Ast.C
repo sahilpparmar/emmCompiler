@@ -162,6 +162,27 @@ const Type* ReturnStmtNode::typeCheck() const
     }
     return return_type;
 }
+
+/****************************************************************/
+
+void BreakStmtNode::print(ostream& os, int indent) const 
+{
+    prtSpace(os, indent);
+    os << "break ";
+    if (expr_ != NULL) expr_->print(os, indent);
+    else os << "NULL";
+    os << ";";
+}
+
+const Type* BreakStmtNode::typeCheck() const 
+{   
+    const Type* return_type = NULL;
+
+    if (expr_) 
+        return_type = expr_->typeCheck(); 
+    
+    return return_type;
+}
 /****************************************************************/
 
 void WhileNode::print(ostream& os, int indent) const

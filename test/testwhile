@@ -36,10 +36,11 @@
     {
                 a = 10;
 		logMessage("Assignment in condition") ; 
-
+                    break 3;
                 while (a > 10)
                 {
                     a = b + c;
+                    break 3;
                 }
 
                 }
