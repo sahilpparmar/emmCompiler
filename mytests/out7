@@ -1,5 +1,5 @@
 Finished parsing, here is the AST
-
+ 
   event open(string a1, int a2, unsigned int a3);
   byte b3;
   int s;
@@ -15,8 +15,8 @@ Finished parsing, here is the AST
   bool b5 = true;
   string str = "sss";
   string str1;
-
-  (open(string file, int flags, unsigned int mode))-->  {
+ 
+  (open(string file, int flags, unsigned int mode))-->   {
     i=s;
     l=s;
     l=i;
@@ -34,4 +34,4 @@ Finished parsing, here is the AST
     logMessage("open: testing types");
   };
   ;;
-  
+

@@ -1,5 +1,5 @@
 Finished parsing, here is the AST
-
+ 
   class CString;
   event open(string a1, int a2, unsigned int a3);
   int i = 2;
@@ -12,18 +12,21 @@ Finished parsing, here is the AST
     int a;
     int b;
     int c;
+  
     return 1;
   };
   int f() {
     int a;
     int b;
+  
     return (a+b);
   };
-
-  (open(string file, int flags, unsigned int mode))-->  {
-    if ((i<j||j>k)) {
+ 
+  (open(string file, int flags, unsigned int mode))-->   {
+    if ((i<j||j>k))     {
       i=(23*-i/j);
     };
-    };
+    else ;
+  };
   ;;
-  
+

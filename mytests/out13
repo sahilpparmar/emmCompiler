@@ -4,7 +4,14 @@ Finished parsing, here is the AST
   bool condition;
  
   (open(string file, int flags, unsigned int mode))-->   {
-    if (condition)     {    };
+    if (condition) ;
+    else ;
+    if (condition)     if (condition) ;
+    else ;
+    if (condition)     if (condition) ;
+    else ;
+    else     if (condition) ;
+    else ;
   };
   ;;
 

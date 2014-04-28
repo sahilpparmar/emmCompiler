@@ -12,18 +12,12 @@ Finished parsing, here is the AST
     i=(((23*-i/j)-f)-(45%j));
     i=(s*1%f);
     i=((b+s)-f);
-  };
-  ;;
-  (open(string a, int b, unsigned int c))-->   {  };
-  ;;
-  (open(string a, int b, unsigned int c))-->   {
-    {
-      {      };
-    };
-  };
-  ;;
-  (open(string a, int b, unsigned int c))-->   {
-    {    };
+    b=(j*f|(i&j));
+    s=(s*s+45)<k;
+    j=(i&(j|k))^(i&~j);
+    j=(i&(f|k))^(i&~f);
+    k=(k<<(j>>i));
+    f=(f<<f);
   };
   ;;
 

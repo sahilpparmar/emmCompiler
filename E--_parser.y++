@@ -303,7 +303,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %type <varList> event_aparam_l
 %type <ifVal> if_then_else_stmt 
 %type <whileVal> while_stmt 
-%type <stmtVal> simple_stmt basic_block TOK_SEMICOLON while_body 
+%type <stmtVal> simple_stmt basic_block TOK_SEMICOLON
 %type <stmt_plusVal> compound_stmt1 compound_stmt2 stmt_plus1 empty_block function_defn function_body 
 %type <stmtList> stmt_plus2
 %type <breakVal> break_stmt 
@@ -407,14 +407,7 @@ event_aparam_l:
                   |
                   ;
 
-while_stmt:  	    TOK_WHILE condition while_body                          {   $$ = allocWhileNode($2, $3);  prt("WhileStatement"); }
-                  ;
-
-while_body:        TOK_LBRACE stmt_plus2 TOK_RBRACE semi_colon              {   $$ = allocCompStmtNode($2); prt("CompoundStmt");   }
-                  | TOK_LBRACE stmt_plus2 TOK_RBRACE                        {   $$ = allocCompStmtNode($2); prt("CompoundStmt");   }
-                  | empty_block                                             {   $$ = $1;                                                    }
-                  | simple_stmt                                             {   $$ = $1;                                                    }
-                  | semi_colon                                              {   $$ = allocExprStmtNode(NULL);                               }
+while_stmt:  	    TOK_WHILE condition basic_block                         {   $$ = allocWhileNode($2, $3);  prt("WhileStatement"); }
                   ;
 
 if_then_else_stmt:  TOK_IF condition basic_block                            {   $$ = allocIfNode($2, $3, NULL); prt("IfThenStmt");          }
@@ -442,7 +435,7 @@ simple_stmt:        func_invocation semi_colon                              {   
                   ;
 
 break_stmt:         TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(NULL);   prt("BreakStmt");		    }
-		  | TOK_BREAK expression semi_colon			    {   $$ = allocBreakNode($2);   prt("BreakStmt");		    }
+		  | TOK_BREAK expression semi_colon			    {   $$ = allocBreakNode($2);     prt("BreakStmt");		    }
                   ;
 
 empty_block:        TOK_LBRACE semi_colon TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
