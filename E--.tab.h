@@ -118,7 +118,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 238 "E--_parser.y++" /* yacc.c:1909  */
+#line 237 "E--_parser.y++" /* yacc.c:1909  */
 
     unsigned int        uVal;
     double              dVal;
@@ -143,6 +143,7 @@ union YYSTYPE
     list<StmtNode*>*    stmtList;
     IfNode*             ifVal;
     WhileNode*          whileVal;
+    BreakStmtNode*      breakVal;
     CompoundStmtNode*   stmt_plusVal;
     RuleNode*           ruleNode;
 
@@ -152,7 +153,7 @@ union YYSTYPE
 
     const OpNode::OpInfo*   funIval;
 
-#line 156 "E--_parser.H" /* yacc.c:1909  */
+#line 157 "E--_parser.H" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

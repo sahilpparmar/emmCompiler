@@ -17,7 +17,6 @@ extern const OpNode::OpInfo opInfo[];
 static Type                   *curType      = NULL;
 static vector<ExprNode*>      *curExprList  = NULL;
 static list<StmtNode*>        *curStmtList1 = NULL;
-static list<StmtNode*>        *curStmtList2 = NULL;
 static list<StmtNode*>        *curStmtList3 = NULL;
 static vector<Type*>          *curTypeList  = NULL; 
 static vector<VariableEntry*> *curVarList   = NULL; 
@@ -259,6 +258,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
     list<StmtNode*>*    stmtList;
     IfNode*             ifVal;
     WhileNode*          whileVal;
+    BreakStmtNode*      breakVal;
     CompoundStmtNode*   stmt_plusVal;
     RuleNode*           ruleNode;
 
@@ -304,7 +304,9 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %type <ifVal> if_then_else_stmt 
 %type <whileVal> while_stmt 
 %type <stmtVal> simple_stmt basic_block TOK_SEMICOLON while_body 
-%type <stmt_plusVal> compound_stmt1 compound_stmt2 stmt_plus1 stmt_plus2 empty_block function_defn function_body 
+%type <stmt_plusVal> compound_stmt1 compound_stmt2 stmt_plus1 empty_block function_defn function_body 
+%type <stmtList> stmt_plus2
+%type <breakVal> break_stmt 
 
 %type <ruleNode> rule
 %type <stmtVal> rule_stmts
@@ -408,8 +410,8 @@ event_aparam_l:
 while_stmt:  	    TOK_WHILE condition while_body                          {   $$ = allocWhileNode($2, $3);  prt("WhileStatement"); }
                   ;
 
-while_body:        TOK_LBRACE stmt_plus2 TOK_RBRACE semi_colon              {   $$ = allocCompStmtNode(curStmtList2); curStmtList2 = NULL; prt("CompoundStmt");   }
-                  | TOK_LBRACE stmt_plus2 TOK_RBRACE                        {   $$ = allocCompStmtNode(curStmtList2); curStmtList2 = NULL; prt("CompoundStmt");   }
+while_body:        TOK_LBRACE stmt_plus2 TOK_RBRACE semi_colon              {   $$ = allocCompStmtNode($2); prt("CompoundStmt");   }
+                  | TOK_LBRACE stmt_plus2 TOK_RBRACE                        {   $$ = allocCompStmtNode($2); prt("CompoundStmt");   }
                   | empty_block                                             {   $$ = $1;                                                    }
                   | simple_stmt                                             {   $$ = $1;                                                    }
                   | semi_colon                                              {   $$ = allocExprStmtNode(NULL);                               }
@@ -419,15 +421,15 @@ if_then_else_stmt:  TOK_IF condition basic_block                            {   
                   | TOK_IF condition basic_block TOK_ELSE basic_block       {   $$ = allocIfNode($2, $3, $5);   prt("IfThenElseStmt");      }
                   ;
 
-basic_block:        TOK_LBRACE stmt_plus2 TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(curStmtList2); curStmtList2 = NULL; prt("CompoundStmt");   }
-                  | TOK_LBRACE stmt_plus2 TOK_RBRACE                        {   $$ = allocCompStmtNode(curStmtList2); curStmtList2 = NULL; prt("CompoundStmt");   }
+basic_block:        TOK_LBRACE stmt_plus2 TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode($2); prt("CompoundStmt");   }
+                  | TOK_LBRACE stmt_plus2 TOK_RBRACE                        {   $$ = allocCompStmtNode($2); prt("CompoundStmt");   }
                   | empty_block                                             {   $$ = $1;                                                    }
                   | simple_stmt                                             {   $$ = $1;                                                    }
                   | semi_colon                                              {   $$ = allocExprStmtNode(NULL);                               }
                   ;
 
-stmt_plus2:          stmt_plus2 simple_stmt                                 {   if (!curStmtList2) curStmtList2 = new list<StmtNode*>; curStmtList2->push_back($2);}
-                  |
+stmt_plus2:         stmt_plus2 simple_stmt                                  {   if($2) $$->push_back($2);                               }
+                  | simple_stmt                                             {   $$ = new list<StmtNode*>; if($1) $$->push_back($1);     }
                   ;
 
 simple_stmt:        func_invocation semi_colon                              {   $$ = allocExprStmtNode($1); prt("FunctionInvocationStmt");  }
@@ -435,8 +437,11 @@ simple_stmt:        func_invocation semi_colon                              {   
                   | if_then_else_stmt                                       {   $$ = $1;                                                    }
                   | TOK_RETURN expression semi_colon                        {   $$ = allocReturnNode($2);   prt("ReturnStmt");              }
                   | TOK_RETURN semi_colon                                   {   $$ = allocReturnNode(NULL); prt("ReturnStmt");              }
-		  | while_stmt  					    {   $$ = $1;								    }
-		  | TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(NULL);   prt("BreakStmt");		    }
+		  | while_stmt  					    {   $$ = $1;						    }
+                  | break_stmt                                              {   $$ = $1;                                                    }
+                  ;
+
+break_stmt:         TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(NULL);   prt("BreakStmt");		    }
 		  | TOK_BREAK expression semi_colon			    {   $$ = allocBreakNode($2);   prt("BreakStmt");		    }
                   ;
 
