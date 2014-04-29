@@ -67,13 +67,13 @@
      TOK_SEMICOLON = 285,
      TOK_COLON = 286,
      TOK_ARROW = 287,
-     TOK_QMARK = 288,
-     TOK_LBRACE = 289,
-     TOK_RBRACE = 290,
-     TOK_LPAREN = 291,
-     TOK_RPAREN = 292,
-     TOK_LBRACK = 293,
-     TOK_RBRACK = 294,
+     TOK_LBRACE = 288,
+     TOK_RBRACE = 289,
+     TOK_LPAREN = 290,
+     TOK_RPAREN = 291,
+     TOK_LBRACK = 292,
+     TOK_RBRACK = 293,
+     TOK_QMARK = 294,
      TOK_IF = 295,
      TOK_ELSE = 296,
      TOK_CLASS = 297,
@@ -88,15 +88,15 @@
      TOK_VOID = 306,
      TOK_STRING = 307,
      TOK_STRCONST = 308,
-     TOK_INT = 309,
-     TOK_UNSIGNED = 310,
-     TOK_BOOL = 311,
-     TOK_BYTE = 312,
-     TOK_DOUBLE = 313,
-     TOK_SHORT = 314,
-     TOK_LONG = 315,
-     TOK_BIT = 316,
-     TOK_ENUM = 317,
+     TOK_BIT = 309,
+     TOK_ENUM = 310,
+     TOK_LONG = 311,
+     TOK_INT = 312,
+     TOK_UNSIGNED = 313,
+     TOK_BOOL = 314,
+     TOK_BYTE = 315,
+     TOK_DOUBLE = 316,
+     TOK_SHORT = 317,
      TOK_TRUE = 318,
      TOK_FALSE = 319,
      TOK_IDENT = 320,
@@ -112,46 +112,43 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 242 "E--_parser.y++"
+#line 25 "E--_parser.y++"
 
-    unsigned int        uVal;
-    double              dVal;
-    char*               cVal;
-    vector<string>*     strVector;
-    Value*              valVal;
+  unsigned int 		 uVal;
+  double             dVal;
+  char*              cVal;
+  vector<string>*    strVector;
+  Value*             valVal;
 
-    ExprNode*           exprVal;
-    vector<ExprNode*>*  exprList;
-    RefExprNode*        refexpVal;
+  ExprNode*          exprVal;
+  vector<ExprNode*>* exprList;
+  RefExprNode*       refexpVal;
 
-    ClassEntry*         classEntry;
-    Type*               typeVal;
-    vector<Type*>*      typeList; 
+  ClassEntry*        classEntry;
+  Type*              typeVal;
+  vector<Type*>*     typeList; 
 
-    FunctionEntry*      functionEntry;
-    EventEntry*         eventEntry;                        
-    VariableEntry*      variableEntry;
-    vector<VariableEntry*>* varList;
-    vector<FunctionEntry*>*  classMethodsList;
+  EventEntry*        eventEntry;                        
+  VariableEntry*     variableEntry;
+  FunctionEntry*     functionEntry;
 
-    StmtNode*           stmtVal;
-    list<StmtNode*>*    stmtList;
-    IfNode*             ifVal;
-    WhileNode*          whileVal;
-    BreakStmtNode*      breakVal;
-    CompoundStmtNode*   stmt_plusVal;
-    RuleNode*           ruleNode;
+  BasePatNode*       patVal;
+  PrimitivePatNode*  primPatVal;
+  StmtNode*          stmtVal;
+  list<StmtNode*>*   stmtList;
+  IfNode*            ifVal;
+  CompoundStmtNode*  compoundStmtVal;
+  RuleNode*          ruleNode;
 
-    BasePatNode*        patVal;
-    PrimitivePatNode*   primPatVal;
-    vector<RuleNode*>*  transList;
-
-    const OpNode::OpInfo*   funIval;
+  vector<RuleNode*>* transList;
+  
+  vector<Type*>*     formalTypeVal;
+  const OpNode::OpInfo*    funIval;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 155 "E--_parser.H"
+#line 152 "E--_parser.H"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

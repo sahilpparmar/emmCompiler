@@ -61,7 +61,7 @@ class RuleBlockEntry: public BlockEntry {
 
 class VariableEntry: public SymTabEntry {
     public:
-        enum VarKind {GLOBAL_VAR, LOCAL_VAR, PARAM_VAR, UNDEFINED};
+        enum VarKind {GLOBAL_VAR, LOCAL_VAR, PARAM_VAR, CLASS_VAR, UNDEFINED};
 
     public:
         VariableEntry(string name, VarKind v, Type* type=nullptr,
@@ -100,6 +100,12 @@ class ClassEntry: public SymTabEntry {
 
         void print(ostream& os, int indent) const;
         const Type* typeCheck() const {return NULL;}
+        
+        const vector<FunctionEntry*>* classBody() const { return classMethods_;}
+        vector<FunctionEntry*>* classBody() {return classMethods_;}
+        void classBody(vector<FunctionEntry*>* n) { classMethods_ = n;}
+    private:
+        vector<FunctionEntry*>* classMethods_ ;
 };
 
 class FunctionEntry: public SymTabEntry {

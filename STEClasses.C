@@ -22,7 +22,23 @@ void EventEntry::print(ostream& out, int indent) const
 
 void ClassEntry::print(ostream& out, int indent) const
 {
-    out << type()->name() << " " << name() << ";";
+//   out << type()->name() << " " << name() << ";";
+    if(!classMethods_)
+    {
+        out << type()->name() << " " << name() << ";";
+        return;
+    }
+    out << type()->name() << " " << name() << "{";
+    printST(out, indent, false, false , true, 0, 2);
+    
+    out<<"\n";
+    vector<FunctionEntry*>::iterator iter = classMethods_->begin();
+         
+        for (; iter != classMethods_->end(); ++iter) {
+            (*iter)->print(out, indent);
+    }
+    out<<"\n };";
+
 }
 
 void FunctionEntry::print(ostream& out, int indent) const
@@ -35,6 +51,7 @@ void FunctionEntry::print(ostream& out, int indent) const
 
     // Function formal params 
     if (numParams) {
+        
         printST(out, indent, '(', ')', false, 0, numParams);
     } else {
         out << "()";

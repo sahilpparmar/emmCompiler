@@ -58,6 +58,7 @@ SymTab::printST(ostream& os, int indent, char leftdelim, char rightdelim,
 
     for (i=0; (it != end()) && (i < last); i++, ++it)  {
         SymTabEntry *ste = (SymTabEntry *)(*it);
+       // cout<<"\n ste name: "<<ste->name();
         if (i >= first) {
             if ((ste->kind() != SymTabEntry::Kind::RULE_BLOCK_KIND) && 
                     (ste->kind() != SymTabEntry::Kind::EVENT_BLOCK_KIND) && 
@@ -82,7 +83,7 @@ SymTab::printST(ostream& os, int indent, char leftdelim, char rightdelim,
             if ((ste->kind() != SymTabEntry::Kind::RULE_BLOCK_KIND) && 
                     (ste->kind() != SymTabEntry::Kind::EVENT_BLOCK_KIND) && 
                     (ste->name() != "any")) {
-        //os << "Step2 " << ste->kindTag(ste->kind()) << " "<< ste->name() << endl;
+//        os << "Step2 " << ste->kindTag(ste->kind()) << " "<< ste->name() << endl;
                 ste->print(os,indent+STEP_INDENT);
                 if ((leftdelim == '\0') && (rightdelim != '\0'))
                     os << rightdelim;
