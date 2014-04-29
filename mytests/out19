@@ -26,4 +26,5 @@ Finished parsing, here is the AST
   ;;
   ((a(int i)):(!(b(int y, int w)|j=w)))-->   z=j;
   ;;
+Type Checking Errors:
 

@@ -1,6 +1,16 @@
 Finished parsing, here is the AST
  
-  class CString;
+  class CString{
+    int x;
+    int yy;
+    int classTest(string x);
+    void g() {
+      int a1;
+      int a2;
+    
+      a1=1;
+    };
+  };
   event open(class CString a1, int a2, unsigned int a3);
   int logMessage(string x);
   void g() {
@@ -18,4 +28,6 @@ Finished parsing, here is the AST
     g();
   };
   ;;
+Type Checking Errors:
+mytests/in4:15:Error: Assigned expression must be a subtype of target
 

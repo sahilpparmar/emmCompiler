@@ -7,4 +7,5 @@ Finished parsing, here is the AST
     logMessage("open: testing almost nothing");
   };
   ;;
+Type Checking Errors:
 

@@ -34,4 +34,6 @@ Finished parsing, here is the AST
     logMessage("open: testing types");
   };
   ;;
+Type Checking Errors:
+mytests/in7:44:Error: 0 arguments expected for logMessage
 

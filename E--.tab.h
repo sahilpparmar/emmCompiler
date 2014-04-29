@@ -112,7 +112,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 242 "E--_parser.y++"
+#line 237 "E--_parser.y++"
 
     unsigned int        uVal;
     double              dVal;
@@ -132,7 +132,6 @@ typedef union YYSTYPE
     EventEntry*         eventEntry;                        
     VariableEntry*      variableEntry;
     vector<VariableEntry*>* varList;
-    vector<FunctionEntry*>*  classMethodsList;
 
     StmtNode*           stmtVal;
     list<StmtNode*>*    stmtList;
@@ -151,7 +150,7 @@ typedef union YYSTYPE
 
 
 /* Line 2068 of yacc.c  */
-#line 155 "E--_parser.H"
+#line 154 "E--_parser.H"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -46,4 +46,5 @@ Finished parsing, here is the AST
     };
   };
   ;;
+Type Checking Errors:
 

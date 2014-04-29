@@ -22,4 +22,6 @@ Finished parsing, here is the AST
     {    };
   };
   ;;
+Type Checking Errors:
+mytests/in22:10:Error: Assignment between incompatible types
 

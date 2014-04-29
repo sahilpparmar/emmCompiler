@@ -22,23 +22,9 @@ void EventEntry::print(ostream& out, int indent) const
 
 void ClassEntry::print(ostream& out, int indent) const
 {
-//   out << type()->name() << " " << name() << ";";
-    if(!classMethods_)
-    {
-        out << type()->name() << " " << name() << ";";
-        return;
-    }
-    out << type()->name() << " " << name() << "{";
-    printST(out, indent, false, false , true, 0, 2);
-    
-    out<<"\n";
-    vector<FunctionEntry*>::iterator iter = classMethods_->begin();
-         
-        for (; iter != classMethods_->end(); ++iter) {
-            (*iter)->print(out, indent);
-    }
-    out<<"\n };";
-
+    out << type()->name() << " " << name();
+    printST(out, indent, '{', '}', true, 0, 100000);
+    out<<";";
 }
 
 void FunctionEntry::print(ostream& out, int indent) const
@@ -96,6 +82,11 @@ const Type* GlobalEntry::typeCheck() const
     return type();
 }
 
+const Type* ClassEntry::typeCheck() const
+{
+    typeCheckST();
+    return type();
+}
 
 const Type* VariableEntry::typeCheck() const
 {
@@ -117,7 +108,7 @@ const Type* FunctionEntry::typeCheck() const
     const vector<const Type*>* param_l = type()->argTypes();
     int numParams = param_l ? param_l->size() : 0;
     
-    if(numParams) {
+    if (numParams) {
         typeCheckST(0, numParams);
     } 
     if (body_) {

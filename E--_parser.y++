@@ -1,7 +1,3 @@
-//Changes/Features Added: 1. rules for class definition {includes var and functions}
-//                        2. in VariableEntry CLASS_VAR as a var kind added
-
-
 %{
 
 #include "Ast.h"
@@ -27,7 +23,6 @@ static vector<VariableEntry*> *curVarList   = NULL;
 static FunctionEntry          *curFuncEnt   = NULL;
 static EventEntry             *curEventEnt  = NULL;
 static RuleBlockEntry         *curRBlkNode  = NULL;
-static vector<FunctionEntry*> *curFuncList  = NULL; 
 
 static EventEntry* getEventEntry(char *eventName) {
     SymTabEntry *sym = stm.lookUp(string(eventName));
@@ -258,7 +253,6 @@ static RuleBlockEntry* allocRuleBlockNode() {
     EventEntry*         eventEntry;                        
     VariableEntry*      variableEntry;
     vector<VariableEntry*>* varList;
-    vector<FunctionEntry*>*  classMethodsList;
 
     StmtNode*           stmtVal;
     list<StmtNode*>*    stmtList;
@@ -275,10 +269,10 @@ static RuleBlockEntry* allocRuleBlockNode() {
     const OpNode::OpInfo*   funIval;
 };
 
+/* Expect only 1 Shift-Reduce Conflict for "if-if-else" */
 %expect 1
 
 /* Operators */
-
 %token TOK_LEX_ERROR TOK_PAT_STAR TOK_PAT_OR TOK_PAT_NOT
 %token TOK_PLUS TOK_MINUS TOK_UMINUS TOK_MULT TOK_DIV TOK_MOD 
 %token TOK_BITAND TOK_BITOR TOK_BITNOT TOK_BITXOR TOK_SHL TOK_SHR 
@@ -287,7 +281,6 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %token TOK_LBRACE TOK_RBRACE TOK_LPAREN TOK_RPAREN TOK_LBRACK TOK_RBRACK
 
 /* Key words */
-
 %token TOK_IF TOK_ELSE TOK_CLASS TOK_RETURN TOK_EVENT TOK_ANY TOK_PRINT TOK_WHILE TOK_BREAK
 %token TOK_UINTNUM TOK_DOUBLENUM TOK_VOID TOK_STRING TOK_STRCONST 
 %token TOK_INT TOK_UNSIGNED TOK_BOOL TOK_BYTE TOK_DOUBLE TOK_SHORT TOK_LONG TOK_BIT TOK_ENUM
@@ -296,7 +289,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
 /******************************** Type Info ********************************/
 
 %type <functionEntry> function_decl function_proto
-%type <variableEntry> global_decl global_l global_var local_decl local_l local_var class_local_var class_local_l class_local_decl
+%type <variableEntry> global_var local_var class_var_l
 %type <classEntry>  class_decl class_proto
 %type <eventEntry> event_decl any_event normal_event 
 
@@ -306,23 +299,20 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %type <typeVal> type intType baseType func_param event_param 
 %type <typeList> func_param_l event_param_l
 %type <exprList> caller_param_l
-%type <varList> event_aparam_l
 %type <ifVal> if_then_else_stmt 
 %type <whileVal> while_stmt 
-%type <stmtVal> simple_stmt basic_block TOK_SEMICOLON
-%type <stmt_plusVal> compound_stmt1 compound_stmt2 stmt_plus1 empty_block function_defn function_body 
+%type <stmtVal> simple_stmt basic_block rule_stmts
+%type <stmt_plusVal> compound_stmt1 compound_stmt2 empty_block function_defn
 %type <stmtList> stmt_plus2
 %type <breakVal> break_stmt
-%type <classMethodsList>    class_body class_defn
-
 %type <ruleNode> rule
-%type <stmtVal> rule_stmts
 %type <patVal> primitive_all binary_event_oprs
 
 %type <cVal> TOK_IDENT TOK_PRINT func_name
 %type <uVal> TOK_UINTNUM 
 %type <dVal> TOK_DOUBLENUM 
 %type <cVal> TOK_STRCONST
+%type <stmtVal> TOK_SEMICOLON 
 
 
 /*********************   Precedence and Associativity    ********************/
@@ -362,9 +352,8 @@ specification:      specification declaration
 
 declaration:        event_decl                                              {   stm.leaveScope();   stm.insert($1); }
                   | function_proto                                          {   stm.leaveScope();   stm.insert($1); }
-//                  | class_decl                                              {   stm.leaveScope();                   }
+                  | class_proto                                             {   stm.leaveScope();                   }
                   | global_decl
-                  | class_proto                                             {   stm.leaveScope();    stm.insert($1);    }                
                   ;
 
 rule:               primitive_all TOK_ARROW rule_stmts                      {   $$ = allocRuleNode($1, $3); prt("Rule");   }
@@ -512,46 +501,32 @@ global_l:           global_l TOK_COMMA global_var
                   | global_var
                   ;
 
-global_var:         TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, nullptr); prt("VariableDecl");   }
+global_var:         TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, NULL); prt("VariableDecl");   }
                   | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, $3); prt("VariableDeclWithInit");}
                   ;
 
-class_decl:         TOK_CLASS TOK_IDENT semi_colon                          {   $$ = allocClassEntry($2); prt("ClassDecl");  }
-                  | TOK_CLASS TOK_IDENT                                     {   $$ = allocClassEntry($2); prt("ClassDecl");  }
+class_proto:        class_decl semi_colon                                   {   $$ = $1;    }
+                  | class_decl class_defn semi_colon                        {   $$ = $1;    }
                   ;
 
-class_proto:        class_decl                                              {   $$ = $1;                                     }
-                  | class_decl class_defn                                   {   $$ = $1;
-                                                                                $$->classBody(curFuncList); 
-                                                                                curFuncList = NULL;
-                                                                            }
+class_decl:         TOK_CLASS TOK_IDENT                                     {   $$ = allocClassEntry($2); prt("ClassDecl");  }
                   ;
 
-class_defn:         TOK_LBRACE class_body TOK_RBRACE semi_colon             {                                       }
+class_defn:         TOK_LBRACE class_body TOK_RBRACE
                   ;
 
 //TODO: add rule for class_object.member ... also in compound statement ???
-class_body:         class_body class_local_decl
-                  | class_body function_proto                               {   if(!curFuncList)
-                                                                                    {
-                                                                                        curFuncList = new vector<FunctionEntry*>;
-                                                                                    }
-                                                                                        curFuncList->push_back($2);
-                                                                            }
+class_body:         class_body class_var_decl
+                  | class_body function_proto                               {   stm.leaveScope();   stm.insert($2);         }
                   |
                   ;
                  
-class_local_decl:  type class_local_l semi_colon
+class_var_decl:     type class_var_l semi_colon
                   ;
 
-class_local_l:      class_local_l TOK_COMMA class_local_var
-                  | class_local_var
+class_var_l:        class_var_l TOK_COMMA TOK_IDENT                         {   $$ = allocVarEntry($3, VariableEntry::CLASS_VAR, curType, NULL); prt("ClassVarDecl");  }
+                  | TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::CLASS_VAR, curType, NULL); prt("ClassVarDecl");  }
                   ;
-
-class_local_var:    TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::CLASS_VAR, curType, nullptr); prt("VariableDecl");    }
-                  | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::CLASS_VAR, curType, $3); prt("VariableDeclWithInit"); }
-                  ;
-
 
 function_proto:     function_decl semi_colon                                {   $$ = $1;                    }
                   | function_decl function_defn                             {   $1->body($2);   $$ = $1;    }
@@ -562,7 +537,7 @@ function_defn:      TOK_LBRACE function_body TOK_RBRACE semi_colon          {   
                   ;
 
 function_body:      function_body local_decl
-                  | function_body simple_stmt                               {   if (!curStmtList3) curStmtList3 = new list<StmtNode*>; curStmtList3->push_back($2);}
+                  | function_body simple_stmt                               {   if (!curStmtList3) curStmtList3 = new list<StmtNode*>; curStmtList3->push_back($2); }
                   |
                   ;
 
@@ -573,7 +548,7 @@ local_l:            local_l TOK_COMMA local_var
                   | local_var
                   ;
 
-local_var:          TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, nullptr); prt("VariableDecl");    }
+local_var:          TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, NULL); prt("VariableDecl");    }
                   | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::LOCAL_VAR, curType, $3); prt("VariableDeclWithInit"); }
                   ;
 
@@ -586,12 +561,10 @@ func_param_l:       TOK_LPAREN func_param_l TOK_RPAREN                      {   
                   | TOK_LPAREN TOK_RPAREN                                   {   curFuncEnt = allocFuncEntry();  }
                   ;
 func_param:         type TOK_IDENT                                          {   if (!curFuncEnt) curFuncEnt = allocFuncEntry();  
-                                                                                $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr);  prt("FormalParam"); }
+                                                                                $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, NULL);  prt("FormalParam"); }
                   ;
 
-event_decl:         TOK_EVENT TOK_IDENT event_param_l semi_colon            {   $$ = allocEventEntry($2, curTypeList);  curTypeList = NULL;     prt("EventDecl");  
-                                                                                cout<<"\n in event decl ";
-                                                                            }
+event_decl:         TOK_EVENT TOK_IDENT event_param_l semi_colon            {   $$ = allocEventEntry($2, curTypeList);  curTypeList = NULL;     prt("EventDecl");  }
                   ;
 
 event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   prt("FormalParamList");         }
@@ -601,7 +574,7 @@ event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   
                   ;
 
 event_param:        type TOK_IDENT                                          {   if (!curEventEnt) curEventEnt = allocEventEntry();  
-                                                                                $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, nullptr); prt("FormalParam");}
+                                                                                $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, NULL); prt("FormalParam");}
                   ;
 
 semi_colon:         semi_colon TOK_SEMICOLON

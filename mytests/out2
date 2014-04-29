@@ -6,4 +6,5 @@ Finished parsing, here is the AST
   ;;
   (any)-->   {  };
   ;;
+Type Checking Errors:
 

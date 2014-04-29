@@ -67,4 +67,27 @@ Finished parsing, here is the AST
     isLong(f);
   };
   ;;
+Type Checking Errors:
+mytests/in8:39:Error: Type Mismatch for argument 1 to isInt
+mytests/in8:42:Error: Type Mismatch for argument 1 to isInt
+mytests/in8:44:Error: Type Mismatch for argument 1 to isUInt
+mytests/in8:47:Error: Type Mismatch for argument 1 to isUInt
+mytests/in8:49:Error: Type Mismatch for argument 1 to isShort
+mytests/in8:50:Error: Type Mismatch for argument 1 to isShort
+mytests/in8:54:Error: Type Mismatch for argument 1 to isShort
+mytests/in8:58:Error: Type Mismatch for argument 1 to isUShort
+mytests/in8:59:Error: Type Mismatch for argument 1 to isUShort
+mytests/in8:60:Error: Type Mismatch for argument 1 to isUShort
+mytests/in8:62:Error: Type Mismatch for argument 1 to isUShort
+mytests/in8:64:Error: Type Mismatch for argument 1 to isUShort
+mytests/in8:68:Error: Type Mismatch for argument 1 to isLong
+mytests/in8:71:Error: Type Mismatch for argument 1 to isLong
+mytests/in8:75:Error: Type Mismatch for argument 1 to isULong
+mytests/in8:76:Error: Type Mismatch for argument 1 to isULong
+mytests/in8:77:Error: Type Mismatch for argument 1 to isULong
+mytests/in8:79:Error: Type Mismatch for argument 1 to isULong
+mytests/in8:81:Error: Type Mismatch for argument 1 to isULong
+mytests/in8:88:Error: Type Mismatch for argument 1 to isInt
+mytests/in8:89:Error: Type Mismatch for argument 1 to isShort
+mytests/in8:90:Error: Type Mismatch for argument 1 to isLong
 

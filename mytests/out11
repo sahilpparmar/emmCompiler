@@ -20,4 +20,25 @@ Finished parsing, here is the AST
     f=(f<<f);
   };
   ;;
+Type Checking Errors:
+mytests/in11:10:Error: Assignment between incompatible types
+mytests/in11:17:Error: Assigned expression must be a subtype of target
+mytests/in11:18:Error: Incompatible type for agrument 1 for operator `*'
+mytests/in11:18:Error: Incompatible type for argument 1 for operator `%'
+mytests/in11:18:Error: Incompatible type for argument 2 for operator `%'
+mytests/in11:18:Error: Assigned expression must be a subtype of target
+mytests/in11:19:Error: Incompatible type for agrument 2 for operator `+'
+mytests/in11:19:Error: Assigned expression must be a subtype of target
+mytests/in11:20:Error: Incompatible type for agrument 1 for operator `|'
+mytests/in11:20:Error: Assigned expression must be a subtype of target
+mytests/in11:21:Error: Incompatible type for agrument 1 for operator `*'
+mytests/in11:21:Error: Incompatible type for agrument 2 for operator `*'
+mytests/in11:21:Error: Incompatible type for agrument 1 for operator `+'
+mytests/in11:21:Error: Assigned expression must be a subtype of target
+mytests/in11:23:Error: Incompatible type for agrument 1 for operator `|'
+mytests/in11:23:Error: Incompatible type for agrument 2 for operator `&'
+mytests/in11:23:Error: Incompatible type for agrument 1 for operator `~'
+mytests/in11:23:Error: Incompatible type for agrument 2 for operator `&'
+mytests/in11:25:Error: Incompatible type for agrument 1 for operator `<<'
+mytests/in11:25:Error: Incompatible type for agrument 2 for operator `<<'
 

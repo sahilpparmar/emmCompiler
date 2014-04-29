@@ -33,4 +33,5 @@ Finished parsing, here is the AST
     g();
   };
   ;;
+Type Checking Errors:
 

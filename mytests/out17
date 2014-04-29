@@ -39,4 +39,14 @@ Finished parsing, here is the AST
     logmessage("rule2:");
   };
   ;;
+Type Checking Errors:
+mytests/in17:26:Error: Type Mismatch for argument 1 to get
+mytests/in17:26:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in17:27:Error: Type Mismatch for argument 1 to get
+mytests/in17:28:Error: Type Mismatch for argument 2 to logmessageint
+mytests/in17:32:Error: Assigned expression must be a subtype of target
+mytests/in17:32:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in17:37:Error: Type Mismatch for argument 1 to get
+mytests/in17:37:Error: Type Mismatch for argument 1 to get
+mytests/in17:37:Error: Incompatible type for agrument 2 for operator `&&'
 

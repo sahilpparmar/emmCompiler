@@ -37,4 +37,10 @@ Finished parsing, here is the AST
     logMessage("open: testing types");
   };
   ;;
+Type Checking Errors:
+mytests/in10:46:Error: Assigned expression must be a subtype of target
+mytests/in10:48:Error: Assigned expression must be a subtype of target
+mytests/in10:50:Error: Assigned expression must be a subtype of target
+mytests/in10:52:Error: Assigned expression must be a subtype of target
+mytests/in10:54:Error: 0 arguments expected for logMessage
 

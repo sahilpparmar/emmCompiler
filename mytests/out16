@@ -27,4 +27,5 @@ Finished parsing, here is the AST
   ;;
   (a(int k))-->   z=(k+y);
   ;;
+Type Checking Errors:
 

@@ -50,4 +50,9 @@ Finished parsing, here is the AST
     logMessageInt("simple pattern 3, %d", mode);
   };
   ;;
+Type Checking Errors:
+mytests/in18:60:Error: Incompatible type for agrument 1 for operator `&&'
+mytests/in18:60:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in18:60:Error: Assigned expression must be a subtype of target
+mytests/in18:60:Error: Incompatible type for agrument 2 for operator `&&'
 

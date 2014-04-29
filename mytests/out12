@@ -7,4 +7,5 @@ Finished parsing, here is the AST
     if (condition)     {    };
   };
   ;;
+Type Checking Errors:
 

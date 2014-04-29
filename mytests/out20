@@ -119,4 +119,13 @@ Finished parsing, here is the AST
 ", syscall);
   };
   ;;
+Type Checking Errors:
+mytests/in20:110:Error: Incompatible type for agrument 1 for operator `&&'
+mytests/in20:110:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:110:Error: Assigned expression must be a subtype of target
+mytests/in20:110:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:114:Error: Assigned expression must be a subtype of target
+mytests/in20:114:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:115:Error: Assigned expression must be a subtype of target
+mytests/in20:118:Error: 1 arguments expected for logMessageStr
 

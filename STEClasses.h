@@ -66,9 +66,10 @@ class VariableEntry: public SymTabEntry {
     public:
         VariableEntry(string name, VarKind v, Type* type=nullptr,
                 ExprNode* init=nullptr, int ln=0, int col=0, string file=""):
-            SymTabEntry(name, SymTabEntry::Kind::VARIABLE_KIND, ln, col, file, type) {
-                vkind_ = v; initVal(init);
-            };
+            SymTabEntry(name, SymTabEntry::Kind::VARIABLE_KIND, ln, col, file, type) 
+        {
+            vkind_ = v; initVal(init);
+        };
 
         VariableEntry(const VariableEntry &v);
         ~VariableEntry() {};
@@ -99,13 +100,7 @@ class ClassEntry: public SymTabEntry {
         ~ClassEntry() {};
 
         void print(ostream& os, int indent) const;
-        const Type* typeCheck() const {return NULL;}
-        
-        const vector<FunctionEntry*>* classBody() const { return classMethods_;}
-        vector<FunctionEntry*>* classBody() {return classMethods_;}
-        void classBody(vector<FunctionEntry*>* n) { classMethods_ = n;}
-    private:
-        vector<FunctionEntry*>* classMethods_ ;
+        const Type* typeCheck() const;
 };
 
 class FunctionEntry: public SymTabEntry {
