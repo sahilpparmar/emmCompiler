@@ -4,6 +4,8 @@ static int variableCount = 333;
 EventEntry *any, *other;
 extern int yylineno;
 int yycolumnno;
+int debugLevel;
+int optLevel;
 
 static void 
 errPrint(ErrorST code, const string& sym) {

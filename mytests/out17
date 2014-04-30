@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   class CString;
   string get(class CString s);
@@ -39,7 +42,8 @@ Finished parsing, here is the AST
     logmessage("rule2:");
   };
   ;;
-Type Checking Errors:
+
+========================Type Checking========================
 mytests/in17:26:Error: Type Mismatch for argument 1 to get
 mytests/in17:26:Error: Incompatible type for agrument 2 for operator `&&'
 mytests/in17:27:Error: Type Mismatch for argument 1 to get
@@ -50,3 +54,56 @@ mytests/in17:37:Error: Type Mismatch for argument 1 to get
 mytests/in17:37:Error: Type Mismatch for argument 1 to get
 mytests/in17:37:Error: Incompatible type for agrument 2 for operator `&&'
 
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Class CString
+
+====Function get
+Variable: s, Offset: 8
+
+====Class Integer
+
+====Class ArgV
+
+====Class StatP
+
+====Class NewStatP
+
+====Function logmessage
+Variable: x, Offset: 8
+
+====Function logmessageint
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Function isfile
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Event open
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Event close
+Variable: a1, Offset: 4
+
+====Event execve
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Event lstat
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+
+====Event stat
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: i, Offset: 4
+Variable: j, Offset: 8
+Variable: rv, Offset: 12
+Variable: t2, Offset: 16

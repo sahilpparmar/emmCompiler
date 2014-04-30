@@ -1,0 +1,31 @@
+Finished parsing, here is the AST
+ 
+  int logMessage(string x);
+  int a = 5;
+  int b;
+  int c;
+  event open(string a1, int a2, unsigned int a3);
+  bool condition;
+ 
+  (open(string file, int flags, unsigned int mode))-->   {
+    if (a==0)     {
+      logMessage("Assignment in condition");
+      if (a<5)       {
+        b=3;
+      };
+      else ;
+    };
+    else ;
+    while (a<3)     {
+      a=10;
+      logMessage("Assignment in condition");
+      break 3;
+      while (a>10)       {
+        a=(b+c);
+        break 3;
+      };
+    };
+  };
+  ;;
+Type Checking Errors:
+

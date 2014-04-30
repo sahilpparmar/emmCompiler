@@ -6,6 +6,10 @@ extern int yylinenum;
 extern int yycolumnno;
 extern const char* yyfilename;
 extern FILE *yyin;
+extern int debugLevel;
+extern int optLevel;
+
+#define DEBUG(s) if (debugLevel) cout << endl << s
 
 extern void yyerror(char *);
 extern int yyparse(void);

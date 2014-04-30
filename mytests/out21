@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   event open(string a1, int a2, unsigned int a3);
   int i = 2;
@@ -26,7 +29,8 @@ Finished parsing, here is the AST
     {    };
   };
   ;;
-Type Checking Errors:
+
+========================Type Checking========================
 mytests/in21:10:Error: Assignment between incompatible types
 mytests/in21:18:Error: Assigned expression must be a subtype of target
 mytests/in21:20:Error: Incompatible type for agrument 1 for operator `*'
@@ -36,3 +40,18 @@ mytests/in21:20:Error: Assigned expression must be a subtype of target
 mytests/in21:21:Error: Incompatible type for agrument 2 for operator `+'
 mytests/in21:21:Error: Assigned expression must be a subtype of target
 
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event open
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+Variable: i, Offset: 4
+Variable: j, Offset: 8
+Variable: k, Offset: 12
+Variable: f, Offset: 16
+Variable: b, Offset: 20
+Variable: s, Offset: 24
