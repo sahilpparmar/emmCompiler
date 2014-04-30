@@ -2,7 +2,7 @@
 make
 rm -rf myoutputs
 mkdir myoutputs
-for i in `seq 1 23`;
+for i in `seq 1 24`;
 do
     echo;echo "---->Running in$i"
     ./demo mytests/in$i > myoutputs/out$i 2>&1;
