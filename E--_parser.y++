@@ -611,6 +611,8 @@ baseType:           TOK_VOID                                                {   
                   | TOK_BYTE                                                {   $$ = new Type(Type::BYTE);    }
                   | TOK_STRING                                              {   $$ = new Type(Type::STRING);  }
                   | TOK_DOUBLE                                              {   $$ = new Type(Type::DOUBLE);  }
+                  | TOK_LONG                                                {   $$ = new Type(Type::LONG);     }
+                  | TOK_BIT                                                 {   $$ = new Type(Type::BIT);     }
                   ;
 
 intType:            TOK_INT                                                 {   $$ = new Type(Type::INT);     }

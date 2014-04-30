@@ -1,0 +1,28 @@
+Finished parsing, here is the AST
+ 
+  int logMessage(string x);
+  int a = 5;
+  long b = 12345678;
+  bit c = 1;
+  event open(string a1, int a2, unsigned int a3);
+ 
+  (open(string file, int flags, unsigned int mode))-->   {
+    if (a==0)     {
+      logMessage("Assignment in condition");
+      c=0;
+    };
+    else ;
+    while (a<3)     {
+      a=10;
+      logMessage("Assignment in condition");
+      b=987654321;
+      break NULL;
+      while (a>10)       {
+        c=1;
+        break 2;
+      };
+    };
+  };
+  ;;
+Type Checking Errors:
+
