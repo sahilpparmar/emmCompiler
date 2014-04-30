@@ -100,36 +100,53 @@ mytests/in8:90:Error: Type Mismatch for argument 1 to isLong
 
 ====Global Declarations
 
-====Function isInFile
+====Function 'isInFile'
+==Formal Parameters
 Variable: x, Offset: 8
 Variable: y, Offset: 12
 
-====Function isInt
+
+====Function 'isInt'
+==Formal Parameters
 Variable: i, Offset: 8
 
-====Function isUInt
+
+====Function 'isUInt'
+==Formal Parameters
 Variable: i, Offset: 8
 
-====Function isShort
+
+====Function 'isShort'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Function isUShort
+
+====Function 'isUShort'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Function isLong
+
+====Function 'isLong'
+==Formal Parameters
 Variable: l, Offset: 8
 
-====Function isULong
+
+====Function 'isULong'
+==Formal Parameters
 Variable: l, Offset: 8
 
-====Function y
+
+====Function 'y'
+==Formal Parameters
 Variable: s, Offset: 8
 Variable: t, Offset: 12
 
-====Event open
+
+====Event 'open'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
+
 Variable: i, Offset: 0
 Variable: ci, Offset: 4
 Variable: us, Offset: 8

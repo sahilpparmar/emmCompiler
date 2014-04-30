@@ -138,190 +138,274 @@ mytests/in20:118:Error: 1 arguments expected for logMessageStr
 
 ====Global Declarations
 
-====Function geteuid
+====Function 'geteuid'
 
-====Function logMessageStr
+
+====Function 'logMessageStr'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Class CString
 
-====Function f
+====Class 'CString'
+
+
+====Function 'f'
+==Formal Parameters
 Variable: g, Offset: 8
 
-====Function get
+
+====Function 'get'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Function setCStr
+
+====Function 'setCStr'
+==Formal Parameters
 Variable: s, Offset: 8
 Variable: t, Offset: 12
 
-====Class Integer
 
-====Function getInt
+====Class 'Integer'
+
+
+====Function 'getInt'
+==Formal Parameters
 Variable: i, Offset: 8
 
-====Function setInt
+
+====Function 'setInt'
+==Formal Parameters
 Variable: i, Offset: 8
 Variable: j, Offset: 12
 
-====Class ArgV
 
-====Function getNumberOfArgs
+====Class 'ArgV'
+
+
+====Function 'getNumberOfArgs'
+==Formal Parameters
 Variable: a, Offset: 8
 
-====Function getArg
+
+====Function 'getArg'
+==Formal Parameters
 Variable: i, Offset: 8
 Variable: a, Offset: 12
 
-====Class pid_t
 
-====Function getpid_t
+====Class 'pid_t'
+
+
+====Function 'getpid_t'
+==Formal Parameters
 Variable: p, Offset: 8
 
-====Function setpid_t
-Variable: p, Offset: 8
-Variable: i, Offset: 12
 
-====Class SchedParamP
-
-====Function set
-Variable: s, Offset: 8
-Variable: i, Offset: 12
-
-====Class VoidP
-
-====Function setvoid
+====Function 'setpid_t'
+==Formal Parameters
 Variable: p, Offset: 8
 Variable: i, Offset: 12
 
-====Function getvoid
+
+====Class 'SchedParamP'
+
+
+====Function 'set'
+==Formal Parameters
+Variable: s, Offset: 8
+Variable: i, Offset: 12
+
+
+====Class 'VoidP'
+
+
+====Function 'setvoid'
+==Formal Parameters
+Variable: p, Offset: 8
+Variable: i, Offset: 12
+
+
+====Function 'getvoid'
+==Formal Parameters
 Variable: p, Offset: 8
 
-====Class size_t
 
-====Function getsize
+====Class 'size_t'
+
+
+====Function 'getsize'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Class StatP
 
-====Function setstat
+====Class 'StatP'
+
+
+====Function 'setstat'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Class NewStatP
 
-====Function setnstat
+====Class 'NewStatP'
+
+
+====Function 'setnstat'
+==Formal Parameters
 Variable: n, Offset: 8
 Variable: i, Offset: 12
 
-====Event open
+
+====Event 'open'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Event close
+
+====Event 'close'
 Variable: a1, Offset: 0
 
-====Event chroot
+
+====Event 'chroot'
 Variable: a1, Offset: 0
 
-====Event lstat
+
+====Event 'lstat'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event read
+
+====Event 'read'
 Variable: r, Offset: 0
 
-====Event write
+
+====Event 'write'
 Variable: r, Offset: 0
 
-====Event stat
+
+====Event 'stat'
 Variable: r, Offset: 0
 
-====Event connect
+
+====Event 'connect'
 Variable: t, Offset: 0
 
-====Event accept
+
+====Event 'accept'
 Variable: t, Offset: 0
 
-====Function logMessage
+
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
 
-====Function logMessageInt
+
+====Function 'logMessageInt'
+==Formal Parameters
 Variable: x, Offset: 8
 Variable: y, Offset: 12
 
-====Function isInFile
+
+====Function 'isInFile'
+==Formal Parameters
 Variable: x, Offset: 8
 Variable: y, Offset: 12
 
-====Function getpid
 
-====Function isChild
+====Function 'getpid'
+
+
+====Function 'isChild'
+==Formal Parameters
 Variable: a, Offset: 8
 
-====Event execve
+
+====Event 'execve'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Event fork
 
-====Event clone
+====Event 'fork'
 
-====Event kill
+
+====Event 'clone'
+
+
+====Event 'kill'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event ptrace
+
+====Event 'ptrace'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 Variable: a4, Offset: 12
 
-====Event sched_setparam
+
+====Event 'sched_setparam'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event sched_setscheduler
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
-Variable: a3, Offset: 8
 
-====Event setpgid
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
-
-====Event setpriority
+====Event 'sched_setscheduler'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Event mlock
+
+====Event 'setpgid'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event mlockall
+
+====Event 'setpriority'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+
+====Event 'mlock'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+
+====Event 'mlockall'
 Variable: a1, Offset: 0
 
-====Event munlockall
 
-====Function isInt
+====Event 'munlockall'
+
+
+====Function 'isInt'
+==Formal Parameters
 Variable: i, Offset: 8
 
-====Function isUInt
+
+====Function 'isUInt'
+==Formal Parameters
 Variable: i, Offset: 8
 
-====Function isShort
+
+====Function 'isShort'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Function isUShort
+
+====Function 'isUShort'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Function isLong
+
+====Function 'isLong'
+==Formal Parameters
 Variable: l, Offset: 8
 
-====Function isULong
+
+====Function 'isULong'
+==Formal Parameters
 Variable: l, Offset: 8
+
 Variable: valid_write, Offset: 0
 Variable: admin_file, Offset: 4
 Variable: admin_file_name, Offset: 8
@@ -334,7 +418,8 @@ Variable: tempfile, Offset: 32
 Variable: checkProcess, Offset: 36
 Variable: check_file, Offset: 40
 
-====Function getCurrentSysCall
+====Function 'getCurrentSysCall'
+
 Variable: a, Offset: 44
 Variable: b, Offset: 48
 Variable: tmp, Offset: 52

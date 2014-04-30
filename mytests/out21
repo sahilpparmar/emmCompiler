@@ -45,10 +45,11 @@ mytests/in21:21:Error: Assigned expression must be a subtype of target
 
 ====Global Declarations
 
-====Event open
+====Event 'open'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
+
 Variable: i, Offset: 0
 Variable: j, Offset: 4
 Variable: k, Offset: 8

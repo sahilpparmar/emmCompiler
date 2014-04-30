@@ -18,10 +18,13 @@
 
 ====Global Declarations
 
-====Event open
+====Event 'open'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Function logMessage
+
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
+

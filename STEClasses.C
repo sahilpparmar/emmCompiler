@@ -51,9 +51,10 @@ const Type* ClassEntry::typeCheck() const
 
 void ClassEntry::memAlloc() 
 {
-    DEBUG("\n====Class " + name());
+    DEBUG("\n====Class '" + name() + "'");
     addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
     memAllocST();
+    DEBUG("");
 }
 
 void VariableEntry::print(ostream& out, int indent) const
@@ -85,7 +86,7 @@ const Type* VariableEntry::typeCheck() const
 }
 
 void VariableEntry::memAlloc() 
-{   int off = -1;
+{   int off;
 
     if (varKind() == VarKind::GLOBAL_VAR) {
         off = addr_mng.getAddress (AddressManage::OffKind::GLOBAL, type()->size(), INCR);
@@ -98,10 +99,16 @@ void VariableEntry::memAlloc()
     } else if (varKind() == VarKind::PARAM_VAR) { 
         off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, type()->size(), INCR);
         offSet(off);
+
+    } else if (varKind() == VarKind::CLASS_VAR) { 
+        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, type()->size(), INCR);
+        offSet(off);
+
+    } else {
+        assert(0 && "Invalid Variable Symbol");
     }
     
-    if (off != -1)
-        PRINT_OFFSET(name().c_str(), off);
+    PRINT_OFFSET(name().c_str(), off);
 }
 
 void FunctionEntry::print(ostream& out, int indent) const
@@ -155,16 +162,19 @@ void FunctionEntry::memAlloc()
 {
     int numParams = type()->arity();
 
-    DEBUG("\n====Function " + name());
+    DEBUG("\n====Function '" + name() + "'");
     if (numParams) {
         addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 8);
+        DEBUG("==Formal Parameters");
         memAllocST (0, numParams);
     } 
 
     if (body_) {
         addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
+        DEBUG("==Local Variables");
         memAllocST (numParams, 10000);
     }
+    DEBUG("");
 }
 
 void EventEntry::print(ostream& out, int indent) const
@@ -182,9 +192,10 @@ const Type* EventEntry::typeCheck() const
 
 void EventEntry::memAlloc() 
 {
-    DEBUG("\n====Event " + name());
+    DEBUG("\n====Event '" + name() + "'");
     addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
     memAllocST();
+    DEBUG("");
 }
 
 void BlockEntry::print(ostream& out, int indent) const

@@ -24,11 +24,17 @@
 ====Global Declarations
 Variable: x, Offset: 0
 
-====Class abc
+====Class 'abc'
+Variable: m, Offset: 0
+Variable: n, Offset: 4
 
-====Function foo
+
+====Function 'foo'
+==Formal Parameters
 Variable: a, Offset: 8
+==Local Variables
 Variable: b, Offset: -4
 Variable: c, Offset: -8
 Variable: obj, Offset: -16
+
 Variable: a, Offset: 4

@@ -136,7 +136,7 @@ SymTab::memAllocST (int first, int last) {
             if ((ste->kind() != SymTabEntry::Kind::RULE_BLOCK_KIND) && 
                     (ste->kind() != SymTabEntry::Kind::EVENT_BLOCK_KIND) && 
                     (ste->name() != "any")) {
-        //cout << "[TYPECHECKST] " << ste->kindTag(ste->kind()) << " "<< ste->name() << endl;
+        //cout << "[MEMALLOCST] " << ste->kindTag(ste->kind()) << " "<< ste->name() << endl;
                 ste->memAlloc();
             }
         }

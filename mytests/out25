@@ -1,5 +1,8 @@
 
 =================Lexical and Syntax Parsing==================
+mytests/in25:7:Warning: Unsupported datatype, converting 'long' to 'int'
+mytests/in25:8:Warning: Unsupported datatype, Converting 'bit' to 'int'
+mytests/in25:9:Warning: Unsupported datatype, converting 'short' to 'int'
 
 =========================AST Builder=========================
  
@@ -7,6 +10,7 @@
   int a = 5;
   int b = 12345678;
   int c = 1;
+  int d = 1;
   event open(string a1, int a2, unsigned int a3);
  
   (open(string file, int flags, unsigned int mode))-->   {
@@ -35,13 +39,17 @@
 
 ====Global Declarations
 
-====Function logMessage
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
+
 Variable: a, Offset: 0
 Variable: b, Offset: 4
 Variable: c, Offset: 8
+Variable: d, Offset: 12
 
-====Event open
+====Event 'open'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
+

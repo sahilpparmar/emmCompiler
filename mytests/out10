@@ -53,10 +53,11 @@ mytests/in10:54:Error: 0 arguments expected for logMessage
 
 ====Global Declarations
 
-====Event open
+====Event 'open'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
+
 Variable: b3, Offset: 0
 Variable: s, Offset: 4
 Variable: l, Offset: 8
@@ -68,10 +69,13 @@ Variable: ul, Offset: 28
 Variable: ci, Offset: 32
 Variable: d, Offset: 36
 
-====Function logMessage
+====Function 'logMessage'
+
 Variable: b5, Offset: 40
 Variable: str, Offset: 44
 Variable: str1, Offset: 48
 
-====Function get
+====Function 'get'
+==Formal Parameters
 Variable: a, Offset: 8
+

@@ -65,99 +65,133 @@ mytests/in18:60:Error: Incompatible type for agrument 2 for operator `&&'
 
 ====Global Declarations
 
-====Class CString
+====Class 'CString'
 
-====Function get
+
+====Function 'get'
+==Formal Parameters
 Variable: c, Offset: 8
 
-====Class ArgV
 
-====Class pid_t
+====Class 'ArgV'
 
-====Function getpid_t
+
+====Class 'pid_t'
+
+
+====Function 'getpid_t'
+==Formal Parameters
 Variable: t, Offset: 8
 
-====Class SchedParamP
 
-====Class StatP
+====Class 'SchedParamP'
 
-====Class NewStatP
 
-====Function logMessage
+====Class 'StatP'
+
+
+====Class 'NewStatP'
+
+
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
 
-====Function logMessageInt
+
+====Function 'logMessageInt'
+==Formal Parameters
 Variable: x, Offset: 8
 Variable: y, Offset: 12
 
-====Function getpid
 
-====Function isChild
+====Function 'getpid'
+
+
+====Function 'isChild'
+==Formal Parameters
 Variable: a, Offset: 8
 
-====Event open
+
+====Event 'open'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Event close
+
+====Event 'close'
 Variable: a1, Offset: 0
 
-====Event lstat
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
 
-====Event execve
-
-====Event fork
-
-====Event clone
-
-====Event unlink
-Variable: a1, Offset: 0
-
-====Event kill
+====Event 'lstat'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event ptrace
+
+====Event 'execve'
+
+
+====Event 'fork'
+
+
+====Event 'clone'
+
+
+====Event 'unlink'
+Variable: a1, Offset: 0
+
+
+====Event 'kill'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+
+====Event 'ptrace'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 Variable: a4, Offset: 12
 
-====Event sched_setscheduler
+
+====Event 'sched_setscheduler'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Event umask
+
+====Event 'umask'
 Variable: a1, Offset: 0
 
-====Event write
+
+====Event 'write'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Event chmod
+
+====Event 'chmod'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event truncate
+
+====Event 'truncate'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event sysinfo
+
+====Event 'sysinfo'
 Variable: a1, Offset: 0
 
-====Event sched_setparam
+
+====Event 'sched_setparam'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event setpriority
+
+====Event 'setpriority'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
+
 Variable: tmp, Offset: 0
 Variable: i, Offset: 4
 Variable: j, Offset: 8

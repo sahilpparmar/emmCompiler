@@ -59,50 +59,68 @@ mytests/in17:37:Error: Incompatible type for agrument 2 for operator `&&'
 
 ====Global Declarations
 
-====Class CString
+====Class 'CString'
 
-====Function get
+
+====Function 'get'
+==Formal Parameters
 Variable: s, Offset: 8
 
-====Class Integer
 
-====Class ArgV
+====Class 'Integer'
 
-====Class StatP
 
-====Class NewStatP
+====Class 'ArgV'
 
-====Function logmessage
+
+====Class 'StatP'
+
+
+====Class 'NewStatP'
+
+
+====Function 'logmessage'
+==Formal Parameters
 Variable: x, Offset: 8
 
-====Function logmessageint
+
+====Function 'logmessageint'
+==Formal Parameters
 Variable: x, Offset: 8
 Variable: y, Offset: 12
 
-====Function isfile
+
+====Function 'isfile'
+==Formal Parameters
 Variable: x, Offset: 8
 Variable: y, Offset: 12
 
-====Event open
+
+====Event 'open'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Event close
+
+====Event 'close'
 Variable: a1, Offset: 0
 
-====Event execve
+
+====Event 'execve'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
-====Event lstat
+
+====Event 'lstat'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 
-====Event stat
+
+====Event 'stat'
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
+
 Variable: i, Offset: 0
 Variable: j, Offset: 4
 Variable: rv, Offset: 8
