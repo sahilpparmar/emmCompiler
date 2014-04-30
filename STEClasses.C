@@ -2,6 +2,9 @@
 #include "Value.h"
 #include "ParserUtil.h"
 
+#define prt_off(s, i) printf("\n Variable %s, Offset : %d", s, i)
+AddressManage addr_mng;
+
 void GlobalEntry::print(ostream& out, int indent) const
 {
     printST(out, indent, ' ', ' ');
@@ -82,11 +85,26 @@ const Type* GlobalEntry::typeCheck() const
     return type();
 }
 
+void GlobalEntry :: memAlloc() 
+{
+    addr_mng.setAddress (AddressManage::OffKind::GLOBAL, 0);
+    memAllocST();
+
+}
+
+
 const Type* ClassEntry::typeCheck() const
 {
     typeCheckST();
     return type();
 }
+
+void ClassEntry::memAlloc() 
+{
+    addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
+    memAllocST();
+}
+
 
 const Type* VariableEntry::typeCheck() const
 {
@@ -101,6 +119,43 @@ const Type* VariableEntry::typeCheck() const
     }
 
     return t1; 
+}
+
+void VariableEntry::memAlloc() 
+{   int off = 0;
+
+    if (varKind() == VarKind::GLOBAL_VAR) {
+        off = addr_mng.getAddress (AddressManage::OffKind::GLOBAL, INCR);
+        offSet(off);
+        
+    } else if (varKind() == VarKind::LOCAL_VAR) {
+        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, DECR);
+        offSet(off);
+
+    } else if (varKind() == VarKind::PARAM_VAR) { 
+        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, INCR);
+        offSet(off);
+    }
+    
+    if(off)
+        prt_off(name().c_str(), off);
+
+}
+
+
+void FunctionEntry::memAlloc() 
+{
+    int numParams = type()->arity();
+
+    if (numParams) {
+        addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 4);
+        memAllocST (0, numParams);
+    } 
+
+    if (body_) {
+        addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
+        memAllocST (numParams, 10000);
+    }
 }
 
 const Type* FunctionEntry::typeCheck() const
@@ -119,6 +174,11 @@ const Type* FunctionEntry::typeCheck() const
     return type();
 }    
 
+void EventEntry::memAlloc() 
+{
+    addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
+    memAllocST();
+}
 const Type* EventEntry::typeCheck() const
 {
     typeCheckST();

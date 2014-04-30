@@ -214,6 +214,8 @@ main(int argc, char *argv[], char *envp[]) {
 	cout << "Type Checking Errors:\n";
         ge->typeCheck();
         cout << endl;
+        cout << "Generating offsets:\n";
+        ge->memAlloc(); 
   }
 #endif
 }

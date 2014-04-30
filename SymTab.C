@@ -122,3 +122,23 @@ SymTab::typeCheckST(int first, int last) const {
     }
 }
 
+void
+SymTab::memAllocST (int first, int last) {
+    int i; SymTab::iterator it = begin();
+    
+    if ((first == 0) && (last == 0))
+        last = 1000000;
+
+    for (i=0, it=begin(); (it != end()) && (i < last); i++, ++it)  {
+        SymTabEntry *ste = (SymTabEntry *)(*it);
+            
+        if (i >= first) {
+            if ((ste->kind() != SymTabEntry::Kind::RULE_BLOCK_KIND) && 
+                    (ste->kind() != SymTabEntry::Kind::EVENT_BLOCK_KIND) && 
+                    (ste->name() != "any")) {
+        //cout << "[TYPECHECKST] " << ste->kindTag(ste->kind()) << " "<< ste->name() << endl;
+                ste->memAlloc();
+            }
+        }
+    }
+}

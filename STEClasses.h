@@ -5,6 +5,8 @@
 #include "SymTabEntry.h"
 #include "Ast.h"
 
+enum opn {INCR, DECR};
+
 class StmtNode;
 class RuleNode;
 class ExprNode;
@@ -33,7 +35,8 @@ class GlobalEntry: public SymTabEntry {
 
         const Type* typeCheck() const;
         void print(ostream&, int indent=0) const;
-
+        void memAlloc();
+    
     private:
         vector<RuleNode*> rules_;
 };
@@ -86,7 +89,7 @@ class VariableEntry: public SymTabEntry {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck() const;
-
+        void memAlloc();
     private:
         VarKind vkind_;
         int offSet_;
@@ -101,6 +104,7 @@ class ClassEntry: public SymTabEntry {
 
         void print(ostream& os, int indent) const;
         const Type* typeCheck() const;
+        void memAlloc();
 };
 
 class FunctionEntry: public SymTabEntry {
@@ -119,7 +123,7 @@ class FunctionEntry: public SymTabEntry {
 
         void print(ostream& os, int indent) const;
         const Type* typeCheck() const;
-
+        void memAlloc();
     private:
         CompoundStmtNode* body_;
 };
@@ -132,6 +136,47 @@ class EventEntry: public SymTabEntry {
 
         void print(ostream& out, int indent=0) const; 
         const Type* typeCheck() const;
-};  
+        void memAlloc();
+};
+
+class AddressManage {
+    int address_;
+    int global_addr_; 
+    public:
+        enum OffKind { GLOBAL, NONGLOBAL};  
+
+        AddressManage () : address_(0), global_addr_(-4) {} 
+        void setAddress (OffKind k, int addr) { 
+            if (k == GLOBAL)     
+                address_ = addr; 
+            else if (k == NONGLOBAL)
+                global_addr_ = addr;
+        }
+        
+        int getAddress (OffKind k, int incr) { 
+
+            if (k == GLOBAL) {
+                if (incr == INCR) 
+                    address_ = address_ + 4;
+                else 
+                    address_ = address_ - 4;
+                return address_;
+
+            } else {
+                if (incr == INCR) 
+                    global_addr_ = global_addr_ + 4;
+                else 
+                    global_addr_ = global_addr_ - 4;
+                return global_addr_;
+            }
+        }
+        
+        void print_Address (OffKind k) { 
+            if (k == GLOBAL) 
+                printf ("offset: %d \n", address_); 
+            else
+                printf ("offset: %d \n", global_addr_);
+        }
+};
 
 #endif

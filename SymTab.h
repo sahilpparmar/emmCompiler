@@ -64,6 +64,7 @@ class SymTab {
   virtual void printST(ostream& os,int ind=0,char ldelim='{',char rdelim='}',
 					   bool linebreaks=true, int first=0, int last=0) const;
   virtual void typeCheckST(int first, int last) const;
+  virtual void memAllocST(int first, int last);
 
   const_iterator begin() const { return const_iterator(first_); };
   iterator begin() { return iterator(first_); };

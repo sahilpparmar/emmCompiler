@@ -82,7 +82,13 @@ class SymTabEntry: public ProgramElem {
             if (symTab() != nullptr) 
                 symTab()->typeCheckST(first, last);
         }
-
+        
+        virtual void memAlloc() {}
+        virtual void memAllocST(int first = 0, int last = 0) {
+            if (symTab() != nullptr) 
+                symTab()->memAllocST(first, last);
+        }
+    
     private:
         string name_;
         Kind kind_;
