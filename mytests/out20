@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   int geteuid();
   int logMessageStr(string s);
@@ -119,7 +122,8 @@ Finished parsing, here is the AST
 ", syscall);
   };
   ;;
-Type Checking Errors:
+
+========================Type Checking========================
 mytests/in20:110:Error: Incompatible type for agrument 1 for operator `&&'
 mytests/in20:110:Error: Incompatible type for agrument 2 for operator `&&'
 mytests/in20:110:Error: Assigned expression must be a subtype of target
@@ -129,3 +133,209 @@ mytests/in20:114:Error: Incompatible type for agrument 2 for operator `&&'
 mytests/in20:115:Error: Assigned expression must be a subtype of target
 mytests/in20:118:Error: 1 arguments expected for logMessageStr
 
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Function geteuid
+
+====Function logMessageStr
+Variable: s, Offset: 8
+
+====Class CString
+
+====Function f
+Variable: g, Offset: 8
+
+====Function get
+Variable: s, Offset: 8
+
+====Function setCStr
+Variable: s, Offset: 8
+Variable: t, Offset: 12
+
+====Class Integer
+
+====Function getInt
+Variable: i, Offset: 8
+
+====Function setInt
+Variable: i, Offset: 8
+Variable: j, Offset: 12
+
+====Class ArgV
+
+====Function getNumberOfArgs
+Variable: a, Offset: 8
+
+====Function getArg
+Variable: i, Offset: 8
+Variable: a, Offset: 12
+
+====Class pid_t
+
+====Function getpid_t
+Variable: p, Offset: 8
+
+====Function setpid_t
+Variable: p, Offset: 8
+Variable: i, Offset: 12
+
+====Class SchedParamP
+
+====Function set
+Variable: s, Offset: 8
+Variable: i, Offset: 12
+
+====Class VoidP
+
+====Function setvoid
+Variable: p, Offset: 8
+Variable: i, Offset: 12
+
+====Function getvoid
+Variable: p, Offset: 8
+
+====Class size_t
+
+====Function getsize
+Variable: s, Offset: 8
+
+====Class StatP
+
+====Function setstat
+Variable: s, Offset: 8
+
+====Class NewStatP
+
+====Function setnstat
+Variable: n, Offset: 8
+Variable: i, Offset: 12
+
+====Event open
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Event close
+Variable: a1, Offset: 4
+
+====Event chroot
+Variable: a1, Offset: 4
+
+====Event lstat
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+
+====Event read
+Variable: r, Offset: 4
+
+====Event write
+Variable: r, Offset: 4
+
+====Event stat
+Variable: r, Offset: 4
+
+====Event connect
+Variable: t, Offset: 4
+
+====Event accept
+Variable: t, Offset: 4
+
+====Function logMessage
+Variable: x, Offset: 8
+
+====Function logMessageInt
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Function isInFile
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Function getpid
+
+====Function isChild
+Variable: a, Offset: 8
+
+====Event execve
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Event fork
+
+====Event clone
+
+====Event kill
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+
+====Event ptrace
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+Variable: a4, Offset: 16
+
+====Event sched_setparam
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+
+====Event sched_setscheduler
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Event setpgid
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+
+====Event setpriority
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Event mlock
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+
+====Event mlockall
+Variable: a1, Offset: 4
+
+====Event munlockall
+
+====Function isInt
+Variable: i, Offset: 8
+
+====Function isUInt
+Variable: i, Offset: 8
+
+====Function isShort
+Variable: s, Offset: 8
+
+====Function isUShort
+Variable: s, Offset: 8
+
+====Function isLong
+Variable: l, Offset: 8
+
+====Function isULong
+Variable: l, Offset: 8
+Variable: valid_write, Offset: 4
+Variable: admin_file, Offset: 8
+Variable: admin_file_name, Offset: 12
+Variable: globalTemp, Offset: 16
+Variable: realUid, Offset: 20
+Variable: foundFlag, Offset: 24
+Variable: syscall, Offset: 28
+Variable: loggedUser, Offset: 32
+Variable: tempfile, Offset: 36
+Variable: checkProcess, Offset: 40
+Variable: check_file, Offset: 44
+
+====Function getCurrentSysCall
+Variable: a, Offset: 48
+Variable: b, Offset: 52
+Variable: tmp, Offset: 56
+Variable: processname, Offset: 60

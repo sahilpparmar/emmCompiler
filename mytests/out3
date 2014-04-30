@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   event open(string a1, int a2, unsigned int a3);
   int logMessage(string x);
@@ -7,5 +10,18 @@ Finished parsing, here is the AST
     logMessage("open: testing almost nothing");
   };
   ;;
-Type Checking Errors:
 
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event open
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Function logMessage
+Variable: x, Offset: 8

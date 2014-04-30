@@ -2,7 +2,8 @@
 #include "Value.h"
 #include "ParserUtil.h"
 
-#define prt_off(s, i) //printf("\n Variable %s, Offset : %d", s, i)
+#define PRINT_OFFSET(s, i) DEBUG((string)"Variable: " + (string)s + (string)", Offset: " + (string)itoa(i));
+
 static AddressManage addr_mng;
 
 void GlobalEntry::print(ostream& out, int indent) const
@@ -16,11 +17,23 @@ void GlobalEntry::print(ostream& out, int indent) const
     }
 }
 
-void EventEntry::print(ostream& out, int indent) const
+const Type* GlobalEntry::typeCheck() const
 {
-    out << type()->name() << " " << name();
-    printST(out, indent, '(', ')', false);
-    out << ";";
+    typeCheckST(); 
+
+    vector<RuleNode*>::const_iterator it; 
+    for (it = rules_.begin(); it != rules_.end(); ++it) {
+        (*it)->typeCheck();    
+    }
+    return type();
+}
+
+void GlobalEntry::memAlloc() 
+{
+    DEBUG("\n====Global Declarations");
+    addr_mng.setAddress (AddressManage::OffKind::GLOBAL, 0);
+    memAllocST();
+
 }
 
 void ClassEntry::print(ostream& out, int indent) const
@@ -28,6 +41,68 @@ void ClassEntry::print(ostream& out, int indent) const
     out << type()->name() << " " << name();
     printST(out, indent, '{', '}', true, 0, 100000);
     out<<";";
+}
+
+const Type* ClassEntry::typeCheck() const
+{
+    typeCheckST();
+    return type();
+}
+
+void ClassEntry::memAlloc() 
+{
+    DEBUG("\n====Class " + name());
+    addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
+    memAllocST();
+}
+
+void VariableEntry::print(ostream& out, int indent) const
+{
+    // GLOBAL_VAR, LOCAL_VAR, PARAM_VAR, UNDEFINED
+    out << type()->fullName() << " " << name();
+    if (varKind() != PARAM_VAR) {
+        if (initVal()) {
+            out << " = ";
+            initVal()->print(out, indent);
+        }
+        out << ";";
+    }   
+}
+
+const Type* VariableEntry::typeCheck() const
+{
+    const Type* t1 = type();
+    if (initVal()) {
+        const Type* t2 = initVal_->typeCheck();
+        assert(t2 && "Invalid rvalue type");
+
+        if (!t1->isSubType(t2->tag(), t2)) {
+            errMsg("Assignment between incompatible types", initVal_);
+        }
+    }
+
+    return t1; 
+}
+
+void VariableEntry::memAlloc() 
+{   int off = -1;
+
+    if (varKind() == VarKind::GLOBAL_VAR) {
+        off = addr_mng.getAddress (AddressManage::OffKind::GLOBAL, INCR);
+        offSet(off);
+        
+    } else if (varKind() == VarKind::LOCAL_VAR) {
+        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, DECR);
+        offSet(off);
+
+    } else if (varKind() == VarKind::PARAM_VAR) { 
+        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, INCR);
+        offSet(off);
+    }
+    
+    if (off != -1)
+        PRINT_OFFSET(name().c_str(), off);
+
 }
 
 void FunctionEntry::print(ostream& out, int indent) const
@@ -61,103 +136,6 @@ void FunctionEntry::print(ostream& out, int indent) const
     out << ";";
 }
 
-void VariableEntry::print(ostream& out, int indent) const
-{
-    // GLOBAL_VAR, LOCAL_VAR, PARAM_VAR, UNDEFINED
-    out << type()->fullName() << " " << name();
-    if (varKind() != PARAM_VAR) {
-        if (initVal()) {
-            out << " = ";
-            initVal()->print(out, indent);
-        }
-        out << ";";
-    }   
-}
-
-const Type* GlobalEntry::typeCheck() const
-{
-    typeCheckST(); 
-
-    vector<RuleNode*>::const_iterator it; 
-    for (it = rules_.begin(); it != rules_.end(); ++it) {
-        (*it)->typeCheck();    
-    }
-    return type();
-}
-
-void GlobalEntry :: memAlloc() 
-{
-    addr_mng.setAddress (AddressManage::OffKind::GLOBAL, 0);
-    memAllocST();
-
-}
-
-
-const Type* ClassEntry::typeCheck() const
-{
-    typeCheckST();
-    return type();
-}
-
-void ClassEntry::memAlloc() 
-{
-    addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
-    memAllocST();
-}
-
-
-const Type* VariableEntry::typeCheck() const
-{
-    const Type* t1 = type();
-    if (initVal()) {
-        const Type* t2 = initVal_->typeCheck();
-        assert(t2 && "Invalid rvalue type");
-
-        if (!t1->isSubType(t2->tag(), t2)) {
-            errMsg("Assignment between incompatible types", initVal_);
-        }
-    }
-
-    return t1; 
-}
-
-void VariableEntry::memAlloc() 
-{   int off = 0;
-
-    if (varKind() == VarKind::GLOBAL_VAR) {
-        off = addr_mng.getAddress (AddressManage::OffKind::GLOBAL, INCR);
-        offSet(off);
-        
-    } else if (varKind() == VarKind::LOCAL_VAR) {
-        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, DECR);
-        offSet(off);
-
-    } else if (varKind() == VarKind::PARAM_VAR) { 
-        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, INCR);
-        offSet(off);
-    }
-    
-    if(off)
-        prt_off(name().c_str(), off);
-
-}
-
-
-void FunctionEntry::memAlloc() 
-{
-    int numParams = type()->arity();
-
-    if (numParams) {
-        addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 4);
-        memAllocST (0, numParams);
-    } 
-
-    if (body_) {
-        addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
-        memAllocST (numParams, 10000);
-    }
-}
-
 const Type* FunctionEntry::typeCheck() const
 {
     const vector<const Type*>* param_l = type()->argTypes();
@@ -174,15 +152,40 @@ const Type* FunctionEntry::typeCheck() const
     return type();
 }    
 
-void EventEntry::memAlloc() 
+void FunctionEntry::memAlloc() 
 {
-    addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
-    memAllocST();
+    int numParams = type()->arity();
+
+    DEBUG("\n====Function " + name());
+    if (numParams) {
+        addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 4);
+        memAllocST (0, numParams);
+    } 
+
+    if (body_) {
+        addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
+        memAllocST (numParams, 10000);
+    }
 }
+
+void EventEntry::print(ostream& out, int indent) const
+{
+    out << type()->name() << " " << name();
+    printST(out, indent, '(', ')', false);
+    out << ";";
+}
+
 const Type* EventEntry::typeCheck() const
 {
     typeCheckST();
     return type();
+}
+
+void EventEntry::memAlloc() 
+{
+    DEBUG("\n====Event " + name());
+    addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
+    memAllocST();
 }
 
 void BlockEntry::print(ostream& out, int indent) const

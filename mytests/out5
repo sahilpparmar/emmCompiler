@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   class CString;
   string get(class CString s);
@@ -11,5 +14,25 @@ Finished parsing, here is the AST
     logMessage("open: testing almost nothing");
   };
   ;;
-Type Checking Errors:
 
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Class CString
+
+====Function get
+Variable: s, Offset: 8
+Variable: a1, Offset: 4
+Variable: b, Offset: 8
+
+====Event open
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Function logMessage
+Variable: x, Offset: 8

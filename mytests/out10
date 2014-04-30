@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   event open(string a1, int a2, unsigned int a3);
   byte b3;
@@ -37,10 +40,38 @@ Finished parsing, here is the AST
     logMessage("open: testing types");
   };
   ;;
-Type Checking Errors:
+
+========================Type Checking========================
 mytests/in10:46:Error: Assigned expression must be a subtype of target
 mytests/in10:48:Error: Assigned expression must be a subtype of target
 mytests/in10:50:Error: Assigned expression must be a subtype of target
 mytests/in10:52:Error: Assigned expression must be a subtype of target
 mytests/in10:54:Error: 0 arguments expected for logMessage
 
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event open
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+Variable: b3, Offset: 4
+Variable: s, Offset: 8
+Variable: l, Offset: 12
+Variable: i, Offset: 16
+Variable: j, Offset: 20
+Variable: us1, Offset: 24
+Variable: ui, Offset: 28
+Variable: ul, Offset: 32
+Variable: ci, Offset: 36
+Variable: d, Offset: 40
+
+====Function logMessage
+Variable: b5, Offset: 44
+Variable: str, Offset: 48
+Variable: str1, Offset: 52
+
+====Function get
+Variable: a, Offset: 8

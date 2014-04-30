@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   int isInFile(string x, string y);
   int isInt(int i);
@@ -67,7 +70,8 @@ Finished parsing, here is the AST
     isLong(f);
   };
   ;;
-Type Checking Errors:
+
+========================Type Checking========================
 mytests/in8:39:Error: Type Mismatch for argument 1 to isInt
 mytests/in8:42:Error: Type Mismatch for argument 1 to isInt
 mytests/in8:44:Error: Type Mismatch for argument 1 to isUInt
@@ -91,3 +95,49 @@ mytests/in8:88:Error: Type Mismatch for argument 1 to isInt
 mytests/in8:89:Error: Type Mismatch for argument 1 to isShort
 mytests/in8:90:Error: Type Mismatch for argument 1 to isLong
 
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Function isInFile
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Function isInt
+Variable: i, Offset: 8
+
+====Function isUInt
+Variable: i, Offset: 8
+
+====Function isShort
+Variable: s, Offset: 8
+
+====Function isUShort
+Variable: s, Offset: 8
+
+====Function isLong
+Variable: l, Offset: 8
+
+====Function isULong
+Variable: l, Offset: 8
+
+====Function y
+Variable: s, Offset: 8
+Variable: t, Offset: 12
+
+====Event open
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+Variable: i, Offset: 4
+Variable: ci, Offset: 8
+Variable: us, Offset: 12
+Variable: cs, Offset: 16
+Variable: s, Offset: 20
+Variable: ui, Offset: 24
+Variable: ul, Offset: 28
+Variable: cl, Offset: 32
+Variable: l, Offset: 36
+Variable: f, Offset: 40
+Variable: b, Offset: 44

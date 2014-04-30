@@ -170,13 +170,6 @@ class AddressManage {
                 return global_addr_;
             }
         }
-        
-        void print_Address (OffKind k) { 
-            if (k == GLOBAL) 
-                printf ("offset: %d \n", address_); 
-            else
-                printf ("offset: %d \n", global_addr_);
-        }
 };
 
 #endif
