@@ -36,7 +36,7 @@
     {
                 a = 10;
 		logMessage("Assignment in condition") ; 
-                    break 3;
+                    break;
                 while (a > 10)
                 {
                     a = b + c;

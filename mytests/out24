@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   int logMessage(string x);
   int a = 5;
@@ -19,7 +22,7 @@ Finished parsing, here is the AST
     while (a<3)     {
       a=10;
       logMessage("Assignment in condition");
-      break 3;
+      break;
       while (a>10)       {
         a=(b+c);
         break 3;
@@ -27,5 +30,22 @@ Finished parsing, here is the AST
     };
   };
   ;;
-Type Checking Errors:
 
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Function logMessage
+Variable: x, Offset: 8
+Variable: a, Offset: 4
+Variable: b, Offset: 8
+Variable: c, Offset: 12
+
+====Event open
+Variable: a1, Offset: 4
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+Variable: condition, Offset: 16
