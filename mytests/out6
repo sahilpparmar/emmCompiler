@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   class CString;
   class CString x;
@@ -33,5 +36,39 @@ Finished parsing, here is the AST
     g();
   };
   ;;
-Type Checking Errors:
 
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Class CString
+Variable: x, Offset: 0
+Variable: y, Offset: 4
+Variable: i1, Offset: 8
+Variable: i2, Offset: 12
+Variable: i3, Offset: 16
+Variable: d1, Offset: 20
+Variable: d2, Offset: 24
+Variable: d3, Offset: 28
+Variable: i4, Offset: 32
+Variable: b1, Offset: 36
+Variable: b2, Offset: 40
+Variable: y2, Offset: 44
+Variable: cs1, Offset: 48
+Variable: cs2, Offset: 52
+Variable: cs3, Offset: 56
+
+====Event open
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Function logMessage
+Variable: x, Offset: 8
+
+====Function g
+Variable: a1, Offset: -4
+Variable: a2, Offset: -8

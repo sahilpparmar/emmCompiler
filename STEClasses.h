@@ -145,37 +145,46 @@ class AddressManage {
     public:
         enum OffKind { GLOBAL, NONGLOBAL};  
 
-        AddressManage () : address_(0), global_addr_(-4) {} 
+        AddressManage () : address_(0), global_addr_(0) {} 
         void setAddress (OffKind k, int addr) { 
             if (k == GLOBAL)     
-                address_ = addr; 
+                global_addr_ = addr; 
             else if (k == NONGLOBAL)
-                global_addr_ = addr;
+                address_ = addr;
         }
         
-        int getAddress (OffKind k, int incr) { 
+        int getAddress (OffKind k, int size, int incr) { 
 
             if (k == GLOBAL) {
-                if (incr == INCR) 
-                    address_ = address_ + 4;
-                else 
-                    address_ = address_ - 4;
-                return address_;
-
+                
+                if (incr == INCR) {
+                    int currAddr = global_addr_; 
+                    global_addr_ = global_addr_ + size;
+                    return currAddr;
+                } else {
+                    global_addr_ = global_addr_ - size;
+                    return global_addr_;
+                }
+                
             } else {
-                if (incr == INCR) 
-                    global_addr_ = global_addr_ + 4;
-                else 
-                    global_addr_ = global_addr_ - 4;
-                return global_addr_;
+                
+                if (incr == INCR) {
+                    int currAddr = address_; 
+                    address_     = address_ + size;
+                    return currAddr; 
+                } else {
+                    address_ = address_ - size;
+                    return address_;
+                }
+                
             }
         }
         
         void print_Address (OffKind k) { 
             if (k == GLOBAL) 
-                printf ("offset: %d \n", address_); 
+                printf ("offset: %d \n", global_addr_); 
             else
-                printf ("offset: %d \n", global_addr_);
+                printf ("offset: %d \n", address_);
         }
 };
 

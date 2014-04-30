@@ -1,12 +1,34 @@
-mytests/in1:7:Error: Expected an event name, but got "foo"
-mytests/in1:7:Error: syntax error
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
+  int x;
+  class abc{
+    int m;
+    int n;
+  };
   void foo(int a) {
     int b;
     int c = 5;
+    class abc obj;
     };
   int a = 2;
  
-Type Checking Errors:
 
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+Variable: x, Offset: 0
+
+====Class abc
+
+====Function foo
+Variable: a, Offset: 8
+Variable: b, Offset: -4
+Variable: c, Offset: -8
+Variable: obj, Offset: -16
+Variable: a, Offset: 4

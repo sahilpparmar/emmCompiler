@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   class CString;
   string get(class CString c);
@@ -50,9 +53,115 @@ Finished parsing, here is the AST
     logMessageInt("simple pattern 3, %d", mode);
   };
   ;;
-Type Checking Errors:
+
+========================Type Checking========================
 mytests/in18:60:Error: Incompatible type for agrument 1 for operator `&&'
 mytests/in18:60:Error: Incompatible type for agrument 2 for operator `&&'
 mytests/in18:60:Error: Assigned expression must be a subtype of target
 mytests/in18:60:Error: Incompatible type for agrument 2 for operator `&&'
 
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Class CString
+
+====Function get
+Variable: c, Offset: 8
+
+====Class ArgV
+
+====Class pid_t
+
+====Function getpid_t
+Variable: t, Offset: 8
+
+====Class SchedParamP
+
+====Class StatP
+
+====Class NewStatP
+
+====Function logMessage
+Variable: x, Offset: 8
+
+====Function logMessageInt
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Function getpid
+
+====Function isChild
+Variable: a, Offset: 8
+
+====Event open
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event close
+Variable: a1, Offset: 0
+
+====Event lstat
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event execve
+
+====Event fork
+
+====Event clone
+
+====Event unlink
+Variable: a1, Offset: 0
+
+====Event kill
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event ptrace
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+Variable: a4, Offset: 12
+
+====Event sched_setscheduler
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event umask
+Variable: a1, Offset: 0
+
+====Event write
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event chmod
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event truncate
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event sysinfo
+Variable: a1, Offset: 0
+
+====Event sched_setparam
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event setpriority
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+Variable: tmp, Offset: 0
+Variable: i, Offset: 4
+Variable: j, Offset: 8
+Variable: k, Offset: 12
+Variable: f, Offset: 16
+Variable: y, Offset: 20
+Variable: state_var, Offset: 24

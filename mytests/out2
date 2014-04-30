@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   event open(string a1, int a2, unsigned int a3);
  
@@ -6,5 +9,15 @@ Finished parsing, here is the AST
   ;;
   (any)-->   {  };
   ;;
-Type Checking Errors:
 
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event open
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8

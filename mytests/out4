@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   class CString{
     int x;
@@ -28,6 +31,32 @@ Finished parsing, here is the AST
     g();
   };
   ;;
-Type Checking Errors:
+
+========================Type Checking========================
 mytests/in4:15:Error: Assigned expression must be a subtype of target
 
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Class CString
+
+====Function classTest
+Variable: x, Offset: 8
+
+====Function g
+Variable: a1, Offset: -4
+Variable: a2, Offset: -8
+
+====Event open
+Variable: a1, Offset: 0
+Variable: a2, Offset: 8
+Variable: a3, Offset: 12
+
+====Function logMessage
+Variable: x, Offset: 8
+
+====Function g
+Variable: a1, Offset: -4
+Variable: a2, Offset: -8

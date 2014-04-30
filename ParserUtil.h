@@ -6,6 +6,8 @@ extern int yylinenum;
 extern int yycolumnno;
 extern const char* yyfilename;
 extern FILE *yyin;
+extern int debugLevel;
+extern int optLevel;
 
 extern void yyerror(char *);
 extern int yyparse(void);

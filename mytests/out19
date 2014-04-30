@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   event a(int x);
   event b(int y, int z);
@@ -26,5 +29,28 @@ Finished parsing, here is the AST
   ;;
   ((a(int i)):(!(b(int y, int w)|j=w)))-->   z=j;
   ;;
-Type Checking Errors:
 
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event a
+Variable: x, Offset: 0
+
+====Event b
+Variable: y, Offset: 0
+Variable: z, Offset: 4
+
+====Event c
+Variable: a, Offset: 0
+Variable: b, Offset: 4
+Variable: c, Offset: 8
+Variable: z, Offset: 0
+Variable: f, Offset: 4
+Variable: g, Offset: 8
+Variable: w, Offset: 12
+Variable: j, Offset: 16
+Variable: y, Offset: 20

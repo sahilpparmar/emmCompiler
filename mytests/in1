@@ -1,7 +1,13 @@
+int x;
+class abc {
+    int m;
+    int n;
+};
+
 void foo(int a) {
     int b;
     int c = 5;
+    abc obj;
 }
 
 int a = 2;
-foo(a);

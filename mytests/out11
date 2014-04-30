@@ -1,4 +1,7 @@
-Finished parsing, here is the AST
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
  
   event open(string a1, int a2, unsigned int a3);
   int i = 2;
@@ -20,7 +23,8 @@ Finished parsing, here is the AST
     f=(f<<f);
   };
   ;;
-Type Checking Errors:
+
+========================Type Checking========================
 mytests/in11:10:Error: Assignment between incompatible types
 mytests/in11:17:Error: Assigned expression must be a subtype of target
 mytests/in11:18:Error: Incompatible type for agrument 1 for operator `*'
@@ -42,3 +46,18 @@ mytests/in11:23:Error: Incompatible type for agrument 2 for operator `&'
 mytests/in11:25:Error: Incompatible type for agrument 1 for operator `<<'
 mytests/in11:25:Error: Incompatible type for agrument 2 for operator `<<'
 
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event open
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+Variable: i, Offset: 0
+Variable: j, Offset: 4
+Variable: k, Offset: 8
+Variable: f, Offset: 12
+Variable: b, Offset: 16
+Variable: s, Offset: 20

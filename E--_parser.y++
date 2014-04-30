@@ -170,10 +170,11 @@ static ReturnStmtNode* allocReturnNode(ExprNode* e) {
 }
 
 static BreakStmtNode* allocBreakNode(ExprNode* e) {
-    //if (IsCurRuleBlockEntry())
-    //    errMsg((string)"Return statement is valid only within a function");
-    //return new BreakStmtNode(e, (FunctionEntry*)stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND));
     return new BreakStmtNode(e);
+}
+
+static ContinueStmtNode* allocContinueNode(ExprNode* e) {
+    return new ContinueStmtNode(e);
 }
 
 static IfNode* allocIfNode(ExprNode* cond, StmtNode* thenStmt, StmtNode* elseStmt) {
@@ -260,6 +261,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
     IfNode*             ifVal;
     WhileNode*          whileVal;
     BreakStmtNode*      breakVal;
+    ContinueStmtNode*   continueVal;
     ReturnStmtNode*     returnVal;
     CompoundStmtNode*   stmt_plusVal;
     RuleNode*           ruleNode;
@@ -308,6 +310,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %type <stmt_plusVal> compound_stmt1 compound_stmt2 empty_block function_defn
 %type <stmtList> stmt_plus2
 %type <breakVal> break_stmt
+%type <continueVal> continue_stmt
 %type <ruleNode> rule
 %type <patVal> primitive_all binary_event_oprs
 
@@ -431,6 +434,7 @@ simple_stmt:        func_invocation semi_colon                              {   
 		  | return_stmt                                             {   $$ = $1;                                                    }
                   | while_stmt  					    {   $$ = $1;						    }
                   | break_stmt                                              {   $$ = $1;                                                    }
+                  | continue_stmt                                           {   $$ = $1;                                                    }
                   ;
 
 return_stmt:        TOK_RETURN expression semi_colon                        {   $$ = allocReturnNode($2);   prt("ReturnStmt");              }
@@ -439,6 +443,10 @@ return_stmt:        TOK_RETURN expression semi_colon                        {   
 
 break_stmt:         TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(NULL);   prt("BreakStmt");		    }
 		  | TOK_BREAK TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocBreakNode(allocValueNode(tempValNode));     prt("BreakStmt");    }
+                  ;
+
+continue_stmt:      TOK_BIT semi_colon  				    {	$$ = allocContinueNode(NULL);   prt("ContinueStmt");	    }
+		  | TOK_BIT TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocContinueNode(allocValueNode(tempValNode));     prt("ContinueStmt"); }
                   ;
 
 empty_block:        TOK_LBRACE semi_colon TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
