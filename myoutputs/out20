@@ -1,0 +1,341 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  int geteuid();
+  int logMessageStr(string s);
+  class CString;
+  int f(int g);
+  string get(class CString s);
+  void setCStr(class CString s, string t);
+  class Integer;
+  int getInt(class Integer i);
+  void setInt(class Integer i, int j);
+  class ArgV;
+  int getNumberOfArgs(class ArgV a);
+  int getArg(int i, class ArgV a);
+  class pid_t;
+  int getpid_t(class pid_t p);
+  void setpid_t(class pid_t p, int i);
+  class SchedParamP;
+  void set(class SchedParamP s, int i);
+  class VoidP;
+  void setvoid(class VoidP p, int i);
+  int getvoid(class VoidP p);
+  class size_t;
+  int getsize(class size_t s);
+  class StatP;
+  void setstat(class StatP s);
+  class NewStatP;
+  void setnstat(class NewStatP n, int i);
+  event open(class CString a1, int a2, unsigned int a3);
+  event close(class Integer a1);
+  event chroot(class CString a1);
+  event lstat(class CString a1, class NewStatP a2);
+  event read(int r);
+  event write(int r);
+  event stat(int r);
+  event connect(int t);
+  event accept(int t);
+  int logMessage(string x);
+  int logMessageInt(string x, int y);
+  int isInFile(string x, string y);
+  int getpid();
+  int isChild(class pid_t a);
+  event execve(class CString a1, class ArgV a2, class ArgV a3);
+  event fork;
+  event clone;
+  event kill(class pid_t a1, int a2);
+  event ptrace(class pid_t a1, int a2, int a3, int a4);
+  event sched_setparam(class pid_t a1, class SchedParamP a2);
+  event sched_setscheduler(class pid_t a1, int a2, class SchedParamP a3);
+  event setpgid(class pid_t a1, class pid_t a2);
+  event setpriority(class pid_t a1, int a2, int a3);
+  event mlock(class VoidP a1, class size_t a2);
+  event mlockall(int a1);
+  event munlockall;
+  int isInt(int i);
+  unsigned int isUInt(unsigned int i);
+  int isShort(int s);
+  unsigned int isUShort(unsigned int s);
+  int isLong(int l);
+  unsigned int isULong(unsigned int l);
+  int valid_write;
+  int admin_file = 0;
+  string admin_file_name;
+  int globalTemp;
+  int realUid;
+  int foundFlag = 0;
+  int syscall;
+  int loggedUser;
+  string tempfile;
+  string checkProcess;
+  string check_file;
+  int getCurrentSysCall();
+  int a;
+  int b = 0;
+  int tmp;
+  int processname;
+ 
+  (((any)**):((ptrace(class pid_t a1, int a2, int a3, int a4)) \/ (mlock(class VoidP b1, class size_t b2))))-->   {
+    syscall=getCurrentSysCall();
+    logMessageInt("privileged call %d
+", syscall);
+  };
+  ;;
+  (any)-->   {
+    a=b;
+  };
+  ;;
+  ((any):(((((((((kill(class pid_t a1, int a2)|((getpid_t(a1)!=getpid()&&getpid_t(a1)!=0)&&tmp=(a2&&b=a2))) \/ (ptrace(class pid_t b1, int b2, int b3, int b4))) \/ (sched_setscheduler(class pid_t c1, int c2, class SchedParamP c3)|((getpid_t(c1)!=getpid()&&getpid_t(c1)!=0)&&isChild(c1)!=0))) \/ (sched_setparam(class pid_t d1, class SchedParamP d2)|getpid_t(d1)!=getpid())) \/ (setpriority(class pid_t e1, int e2, int e3)|((getpid_t(e1)!=getpid()&&e2!=0)&&isChild(e1)!=0))) \/ (setpgid(class pid_t f1, class pid_t f2))) \/ (mlock(class VoidP g1, class size_t g2))) \/ (mlockall(int h1))) \/ (munlockall())))-->   {
+    a=b;
+  };
+  ;;
+  (((any)**):(execve(class CString proc, class ArgV argv, class ArgV envp)|(geteuid()==0&&processname=get(proc))))-->   {
+    checkProcess=processname;
+    foundFlag=0;
+    if (foundFlag==0)     {
+      logMessageStr("exec of process  %s not permitted
+", checkProcess);
+    };
+    foundFlag=0;
+  };
+  ;;
+  (((any)**):(write(int check_file)))-->   {
+    valid_write=0;
+  };
+  ;;
+  (((any)**):(read(int check_file)))-->   {  };
+  ;;
+  (((any)**):(stat(int check_file)))-->   {
+    syscall=getCurrentSysCall();
+  };
+  ;;
+  (((any)**):(connect(int a1)))-->   {
+    logMessage("ipc call");
+  };
+  ;;
+  (((any)**):(((connect(int a)) \/ (accept(int b))) \/ (read(int c))))-->   {
+    syscall=getCurrentSysCall();
+    logMessageInt("socket call %d
+", syscall);
+  };
+  ;;
+
+========================Type Checking========================
+mytests/in20:110:Error: Incompatible type for agrument 1 for operator `&&'
+mytests/in20:110:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:110:Error: Assigned expression must be a subtype of target
+mytests/in20:110:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:114:Error: Assigned expression must be a subtype of target
+mytests/in20:114:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:115:Error: Assigned expression must be a subtype of target
+mytests/in20:118:Error: 1 arguments expected for logMessageStr
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Function geteuid
+
+====Function logMessageStr
+Variable: s, Offset: 8
+
+====Class CString
+
+====Function f
+Variable: g, Offset: 8
+
+====Function get
+Variable: s, Offset: 8
+
+====Function setCStr
+Variable: s, Offset: 8
+Variable: t, Offset: 12
+
+====Class Integer
+
+====Function getInt
+Variable: i, Offset: 8
+
+====Function setInt
+Variable: i, Offset: 8
+Variable: j, Offset: 12
+
+====Class ArgV
+
+====Function getNumberOfArgs
+Variable: a, Offset: 8
+
+====Function getArg
+Variable: i, Offset: 8
+Variable: a, Offset: 12
+
+====Class pid_t
+
+====Function getpid_t
+Variable: p, Offset: 8
+
+====Function setpid_t
+Variable: p, Offset: 8
+Variable: i, Offset: 12
+
+====Class SchedParamP
+
+====Function set
+Variable: s, Offset: 8
+Variable: i, Offset: 12
+
+====Class VoidP
+
+====Function setvoid
+Variable: p, Offset: 8
+Variable: i, Offset: 12
+
+====Function getvoid
+Variable: p, Offset: 8
+
+====Class size_t
+
+====Function getsize
+Variable: s, Offset: 8
+
+====Class StatP
+
+====Function setstat
+Variable: s, Offset: 8
+
+====Class NewStatP
+
+====Function setnstat
+Variable: n, Offset: 8
+Variable: i, Offset: 12
+
+====Event open
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event close
+Variable: a1, Offset: 0
+
+====Event chroot
+Variable: a1, Offset: 0
+
+====Event lstat
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event read
+Variable: r, Offset: 0
+
+====Event write
+Variable: r, Offset: 0
+
+====Event stat
+Variable: r, Offset: 0
+
+====Event connect
+Variable: t, Offset: 0
+
+====Event accept
+Variable: t, Offset: 0
+
+====Function logMessage
+Variable: x, Offset: 8
+
+====Function logMessageInt
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Function isInFile
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Function getpid
+
+====Function isChild
+Variable: a, Offset: 8
+
+====Event execve
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event fork
+
+====Event clone
+
+====Event kill
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event ptrace
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+Variable: a4, Offset: 12
+
+====Event sched_setparam
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event sched_setscheduler
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event setpgid
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event setpriority
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event mlock
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event mlockall
+Variable: a1, Offset: 0
+
+====Event munlockall
+
+====Function isInt
+Variable: i, Offset: 8
+
+====Function isUInt
+Variable: i, Offset: 8
+
+====Function isShort
+Variable: s, Offset: 8
+
+====Function isUShort
+Variable: s, Offset: 8
+
+====Function isLong
+Variable: l, Offset: 8
+
+====Function isULong
+Variable: l, Offset: 8
+Variable: valid_write, Offset: 0
+Variable: admin_file, Offset: 4
+Variable: admin_file_name, Offset: 8
+Variable: globalTemp, Offset: 12
+Variable: realUid, Offset: 16
+Variable: foundFlag, Offset: 20
+Variable: syscall, Offset: 24
+Variable: loggedUser, Offset: 28
+Variable: tempfile, Offset: 32
+Variable: checkProcess, Offset: 36
+Variable: check_file, Offset: 40
+
+====Function getCurrentSysCall
+Variable: a, Offset: 44
+Variable: b, Offset: 48
+Variable: tmp, Offset: 52
+Variable: processname, Offset: 56

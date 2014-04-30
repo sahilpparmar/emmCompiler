@@ -1,0 +1,109 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  class CString;
+  string get(class CString s);
+  class Integer;
+  class ArgV;
+  class StatP;
+  class NewStatP;
+  int logmessage(string x);
+  int logmessageint(string x, int y);
+  bool isfile(string x, string y);
+  event open(class CString a1, class Integer a2, unsigned int a3);
+  event close(class Integer a1);
+  event execve(class CString a1, class ArgV a2, class ArgV a3);
+  event lstat(class CString a1, class NewStatP a2);
+  event stat(class CString a1, class StatP a2);
+  int i = 0;
+  int j = 1;
+  string rv;
+  string t2;
+ 
+  ((open(class CString a1, class Integer a2, unsigned int a3)|(get(a1)=="abc"&&rv=get(a2))):(((lstat(class CString s1, class NewStatP s2)):(close(class Integer c1)|get(c1)==rv))**))-->   {
+    logmessageint("proc_ops open.lstat.close", rv);
+  };
+  ;;
+  (((open(class CString o1, class Integer o2, unsigned int o3)|(!isfile(get(o1), "bd")&&t2=o3)):((stat(class CString s3, class StatP s4))**)):(execve(class CString b1, class ArgV b2, class ArgV b3)))-->   {
+    logmessage("proc_ops open.stat.execve");
+  };
+  ;;
+  (((((any)**):(close(class Integer c1)|(get(c1)==1&&rv=get(c1)))):((stat(class CString s3, class StatP s4))**)):(execve(class CString b1, class ArgV b2, class ArgV b3)))-->   {
+    logmessage("proc_ops any.close.stat.execve");
+  };
+  ;;
+  ((((any)**):(open(class CString o1, class Integer o2, unsigned int o3)|get(o1)=="abc")):(close(class Integer c1)))-->   {
+    logmessage("rule1:");
+  };
+  ;;
+  ((((any)**):(open(class CString a1, class Integer a2, unsigned int a3)|get(a1)=="xyz")):(close(class Integer d1)))-->   {
+    logmessage("rule2:");
+  };
+  ;;
+
+========================Type Checking========================
+mytests/in17:26:Error: Type Mismatch for argument 1 to get
+mytests/in17:26:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in17:27:Error: Type Mismatch for argument 1 to get
+mytests/in17:28:Error: Type Mismatch for argument 2 to logmessageint
+mytests/in17:32:Error: Assigned expression must be a subtype of target
+mytests/in17:32:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in17:37:Error: Type Mismatch for argument 1 to get
+mytests/in17:37:Error: Type Mismatch for argument 1 to get
+mytests/in17:37:Error: Incompatible type for agrument 2 for operator `&&'
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Class CString
+
+====Function get
+Variable: s, Offset: 8
+
+====Class Integer
+
+====Class ArgV
+
+====Class StatP
+
+====Class NewStatP
+
+====Function logmessage
+Variable: x, Offset: 8
+
+====Function logmessageint
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Function isfile
+Variable: x, Offset: 8
+Variable: y, Offset: 12
+
+====Event open
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event close
+Variable: a1, Offset: 0
+
+====Event execve
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+====Event lstat
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+====Event stat
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: i, Offset: 0
+Variable: j, Offset: 4
+Variable: rv, Offset: 8
+Variable: t2, Offset: 12

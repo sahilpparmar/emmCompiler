@@ -1,0 +1,57 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  event open(string a1, int a2, unsigned int a3);
+  int i = 2;
+  int j = 3;
+  int k = 4;
+  double f = 3.3;
+  byte b;
+  string s;
+ 
+  (open(string file, int flags, unsigned int mode))-->   {
+    i=(((23*-i/j)-f)-(45%j));
+    i=(s*1%f);
+    i=((b+s)-f);
+  };
+  ;;
+  (open(string a, int b, unsigned int c))-->   {  };
+  ;;
+  (open(string a, int b, unsigned int c))-->   {
+    {
+      {      };
+    };
+  };
+  ;;
+  (open(string a, int b, unsigned int c))-->   {
+    {    };
+  };
+  ;;
+
+========================Type Checking========================
+mytests/in21:10:Error: Assignment between incompatible types
+mytests/in21:18:Error: Assigned expression must be a subtype of target
+mytests/in21:20:Error: Incompatible type for agrument 1 for operator `*'
+mytests/in21:20:Error: Incompatible type for argument 1 for operator `%'
+mytests/in21:20:Error: Incompatible type for argument 2 for operator `%'
+mytests/in21:20:Error: Assigned expression must be a subtype of target
+mytests/in21:21:Error: Incompatible type for agrument 2 for operator `+'
+mytests/in21:21:Error: Assigned expression must be a subtype of target
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event open
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+Variable: i, Offset: 0
+Variable: j, Offset: 4
+Variable: k, Offset: 8
+Variable: f, Offset: 12
+Variable: b, Offset: 16
+Variable: s, Offset: 20
