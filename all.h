@@ -29,6 +29,8 @@
 
 using namespace std;
 
+#define DEBUG(s) if (debugLevel) cout << endl << s
+
 #define step " "; 
 const int STEP_INDENT = 2;
 

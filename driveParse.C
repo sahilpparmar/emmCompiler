@@ -235,29 +235,23 @@ main(int argc, char *argv[], char *envp[]) {
         any->type(te);
     }
     
-    if (debugLevel > 0) {
-        cout << "\n=================Lexical and Syntax Parsing==================\n";
-    }
+    DEBUG("=================Lexical and Syntax Parsing==================\n");
     yyparse();
     // TODO: Terminate compilation if errCount() > 0
 
     stm.leaveToScope(SymTabEntry::Kind::GLOBAL_KIND);
     GlobalEntry *ge = (GlobalEntry*)(stm.currentScope());
     if (ge != NULL) {
+        DEBUG("=========================AST Builder=========================\n");
         if (debugLevel > 0) {
-            cout << "\n=========================AST Builder=========================\n";
             ge->print(cout, 0);
         }
 
-        if (debugLevel > 0) {
-            cout << "\n========================Type Checking========================\n";
-        }
+        DEBUG("========================Type Checking========================\n");
         ge->typeCheck();
         // TODO: Terminate compilation if errCount() > 0
 
-        if (debugLevel > 0) {
-            cout << "\n======================Memory Allocation======================\n";
-        }
+        DEBUG("======================Memory Allocation======================\n");
         ge->memAlloc(); 
 
         cout << endl;

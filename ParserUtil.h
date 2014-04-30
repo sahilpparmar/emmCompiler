@@ -9,8 +9,6 @@ extern FILE *yyin;
 extern int debugLevel;
 extern int optLevel;
 
-#define DEBUG(s) if (debugLevel) cout << endl << s
-
 extern void yyerror(char *);
 extern int yyparse(void);
 extern int yylex(void);
