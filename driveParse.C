@@ -213,9 +213,9 @@ main(int argc, char *argv[], char *envp[]) {
         ge->print(cout, 0);
 	cout << "Type Checking Errors:\n";
         ge->typeCheck();
-        cout << endl;
-        cout << "Generating offsets:\n";
+        //cout << "Generating offsets:\n";
         ge->memAlloc(); 
+        cout << endl;
   }
 #endif
 }

@@ -66,22 +66,26 @@ Type::Type(TypeTag tag) {
     tag_ = tag; 
     argTypes_ = NULL; 
     retType_ = NULL;
+    size_ = 4;  // All primitive types have size 4 bytes
 };     
 
 Type::Type(SymTabEntry* td, TypeTag t) {   // Must be enum, class or struct
     tag_ = t; 
-    typeDesc_ = td; 
+    typeDesc_ = td;
+    size_ = 4;  // Size of an empty class is 4 bytes
 };
 
 Type::Type(vector<Type*>* tupleType, TypeTag t) {// For tuples, modules, events
     tag_ = t; 
     argTypes(tupleType); 
+    size_ = 0;
 };
 
 Type::Type(vector<Type*>* argt, Type* rt) {      // For functions
     tag_ = FUNCTION; 
     retType_ = rt; 
     argTypes_ = argt; 
+    size_ = 0;
 };
 
 string 

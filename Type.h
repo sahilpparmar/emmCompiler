@@ -67,6 +67,7 @@ class Type {
 
  private:
   TypeTag tag_;
+  int size_;
   union {
     SymTabEntry* typeDesc_; //  class, function
     struct {                // For event, function
@@ -90,6 +91,9 @@ class Type {
 
   string name() const {return name(tag_); }
   string fullName() const;
+
+  int size() const { return size_; }
+  void size(int size) { size_ = size; }
 
   bool isSubType(TypeTag t2, const Type* param_type = NULL) const;
   TypeTag tag() const { return tag_; }

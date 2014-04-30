@@ -9,7 +9,6 @@ using namespace std;
 extern int verbosity;
 extern int yylex();
 extern void yyerror(const char *s);
-int offSet;
 extern const OpNode::OpInfo opInfo[];
 
 #define prt(x) //cout << x << endl;
@@ -23,6 +22,7 @@ static vector<VariableEntry*> *curVarList   = NULL;
 static FunctionEntry          *curFuncEnt   = NULL;
 static EventEntry             *curEventEnt  = NULL;
 static RuleBlockEntry         *curRBlkNode  = NULL;
+static int                    curClassSize  = 0;
 
 static EventEntry* getEventEntry(char *eventName) {
     SymTabEntry *sym = stm.lookUp(string(eventName));
@@ -289,7 +289,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
 /******************************** Type Info ********************************/
 
 %type <functionEntry> function_decl function_proto
-%type <variableEntry> global_var local_var class_var_l
+%type <variableEntry> global_var local_var class_var
 %type <classEntry>  class_decl class_proto
 %type <eventEntry> event_decl any_event normal_event 
 
@@ -505,8 +505,8 @@ global_var:         TOK_IDENT                                               {   
                   | TOK_IDENT TOK_ASSIGN expression                         {   $$ = allocVarEntry($1, VariableEntry::GLOBAL_VAR, curType, $3); prt("VariableDeclWithInit");}
                   ;
 
-class_proto:        class_decl semi_colon                                   {   $$ = $1;    }
-                  | class_decl class_defn semi_colon                        {   $$ = $1;    }
+class_proto:        class_decl semi_colon                                   {   $$ = $1;                                                   }
+                  | class_decl class_defn semi_colon                        {   $$ = $1; $$->type()->size(curClassSize); curClassSize = 0; }
                   ;
 
 class_decl:         TOK_CLASS TOK_IDENT                                     {   $$ = allocClassEntry($2); prt("ClassDecl");  }
@@ -515,7 +515,6 @@ class_decl:         TOK_CLASS TOK_IDENT                                     {   
 class_defn:         TOK_LBRACE class_body TOK_RBRACE
                   ;
 
-//TODO: add rule for class_object.member ... also in compound statement ???
 class_body:         class_body class_var_decl
                   | class_body function_proto                               {   stm.leaveScope();   stm.insert($2);         }
                   |
@@ -524,9 +523,14 @@ class_body:         class_body class_var_decl
 class_var_decl:     type class_var_l semi_colon
                   ;
 
-class_var_l:        class_var_l TOK_COMMA TOK_IDENT                         {   $$ = allocVarEntry($3, VariableEntry::CLASS_VAR, curType, NULL); prt("ClassVarDecl");  }
-                  | TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::CLASS_VAR, curType, NULL); prt("ClassVarDecl");  }
+class_var_l:        class_var_l TOK_COMMA class_var
+                  | class_var
                   ;
+
+class_var:          TOK_IDENT                                               {   $$ = allocVarEntry($1, VariableEntry::CLASS_VAR, curType, NULL); prt("ClassVarDecl");  
+                  ;                                                             curClassSize += $$->type()->size();         }
+
+
 
 function_proto:     function_decl semi_colon                                {   $$ = $1;                    }
                   | function_decl function_defn                             {   $1->body($2);   $$ = $1;    }

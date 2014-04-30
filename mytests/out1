@@ -1,4 +1,12 @@
+mytests/in1:7:Error: Expected an event name, but got "foo"
+mytests/in1:7:Error: syntax error
 Finished parsing, here is the AST
-  
+ 
+  void foo(int a) {
+    int b;
+    int c = 5;
+    };
+  int a = 2;
+ 
 Type Checking Errors:
 

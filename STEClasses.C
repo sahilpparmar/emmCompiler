@@ -2,8 +2,8 @@
 #include "Value.h"
 #include "ParserUtil.h"
 
-#define prt_off(s, i) printf("\n Variable %s, Offset : %d", s, i)
-AddressManage addr_mng;
+#define prt_off(s, i) //printf("\n Variable %s, Offset : %d", s, i)
+static AddressManage addr_mng;
 
 void GlobalEntry::print(ostream& out, int indent) const
 {
