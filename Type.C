@@ -10,8 +10,6 @@ const char* typeName[] = {
     "byte",
     "unsigned int", "int", 
     "double",
-    "long",
-    "bit",
     "class", 
     "event", "function",
     "numeric",

@@ -5,8 +5,8 @@
  
   int logMessage(string x);
   int a = 5;
-  long b = 12345678;
-  bit c = 1;
+  int b = 12345678;
+  int c = 1;
   event open(string a1, int a2, unsigned int a3);
  
   (open(string file, int flags, unsigned int mode))-->   {

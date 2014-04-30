@@ -21,8 +21,6 @@ class Type {
     BYTE, 
     UINT, INT,
     DOUBLE,
-    LONG,
-    BIT,
     CLASS, 
     EVENT, FUNCTION,
     NUMERIC, /* BYTE to DOUBLE */
