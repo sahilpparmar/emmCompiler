@@ -2,7 +2,14 @@
 #include "Value.h"
 #include "ParserUtil.h"
 
-#define prt_off(s, i) //printf("\n Variable %s, Offset : %d", s, i)
+#define DEBUG 0
+#define prt_off(s, i) \
+               do { if (DEBUG) printf("\n Variable %s, Offset : %d", s, i); } while(0)
+
+#define prt(s) \
+               do { if (DEBUG) cout << s; } while(0)
+
+
 static AddressManage addr_mng;
 
 void GlobalEntry::print(ostream& out, int indent) const
@@ -88,6 +95,7 @@ const Type* GlobalEntry::typeCheck() const
 void GlobalEntry :: memAlloc() 
 {
     addr_mng.setAddress (AddressManage::OffKind::GLOBAL, 0);
+    prt("\n Showing Global variables");
     memAllocST();
 
 }
@@ -122,33 +130,35 @@ const Type* VariableEntry::typeCheck() const
 }
 
 void VariableEntry::memAlloc() 
-{   int off = 0;
+{   int off;
+    bool flag = false;
 
     if (varKind() == VarKind::GLOBAL_VAR) {
-        off = addr_mng.getAddress (AddressManage::OffKind::GLOBAL, INCR);
+        off = addr_mng.getAddress (AddressManage::OffKind::GLOBAL, type()->size(), INCR);
         offSet(off);
-        
+        flag = true;
     } else if (varKind() == VarKind::LOCAL_VAR) {
-        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, DECR);
+        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, type()->size(), DECR);
         offSet(off);
-
+        flag = true;
     } else if (varKind() == VarKind::PARAM_VAR) { 
-        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, INCR);
+        off = addr_mng.getAddress (AddressManage::OffKind::NONGLOBAL, type()->size(), INCR);
         offSet(off);
+        flag = true; 
     }
     
-    if(off)
+    if(flag)
         prt_off(name().c_str(), off);
-
 }
 
 
 void FunctionEntry::memAlloc() 
 {
     int numParams = type()->arity();
-
+    
+    prt(std::string("\n Entering function ") + name());
     if (numParams) {
-        addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 4);
+        addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 8);
         memAllocST (0, numParams);
     } 
 
