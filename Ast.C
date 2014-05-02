@@ -316,11 +316,13 @@ void InvocationNode::print(ostream& out, int indent) const
 void PrintFunctionNode::print(ostream& out, int indent) const
 {
     if (params_) {
-        unsigned int i = 0; 
+        unsigned int i = 0;
+        out<<"print(";
         for (std::vector<ExprNode*>::iterator it = params_->begin(); it != params_->end(); i++, it++) {
             if (i > 0) out << ", ";
                 (*it)->print(out, indent);
         } 
+        out<<")";
     }
 }
 

@@ -142,9 +142,7 @@ static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
     assert(str != NULL);
     SymTabEntry *sym = stm.lookUp(string(str));
 
-/*    if (strcmp(str, "print") == 0) {
-{        sym = new FunctionEntry(string("print"), NULL);  cout<<"\n print detected ";}
-    } else */ if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
+ if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
         errMsg((string)"\"" + (string)str + (string)"\" is not a function or module name");
         return NULL;
     }
@@ -468,7 +466,6 @@ func_invocation:    func_name TOK_LPAREN caller_param_l TOK_RPAREN          {   
                   ;
 
 func_name:          TOK_IDENT                                               {   $$ = $1;                }
-//                  | TOK_PRINT                                               {   $$ = (char*)"print";    }
                   ;
 
 caller_param_l:     caller_param_l TOK_COMMA expression                     {   curExprList->push_back($3);                                             }

@@ -16,14 +16,14 @@ mytests/in26:18:Error: Undeclared identifier "z"
     bool d;
   
     ;
-    "hello";
-    hi;
-    (b+c), b*c, 5, obj;
-    b, c;
-    d, b;
-    (d+b);
-    d, z;
-    (b+"hi");
+    print("hello");
+    print(hi);
+    print((b+c), b*c, 5, obj);
+    print(b, c);
+    print(d, b);
+    print((d+b));
+    print(d, z);
+    print((b+"hi"));
   };
  
 
