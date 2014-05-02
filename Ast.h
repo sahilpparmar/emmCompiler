@@ -260,6 +260,77 @@ class InvocationNode: public ExprNode {
 };
 
 /****************************************************************/
+
+class ClassFuncInvocationNode: public ExprNode {
+    // Used to represent function invocation
+    public:
+        ClassFuncInvocationNode(const SymTabEntry *oste, const SymTabEntry *fste, vector<ExprNode*>* param=0, 
+                int line=0, int column=0, string file="");
+        ClassFuncInvocationNode(const ClassFuncInvocationNode&);
+        ExprNode* clone() const { return new ClassFuncInvocationNode(*this); }
+        ~ClassFuncInvocationNode() {};
+
+        const SymTabEntry* symTabEntryObject() const { return oste_; };
+        
+        const SymTabEntry* symTabEntryFunction() const { return fste_; };
+
+        const vector<ExprNode*>* params() const { return params_;};
+
+        vector<ExprNode*>* params() { return params_;}
+
+        void params(vector<ExprNode*>* args) { params_ = args;};
+
+        const ExprNode* param(unsigned int i) const {
+            return (params_ != NULL && i < params_->size()) ? (const ExprNode*)((*params_)[i]) : NULL; 
+        }
+
+        ExprNode* param(unsigned int i) {
+            return (ExprNode*)((const ClassFuncInvocationNode*)this->param(i));
+        }
+
+        void param(ExprNode* arg, unsigned int i) { 
+            if (params_ != NULL && i < params_->size())
+                (*params_)[i] = arg;
+        }
+
+        void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
+
+    private:
+        vector<ExprNode*>* params_;
+        const SymTabEntry *oste_; // reference symbol table entry for object.
+        const SymTabEntry *fste_; // reference symbol table entry for function.
+};
+
+/****************************************************************/
+
+class ClassRefExprNode: public ExprNode {
+    public:
+        ClassRefExprNode(string ext, const SymTabEntry* objSte=NULL, const SymTabEntry* varSte = NULL,
+                int line=0, int column=0, string file="");
+        ClassRefExprNode(const ClassRefExprNode&);
+        ExprNode* clone() const { return new ClassRefExprNode(*this); }
+
+        ~ClassRefExprNode() {};
+
+        string ext() const { return ext_;};
+        void ext(string str) { ext_ = str;}; 
+
+        const SymTabEntry* symTabEntryObject() const { return objSym_;};
+        const SymTabEntry* symTabEntryVariable() const { return varSym_;};
+        void symTabEntryObject(const SymTabEntry *objSte)  { objSym_ = objSte;};
+        void symTabEntryVariable(const SymTabEntry *varSte)  { varSym_ = varSte;};
+
+        void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
+
+    private:
+        string ext_;
+        const SymTabEntry* objSym_;
+        const SymTabEntry* varSym_;
+};
+
+/****************************************************************/
 // There are 3 kinds of PatNodes:
 //   PrimitivePatNodes are of the form: event|cond
 //   AtomicPatNodes consist of PrimitivePatNodes with one or more "||"

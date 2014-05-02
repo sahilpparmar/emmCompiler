@@ -24,6 +24,7 @@ SymTabMgr::lookUp(string name) const {
 
 const SymTabEntry* 
 SymTabMgr::lookUpInScope(string name, SymTabEntry::Kind k) const {
+  
   const SymTabEntry *ste = currentScope(k);
   if ((ste != NULL) && (ste->symTab() != NULL)) {
     ste = ste->symTab()->lookUp(name);
@@ -48,7 +49,7 @@ SymTabMgr::currentScope(SymTabEntry::Kind k) const {
     if (scopeStack_[i]->kind() == k) 
       return scopeStack_[i];
   }
-  return NULL;
+  return scopeStack_[0];
 }	
 
 ErrorST 

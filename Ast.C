@@ -271,6 +271,7 @@ const Type* CompoundStmtNode::typeCheck() const {
     }
     return NULL;
 }
+
 /****************************************************************/
 
 InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param, 
@@ -339,6 +340,110 @@ const Type* InvocationNode::typeCheck() const
         return func_entry->type()->retType();
     
     return NULL;
+}
+/****************************************************************/
+
+ClassFuncInvocationNode::ClassFuncInvocationNode(const SymTabEntry *oste, const SymTabEntry *fste, vector<ExprNode*>* param, 
+        int line, int column, string file):
+    ExprNode(ExprNode::ExprNodeType::INV_NODE, 0, line, column, file)
+{
+    assert(oste);
+    assert(fste);
+    oste_ = oste;
+    fste_ = fste;
+    params_ = param;
+}
+
+ClassFuncInvocationNode::ClassFuncInvocationNode(const ClassFuncInvocationNode& ref) : ExprNode(ref)
+{
+
+}
+
+void ClassFuncInvocationNode::print(ostream& out, int indent) const
+{
+    assert(oste_);
+    assert(fste_);
+    out << oste_->name() << ".";
+    out << fste_->name() << "(";
+    if (params_) {
+        unsigned int i = 0; 
+        for (std::vector<ExprNode*>::iterator it = params_->begin(); it != params_->end(); i++, it++) {
+            if (i > 0) out << ", ";
+            (*it)->print(out, indent);
+        }
+    }
+    out << ")";
+}
+
+const Type* ClassFuncInvocationNode::typeCheck() const
+{
+    FunctionEntry* func_entry  = (FunctionEntry *) symTabEntryFunction();  
+    vector<Type*>* argtypes    = func_entry->type()->argTypes();
+    
+    int caller_param = params_ ? params_->size() : 0;
+    int callee_param = argtypes ? argtypes->size() : 0;
+       
+    if (caller_param != callee_param) {
+        errMsg((string)itoa(callee_param) + " arguments expected for " + func_entry->name(), this);
+        return NULL; 
+
+    } else if (params_) {
+        unsigned int i = 1; 
+        vector<Type*>::iterator t_iter    = argtypes->begin();
+        vector<ExprNode*>::iterator p_iter = params_->begin();
+         
+        for (; t_iter != argtypes->end(); ++t_iter) {
+            
+            ExprNode* expr_node    = *p_iter; 
+            const Type* param_type = expr_node->typeCheck(); 
+            
+            if (*t_iter && param_type && (*t_iter)->isSubType (param_type->tag(), param_type)) {
+                
+                expr_node->coercedType (*t_iter);
+            
+            } else {
+               errMsg("Type Mismatch for argument " + (string)itoa(i) + " to " + func_entry->name(), expr_node); 
+            }
+            ++i;
+            ++p_iter;
+        }
+    }
+
+    if (func_entry)
+        return func_entry->type()->retType();
+    
+    return NULL;
+}
+
+/****************************************************************/
+
+ClassRefExprNode::ClassRefExprNode(string ext, const SymTabEntry* objSte, const SymTabEntry* varSte,
+        int line, int column, string file): 
+    ExprNode(ExprNode::ExprNodeType::REF_EXPR_NODE, 0, line, column, file)
+{
+    ext_ = ext;
+    objSym_ = objSte;
+    varSym_ = varSte;
+}
+
+ClassRefExprNode::ClassRefExprNode(const ClassRefExprNode& ref) : ExprNode(ref)
+{
+
+}
+
+void ClassRefExprNode::print(ostream& os, int indent) const
+{
+    os << objSym_->name();
+    os << ".";
+    os << ext_;
+}
+
+const Type* ClassRefExprNode::typeCheck() const {
+    const Type* typ = NULL; 
+    if (symTabEntryVariable())    
+        typ = varSym_->type();
+
+    return typ;
 }
 
 /****************************************************************/
