@@ -315,15 +315,15 @@ void InvocationNode::print(ostream& out, int indent) const
 
 void PrintFunctionNode::print(ostream& out, int indent) const
 {
+    out<<"print(";
     if (params_) {
         unsigned int i = 0;
-        out<<"print(";
         for (std::vector<ExprNode*>::iterator it = params_->begin(); it != params_->end(); i++, it++) {
             if (i > 0) out << ", ";
-                (*it)->print(out, indent);
+            (*it)->print(out, indent);
         } 
-        out<<")";
     }
+    out<<")";
 }
 
 const Type* InvocationNode::typeCheck() const
@@ -370,20 +370,14 @@ const Type* InvocationNode::typeCheck() const
 const Type* PrintFunctionNode::typeCheck() const
 {
     if (params_) {
-        unsigned int i = 1; 
         vector<ExprNode*>::iterator p_iter = params_->begin();
-         const Type* param_type;
         for (; p_iter != params_->end(); ++p_iter) {
-            
-            ExprNode* expr_node    = *p_iter; 
-            param_type = expr_node->typeCheck(); 
-            
+            ExprNode* expr_node = *p_iter; 
+            expr_node->typeCheck(); 
         }
-        return param_type;
     }
-
-  
-    return NULL;
+    // 'print' function has return type VOID
+    return new Type(Type::TypeTag::VOID);
 }
 
 /****************************************************************/

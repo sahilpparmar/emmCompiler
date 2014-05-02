@@ -15,7 +15,7 @@ mytests/in26:18:Error: Undeclared identifier "z"
     class abc obj;
     bool d;
   
-    ;
+    print();
     print("hello");
     print(hi);
     print((b+c), b*c, 5, obj);
