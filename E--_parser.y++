@@ -1,3 +1,4 @@
+//TODO: mytest/in26
 %{
 
 #include "Ast.h"
@@ -179,14 +180,16 @@ static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
     assert(str != NULL);
     SymTabEntry *sym = stm.lookUp(string(str));
 
-    if (strcmp(str, "print") == 0) {
-        sym = new FunctionEntry(string("print"), NULL);
-    } else if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
+ if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
         errMsg((string)"\"" + (string)str + (string)"\" is not a function or module name");
         return NULL;
     }
     return new InvocationNode(sym, param_l, yylinenum, yycolumnno, string(yyfilename));
 }
+
+static PrintFunctionNode* allocPrintNode(vector<ExprNode*>* param_l) {
+        return new PrintFunctionNode(param_l, yylinenum, yycolumnno, string(yyfilename)); 
+    } 
 
 static ValueNode* allocValueNode(Value* val) {
     return new ValueNode(val, yylinenum, yycolumnno, string(yyfilename));
@@ -498,12 +501,13 @@ empty_block:        TOK_LBRACE semi_colon TOK_RBRACE semi_colon             {   
 condition:          TOK_LPAREN expression TOK_RPAREN                        {   $$ = $2;    prt("(Expr)"); }
                   ;
 
-func_invocation:    func_name TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocInvNode($1, curExprList); funcName = $1; funcParamList = curExprList; curExprList = NULL; prt("FunctionInvocation"); }
-                  | func_name TOK_LPAREN TOK_RPAREN                         {   $$ = allocInvNode($1, NULL);        funcName = $1; funcParamList = NULL;                            prt("FunctionInvocation"); }
+func_invocation:    func_name TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocInvNode  ($1, curExprList); curExprList = NULL;   prt("FunctionInvocation"); }
+                  | func_name TOK_LPAREN TOK_RPAREN                         {   $$ = allocInvNode  ($1, NULL);                              prt("FunctionInvocation"); }
+                  | TOK_PRINT TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocPrintNode(curExprList);     curExprList = NULL;   prt("PrintFunctionNode");  }
+                  | TOK_PRINT TOK_LPAREN TOK_RPAREN                         {   $$ = allocPrintNode  ( NULL);                                 prt("FunctionInvocation"); }
                   ;
 
 func_name:          TOK_IDENT                                               {   $$ = $1;                }
-                  | TOK_PRINT                                               {   $$ = (char*)"print";    }
                   ;
 
 caller_param_l:     caller_param_l TOK_COMMA expression                     {   curExprList->push_back($3);                                             }
