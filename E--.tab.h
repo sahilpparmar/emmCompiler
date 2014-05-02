@@ -91,25 +91,26 @@ extern int yydebug;
     TOK_PRINT = 301,
     TOK_WHILE = 302,
     TOK_BREAK = 303,
-    TOK_UINTNUM = 304,
-    TOK_DOUBLENUM = 305,
-    TOK_VOID = 306,
-    TOK_STRING = 307,
-    TOK_STRCONST = 308,
-    TOK_INT = 309,
-    TOK_UNSIGNED = 310,
-    TOK_BOOL = 311,
-    TOK_BYTE = 312,
-    TOK_DOUBLE = 313,
-    TOK_SHORT = 314,
-    TOK_LONG = 315,
-    TOK_BIT = 316,
-    TOK_ENUM = 317,
-    TOK_TRUE = 318,
-    TOK_FALSE = 319,
-    TOK_IDENT = 320,
-    TOK_DOUBLE_COLON = 321,
-    TOK_DOT = 322
+    TOK_CONTINUE = 304,
+    TOK_UINTNUM = 305,
+    TOK_DOUBLENUM = 306,
+    TOK_VOID = 307,
+    TOK_STRING = 308,
+    TOK_STRCONST = 309,
+    TOK_INT = 310,
+    TOK_UNSIGNED = 311,
+    TOK_BOOL = 312,
+    TOK_BYTE = 313,
+    TOK_DOUBLE = 314,
+    TOK_SHORT = 315,
+    TOK_LONG = 316,
+    TOK_BIT = 317,
+    TOK_ENUM = 318,
+    TOK_TRUE = 319,
+    TOK_FALSE = 320,
+    TOK_IDENT = 321,
+    TOK_DOUBLE_COLON = 322,
+    TOK_DOT = 323
   };
 #endif
 
@@ -158,7 +159,7 @@ union YYSTYPE
 
     const OpNode::OpInfo*   funIval;
 
-#line 162 "E--_parser.H" /* yacc.c:1909  */
+#line 163 "E--_parser.H" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

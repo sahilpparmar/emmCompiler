@@ -329,7 +329,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %token TOK_LBRACE TOK_RBRACE TOK_LPAREN TOK_RPAREN TOK_LBRACK TOK_RBRACK
 
 /* Key words */
-%token TOK_IF TOK_ELSE TOK_CLASS TOK_RETURN TOK_EVENT TOK_ANY TOK_PRINT TOK_WHILE TOK_BREAK
+%token TOK_IF TOK_ELSE TOK_CLASS TOK_RETURN TOK_EVENT TOK_ANY TOK_PRINT TOK_WHILE TOK_BREAK TOK_CONTINUE
 %token TOK_UINTNUM TOK_DOUBLENUM TOK_VOID TOK_STRING TOK_STRCONST 
 %token TOK_INT TOK_UNSIGNED TOK_BOOL TOK_BYTE TOK_DOUBLE TOK_SHORT TOK_LONG TOK_BIT TOK_ENUM
 %token TOK_TRUE TOK_FALSE TOK_IDENT
@@ -490,8 +490,8 @@ break_stmt:         TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(NULL);  
 		  | TOK_BREAK TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocBreakNode(allocValueNode(tempValNode));     prt("BreakStmt");    }
                   ;
 
-continue_stmt:      TOK_BIT semi_colon  				    {	$$ = allocContinueNode(NULL);   prt("ContinueStmt");	    }
-		  | TOK_BIT TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocContinueNode(allocValueNode(tempValNode));     prt("ContinueStmt"); }
+continue_stmt:      TOK_CONTINUE semi_colon  				    {	$$ = allocContinueNode(NULL);   prt("ContinueStmt");	    }
+		  | TOK_CONTINUE TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocContinueNode(allocValueNode(tempValNode));     prt("ContinueStmt"); }
                   ;
 
 empty_block:        TOK_LBRACE semi_colon TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }

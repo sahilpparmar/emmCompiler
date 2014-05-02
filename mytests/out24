@@ -21,11 +21,19 @@
     else ;
     while (a<3)     {
       a=10;
+      if (a==10)       {
+        continue;
+      };
       logMessage("Assignment in condition");
       break;
       while (a>10)       {
         a=(b+c);
-        break 3;
+        if (a>20)         {
+          continue 2;
+        };
+        else         {
+          break 2;
+        };
       };
     };
   };
