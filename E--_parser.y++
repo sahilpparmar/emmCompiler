@@ -14,17 +14,19 @@ extern const OpNode::OpInfo opInfo[];
 
 #define prt(x) //cout << x << endl;
 
-static Type                   *curType      = NULL;
-static Value                  *tempValNode  = NULL;
-static vector<ExprNode*>      *curExprList  = NULL;
-static list<StmtNode*>        *curStmtList1 = NULL;
-static list<StmtNode*>        *curStmtList3 = NULL;
-static vector<Type*>          *curTypeList  = NULL; 
-static vector<VariableEntry*> *curVarList   = NULL; 
-static FunctionEntry          *curFuncEnt   = NULL;
-static EventEntry             *curEventEnt  = NULL;
-static RuleBlockEntry         *curRBlkNode  = NULL;
-static int                    curClassSize  = 0;
+static Type                   *curType        =  NULL;
+static Value                  *tempValNode    =  NULL;
+static vector<ExprNode*>      *curExprList    =  NULL;
+static vector<ExprNode*>      *funcParamList  =  NULL;
+static list<StmtNode*>        *curStmtList1   =  NULL;
+static list<StmtNode*>        *curStmtList3   =  NULL;
+static vector<Type*>          *curTypeList    =  NULL; 
+static vector<VariableEntry*> *curVarList     =  NULL; 
+static FunctionEntry          *curFuncEnt     =  NULL;
+static EventEntry             *curEventEnt    =  NULL;
+static RuleBlockEntry         *curRBlkNode    =  NULL;
+static int                    curClassSize    =  0;
+static char                   *funcName       =  NULL;
 
 static EventEntry* getEventEntry(char *eventName) {
     SymTabEntry *sym = stm.lookUp(string(eventName));
@@ -90,6 +92,41 @@ static ClassEntry* allocClassEntry(char* name) {
     return retClassEnt;
 }
 
+static ClassFuncInvocationNode* allocClassFuncInvNode(char *objName, char* funcName, vector<ExprNode*>* param_l) {
+    assert(objName != NULL);
+    assert(funcName != NULL);
+    SymTabEntry *objSym = stm.lookUpInScope(objName, stm.currentScope()->kind());
+    SymTabEntry *classSym = NULL, *funcSym = NULL; 
+    if (objSym && objSym->type()->tag() == Type::CLASS) {
+        classSym = stm.lookUp(objSym->type()->typeDesc()->name());
+        funcSym = classSym->symTab()->lookUp(string(funcName));
+        }
+    if (!(IsFuncSymEntry(funcSym) || IsEventSymEntry(funcSym))) {
+        errMsg((string)"\"" + (string)funcName + (string)"\" is not a function or module name");
+        return NULL;
+    }
+    return new ClassFuncInvocationNode(objSym, funcSym, param_l, yylinenum, yycolumnno, string(yyfilename));
+}
+
+static ClassRefExprNode* allocClassRefExprNode(char* objName, char* varName) {
+    assert(objName != NULL);
+    assert(varName != NULL);
+    SymTabEntry *objSym = stm.lookUpInScope(string(objName), stm.currentScope()->kind());
+    SymTabEntry *classSym = NULL, *varSym = NULL; 
+    if (objSym == NULL) {
+        errMsg((string)"Undeclared identifier \"" + (string)objName + (string)"\"");
+    }
+    if (objSym && objSym->type()->tag() == Type::CLASS) {
+        classSym = stm.lookUp(objSym->type()->typeDesc()->name());
+        varSym = classSym->symTab()->lookUp(string(varName));
+        }
+    if (varSym == NULL) {
+        errMsg((string)"Undeclared identifier \"" + (string)varName + (string)"\"");
+    }
+    
+    return new ClassRefExprNode(string(varName), objSym, varSym, yylinenum, yycolumnno, string(yyfilename));
+}
+
 static EventEntry* allocEventEntry(char* name = NULL, vector<Type*>* param_l = NULL) {
     EventEntry* retEventEnt = curEventEnt;
 
@@ -124,6 +161,7 @@ static FunctionEntry* allocFuncEntry(char* name = NULL, Type* rettype = NULL, ve
         curFuncEnt = NULL;
     } else {
         retFuncEnt = new FunctionEntry(string("dummy_func"), NULL, yylinenum, yycolumnno, string(yyfilename));
+        //cout << "Current Scope : "<<stm.currentScope()->name();
         stm.enterScope(retFuncEnt);
     }
     return retFuncEnt;
@@ -251,6 +289,9 @@ static RuleBlockEntry* allocRuleBlockNode() {
     RefExprNode*        refexpVal;
 
     ClassEntry*         classEntry;
+    ClassFuncInvocationNode*   classFuncVal;
+    ClassRefExprNode*   classRefExpVal;
+    
     Type*               typeVal;
     vector<Type*>*      typeList; 
 
@@ -288,7 +329,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %token TOK_LBRACE TOK_RBRACE TOK_LPAREN TOK_RPAREN TOK_LBRACK TOK_RBRACK
 
 /* Key words */
-%token TOK_IF TOK_ELSE TOK_CLASS TOK_RETURN TOK_EVENT TOK_ANY TOK_PRINT TOK_WHILE TOK_BREAK
+%token TOK_IF TOK_ELSE TOK_CLASS TOK_RETURN TOK_EVENT TOK_ANY TOK_PRINT TOK_WHILE TOK_BREAK TOK_CONTINUE
 %token TOK_UINTNUM TOK_DOUBLENUM TOK_VOID TOK_STRING TOK_STRCONST 
 %token TOK_INT TOK_UNSIGNED TOK_BOOL TOK_BYTE TOK_DOUBLE TOK_SHORT TOK_LONG TOK_BIT TOK_ENUM
 %token TOK_TRUE TOK_FALSE TOK_IDENT
@@ -298,11 +339,11 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %type <functionEntry> function_decl function_proto
 %type <variableEntry> global_var local_var class_var
 %type <classEntry>  class_decl class_proto
+%type <classFuncVal> obj_func
 %type <eventEntry> event_decl any_event normal_event 
 
-%type <refexpVal> ref_expr
 %type <valVal> literal
-%type <exprVal> expression func_invocation assignment binary_operation unary_operation condition
+%type <exprVal> expression func_invocation assignment binary_operation unary_operation condition ref_expr obj_var 
 %type <typeVal> type intType baseType func_param event_param 
 %type <typeList> func_param_l event_param_l
 %type <exprList> caller_param_l
@@ -438,6 +479,7 @@ simple_stmt:        func_invocation semi_colon                              {   
                   | while_stmt  					    {   $$ = $1;						    }
                   | break_stmt                                              {   $$ = $1;                                                    }
                   | continue_stmt                                           {   $$ = $1;                                                    }
+                  | obj_func                                                {   $$ = allocExprStmtNode($1);    prt("ObjectFunctionCall");   }
                   ;
 
 return_stmt:        TOK_RETURN expression semi_colon                        {   $$ = allocReturnNode($2);   prt("ReturnStmt");              }
@@ -448,8 +490,8 @@ break_stmt:         TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(NULL);  
 		  | TOK_BREAK TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocBreakNode(allocValueNode(tempValNode));     prt("BreakStmt");    }
                   ;
 
-continue_stmt:      TOK_BIT semi_colon  				    {	$$ = allocContinueNode(NULL);   prt("ContinueStmt");	    }
-		  | TOK_BIT TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocContinueNode(allocValueNode(tempValNode));     prt("ContinueStmt"); }
+continue_stmt:      TOK_CONTINUE semi_colon  				    {	$$ = allocContinueNode(NULL);   prt("ContinueStmt");	    }
+		  | TOK_CONTINUE TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocContinueNode(allocValueNode(tempValNode));     prt("ContinueStmt"); }
                   ;
 
 empty_block:        TOK_LBRACE semi_colon TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
@@ -510,6 +552,7 @@ binary_operation:   expression TOK_OR          expression                   {   
                   ;
 
 ref_expr:           TOK_IDENT                                               {   $$ = allocRefExprNode($1); prt("RefExpr"); }
+                  | obj_var                                                 {   $$ = $1;    prt("Object Function Call");   }
                   ;
 
 global_decl:        type global_l semi_colon
@@ -549,6 +592,15 @@ class_var:          TOK_IDENT                                               {   
                   ;                                                             curClassSize += $$->type()->size();         }
 
 
+obj_var:            TOK_IDENT TOK_DOT TOK_IDENT                             {   $$ = allocClassRefExprNode($1, $3); prt("classVariableCall");     }
+                  ;
+
+obj_func:           TOK_IDENT TOK_DOT class_func_invocation semi_colon      {   $$ = allocClassFuncInvNode($1, funcName, funcParamList); prt("classFuntionInvocation");   }
+                  ;
+
+class_func_invocation:    func_name TOK_LPAREN caller_param_l TOK_RPAREN    {   funcName = $1; funcParamList = curExprList; curExprList = NULL; prt("ClassFunctionInvocation"); }
+                  | func_name TOK_LPAREN TOK_RPAREN                         {   funcName = $1; funcParamList = NULL;                            prt("ClassFunctionInvocation"); }
+                  ;
 
 function_proto:     function_decl semi_colon                                {   $$ = $1;                    }
                   | function_decl function_defn                             {   $1->body($2);   $$ = $1;    }
