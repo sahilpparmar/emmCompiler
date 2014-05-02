@@ -91,7 +91,8 @@ class ExprNode: public AstNode {
             REF_EXPR_NODE, 
             OP_NODE, 
             VALUE_NODE, 
-            INV_NODE
+            INV_NODE,
+            PRINT_NODE
         };
 
     public:
@@ -257,6 +258,41 @@ class InvocationNode: public ExprNode {
     private:
         vector<ExprNode*>* params_;
         const SymTabEntry *ste_; // reference semantics
+};
+
+
+class PrintFunctionNode: public ExprNode {
+    // Used to represent function invocation
+    public:
+        PrintFunctionNode( vector<ExprNode*>* param=0, int line=0, int column=0, string file="");
+        PrintFunctionNode(const PrintFunctionNode&);
+        ExprNode* clone() const { return new PrintFunctionNode(*this); }
+        ~PrintFunctionNode() {};
+
+        const vector<ExprNode*>* params() const { return params_;};
+
+        vector<ExprNode*>* params() { return params_;}
+
+        void params(vector<ExprNode*>* args) { params_ = args;};
+
+        const ExprNode* param(unsigned int i) const {
+            return (params_ != NULL && i < params_->size()) ? (const ExprNode*)((*params_)[i]) : NULL; 
+        }
+
+        ExprNode* param(unsigned int i) {
+            return (ExprNode*)((const PrintFunctionNode*)this->param(i));
+        }
+
+        void param(ExprNode* arg, unsigned int i) { 
+            if (params_ != NULL && i < params_->size())
+                (*params_)[i] = arg;
+        }
+
+        void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
+
+    private:
+        vector<ExprNode*>* params_;
 };
 
 /****************************************************************/

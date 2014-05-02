@@ -287,6 +287,17 @@ InvocationNode::InvocationNode(const InvocationNode& ref) : ExprNode(ref)
 
 }
 
+PrintFunctionNode::PrintFunctionNode( vector<ExprNode*>* param, int line, int column, string file):
+    ExprNode(ExprNode::ExprNodeType::PRINT_NODE, 0, line, column, file)
+{
+    params_ = param;
+}
+
+PrintFunctionNode::PrintFunctionNode(const PrintFunctionNode& ref) : ExprNode(ref)
+{
+
+}
+
 void InvocationNode::print(ostream& out, int indent) const
 {
     assert(ste_);
@@ -299,6 +310,18 @@ void InvocationNode::print(ostream& out, int indent) const
         }
     }
     out << ")";
+}
+
+
+void PrintFunctionNode::print(ostream& out, int indent) const
+{
+    if (params_) {
+        unsigned int i = 0; 
+        for (std::vector<ExprNode*>::iterator it = params_->begin(); it != params_->end(); i++, it++) {
+            if (i > 0) out << ", ";
+                (*it)->print(out, indent);
+        } 
+    }
 }
 
 const Type* InvocationNode::typeCheck() const
@@ -338,6 +361,26 @@ const Type* InvocationNode::typeCheck() const
     if (func_entry)
         return func_entry->type()->retType();
     
+    return NULL;
+}
+
+
+const Type* PrintFunctionNode::typeCheck() const
+{
+    if (params_) {
+        unsigned int i = 1; 
+        vector<ExprNode*>::iterator p_iter = params_->begin();
+         const Type* param_type;
+        for (; p_iter != params_->end(); ++p_iter) {
+            
+            ExprNode* expr_node    = *p_iter; 
+            param_type = expr_node->typeCheck(); 
+            
+        }
+        return param_type;
+    }
+
+  
     return NULL;
 }
 
