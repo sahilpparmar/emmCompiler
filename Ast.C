@@ -375,7 +375,6 @@ InterCodesClass* CompoundStmtNode::codeGen() {
     return cls;
 }
 
-
 /****************************************************************/
 
 InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param, 

@@ -227,7 +227,7 @@ void FunctionEntry::memAlloc()
         DEBUG("==Local Variables");
         memAllocST (numParams, 10000);
     }
-    DEBUG("\n");
+    DEBUG("");
 }
 
 void EventEntry::print(ostream& out, int indent) const
@@ -248,7 +248,7 @@ void EventEntry::memAlloc()
     DEBUG("\n====Event '" + name() + "'");
     addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
     memAllocST();
-    DEBUG("\n");
+    DEBUG("");
 }
 
 void BlockEntry::print(ostream& out, int indent) const
