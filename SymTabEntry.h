@@ -7,6 +7,7 @@
 
 class SymTabEntry;
 class ExprNode;
+class InterCodesClass;
 
 class SymTabEntry: public ProgramElem {
     public:

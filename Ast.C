@@ -1,6 +1,6 @@
 #include "Ast.h"
 #include "ParserUtil.h"
-
+#include "InterCode.h"
 
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) 
@@ -15,12 +15,31 @@ AstNode::AstNode(const AstNode& ast): ProgramElem(ast)
 
 /****************************************************************/
 
+VregNode::VregNode (int line=0, int column=0, string file="") : 
+    ExprNode (ExprNode::ExprNodeType::VREG_NODE, NULL, line, column, file) 
+{
+    name_    = newName("vreg"); 
+    refnode_ = this;
+}
+
+/****************************************************************/
+
+ExprNode* ExprNode:: getRefNode () 
+{
+    if (refnode_ == NULL) {
+        refnode_ = new VregNode();
+        //TODO: add type info
+
+    }
+    return (ExprNode *)refnode_;
+}
+
 ExprNode::ExprNode(ExprNodeType et, const Value* val, int line, int column, 
         string file):
     AstNode(AstNode::NodeType::EXPR_NODE, line, column, file)
 {
     exprType_ = et;
-    val_ = val;
+    val_      = val;
 }
 
 
@@ -35,13 +54,14 @@ RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
         int line, int column, string file): 
     ExprNode(ExprNode::ExprNodeType::REF_EXPR_NODE, 0, line, column, file)
 {
-    ext_ = ext;
-    sym_ = ste;
+    ext_     = ext;
+    sym_     = ste;
+    refnode_ = this;
 }
 
 RefExprNode::RefExprNode(const RefExprNode& ref) : ExprNode(ref)
 {
-
+    refnode_ = this;
 }
 
 void RefExprNode::print(ostream& os, int indent) const
@@ -56,6 +76,17 @@ const Type* RefExprNode::typeCheck() const {
 
     return typ;
 }
+
+
+InterCodesClass* RefExprNode::codeGen()
+{
+    InterCodesClass* cls = new InterCodesClass();
+    cls->addCode(InterCode::OPNTYPE::IF, onTrue_, this);
+    cls->addCode(InterCode::OPNTYPE::GOTO, onFalse_);
+    return cls;
+}
+
+
 /****************************************************************/
 
 void ValueNode::print(ostream& os, int indent) const
@@ -68,6 +99,19 @@ const Type* ValueNode::typeCheck() const {
     return value()->type(); 
 }
 
+InterCodesClass* ValueNode::codeGen() {
+    InterCodesClass *cls = new InterCodesClass();
+    const Value *v = value(); 
+    if(v != NULL) { 
+        if (v->ival() || v->dval() || v->bval())
+            cls->addCode (InterCode::OPNTYPE::GOTO, (void *)onTrue_); 
+        else 
+            cls->addCode (InterCode::OPNTYPE::GOTO, (void *)onFalse_); 
+        return cls;
+    }
+    
+    return NULL;
+}
 /****************************************************************/
 
 void ExprStmtNode::print(ostream& os, int indent) const {
@@ -85,6 +129,11 @@ const Type* ExprStmtNode::typeCheck() const {
     return NULL;
 }
 
+InterCodesClass* ExprStmtNode::codeGen() {
+    InterCodesClass *cls = new InterCodesClass();
+    cls->addCode (expr_->codeGen());
+    return cls;
+}
 /****************************************************************/
 
 void IfNode::print(ostream& os, int indent) const
@@ -125,6 +174,48 @@ const Type* IfNode::typeCheck() const
     }
     return NULL;
 }
+
+
+InterCodesClass* IfNode::codeGen()
+{
+    InterCodesClass* cls = new InterCodesClass();    
+    
+    if (then_ && cond_) {
+        InterCode* nxt = LabelClass::assignLabel();
+        if(!else_) {
+           cond_->OnTrue (LabelClass::assignLabel()); 
+           cond_->OnFalse (nxt);   
+           then_->next (nxt);
+
+           cls->addCode (cond_->codeGen());     
+           cls->addCode (cond_->onTrue_);
+           cls->addCode (then_->codeGen());
+           cls->addCode (nxt); 
+        } else {
+           cond_->OnTrue  (LabelClass::assignLabel()); 
+           cond_->OnFalse (LabelClass::assignLabel());   
+           then_->next (nxt);
+           else_->next (nxt);
+            
+           cls->addCode (cond_->codeGen());
+           cls->addCode (cond_->onTrue_);
+           cls->addCode (then_->codeGen());
+           cls->addCode (InterCode::OPNTYPE::GOTO, nxt); 
+           cls->addCode (cond_->onFalse_);
+           cls->addCode (else_->codeGen());
+           cls->addCode (nxt); 
+        }
+        
+        return cls;
+    }
+    return NULL;
+}
+
+
+
+
+
+
 /****************************************************************/
 
 void ReturnStmtNode::print(ostream& os, int indent) const 
@@ -247,6 +338,20 @@ const Type* CompoundStmtNode::typeCheck() const {
     }
     return NULL;
 }
+
+InterCodesClass* CompoundStmtNode::codeGen() {
+    InterCodesClass *cls = new InterCodesClass();
+    
+    if (stmts_) {
+        list <StmtNode*>::iterator it = stmts_->begin(); 
+        for (; it != stmts_->end(); ++it) {
+            cls->addCode((*it)->codeGen());
+        }
+    }
+    return cls;
+}
+
+
 /****************************************************************/
 
 InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param, 
@@ -501,7 +606,7 @@ bool PatNode::hasSeqOps() const
 
 /****************************************************************/
 
-extern const OpNode::OpInfo opInfo[] = {
+const OpNode::OpInfo OpNode::opInfo[] = {
     // print name, arity, paren_flag, fixity, arg types, out type, constraints
     //
     // Paren_flag -- opnode->print() outputs is surrounded by parenthesis if 
@@ -823,3 +928,46 @@ const Type* OpNode::typeCheck() const {
     }
     return targ1;
 }
+
+
+InterCodesClass* OpNode::codeGen() 
+{
+    InterCodesClass *cls = new InterCodesClass();
+    switch(opCode()) {
+        
+        case OpCode::EQ  :
+        case OpCode::NE  :
+        case OpCode::GT  :
+        case OpCode::LT  :
+        case OpCode::GE  :
+        case OpCode::LE  :
+        case OpCode::AND :
+        case OpCode::OR  :
+        case OpCode::NOT : 
+                 cls->addCode (arg_[0]->codeGen());
+                 cls->addCode (arg_[1]->codeGen());
+                 cls->addCode (InterCode::OPNTYPE::IFREL, getRefNode(), 
+                                 arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
+                   
+                 break;
+        
+        
+        case OpCode::PLUS : 
+                 cls->addCode (arg_[0]->codeGen());
+                 cls->addCode (arg_[1]->codeGen());
+                 cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(), 
+                                 arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
+                 break;
+        
+        case OpCode::ASSIGN : 
+                 cls->addCode (arg_[0]->codeGen()); 
+                 cls->addCode (InterCode::OPNTYPE::EXPR, arg_[0]->getRefNode(), 
+                                arg_[1]->getRefNode(), NULL, opCode_);
+                 break; 
+        default           : DEBUG("ERROR-----------"); 
+    }
+    
+    return cls;
+}
+
+

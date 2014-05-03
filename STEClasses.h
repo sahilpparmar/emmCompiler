@@ -36,7 +36,7 @@ class GlobalEntry: public SymTabEntry {
         const Type* typeCheck() const;
         void print(ostream&, int indent=0) const;
         void memAlloc();
-    
+        InterCodesClass* codeGen();     
     private:
         vector<RuleNode*> rules_;
 };
@@ -55,6 +55,7 @@ class RuleBlockEntry: public BlockEntry {
         RuleBlockEntry(int line=0, int column=0, string file=""):
             BlockEntry(newName("rule"), line, column, file) { kind(SymTabEntry::Kind::RULE_BLOCK_KIND);};
         ~RuleBlockEntry() {};
+        InterCodesClass* codeGen() { return NULL;}
 };
 
 /****************************************************************
@@ -90,6 +91,7 @@ class VariableEntry: public SymTabEntry {
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck() const;
         void memAlloc();
+        InterCodesClass* codeGen();
     private:
         VarKind vkind_;
         int offSet_;
@@ -124,6 +126,7 @@ class FunctionEntry: public SymTabEntry {
         void print(ostream& os, int indent) const;
         const Type* typeCheck() const;
         void memAlloc();
+        InterCodesClass* codeGen();
     private:
         CompoundStmtNode* body_;
 };

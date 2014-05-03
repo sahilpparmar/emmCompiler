@@ -1,6 +1,6 @@
 #include "ParserUtil.h"
 
-static int variableCount = 333;     
+static int variableCount = 0;     
 EventEntry *any, *other;
 extern int yylineno;
 int yycolumnno;
@@ -37,7 +37,7 @@ void enterScopeErrCheck(SymTabEntry* se) {
 
 string newName(const string& type) {
   string s("__");
-  s +=type+"__"+ itoa(variableCount++);
+  s +=type+ itoa(variableCount++);
   return s;
 }
 

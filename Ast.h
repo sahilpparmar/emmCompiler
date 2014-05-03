@@ -7,7 +7,8 @@
 #include "SymTabEntry.h"
 
 class BlockEntry;
-class EFSA;
+class InterCodesClass;
+class InterCode;
 class EventEntry;
 class FunctionEntry;
 class LabelEntry;
@@ -67,7 +68,6 @@ class AstNode: public ProgramElem {
 
         virtual const Type* typeCheck() const {return NULL;};
         virtual void print(ostream& os, int indent=0) const=0;
-        virtual EFSA* codeGen() {return NULL;};
 
         virtual void renameRV(string prefix) {}; // new names start with given prefix
         virtual bool operator==(const AstNode&) const { return false; };
@@ -91,7 +91,8 @@ class ExprNode: public AstNode {
             REF_EXPR_NODE, 
             OP_NODE, 
             VALUE_NODE, 
-            INV_NODE
+            INV_NODE,
+            VREG_NODE
         };
 
     public:
@@ -111,7 +112,8 @@ class ExprNode: public AstNode {
         void coercedType(const Type* type) { coercedType_ = type; }
 
         void print(ostream& os, int indent=0) const=0;
-
+        
+        virtual ExprNode* getRefNode ();
     private:
         ExprNodeType exprType_;
         const Value *val_; // reference semantics for val_ and coercedType_
@@ -136,7 +138,8 @@ class RefExprNode: public ExprNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck() const;
-
+        InterCodesClass* codeGen();  
+        string getRefName() { return ext_; }
     private:
         string ext_;
         const SymTabEntry* sym_;
@@ -173,6 +176,7 @@ class OpNode: public ExprNode {
 
     public:
         static const int VARIABLE = 100;
+        static const OpInfo opInfo[];
     public:
         OpNode(OpCode op, ExprNode *l, ExprNode *r=NULL,
                 int line=0, int column=0, string file="");
@@ -193,7 +197,7 @@ class OpNode: public ExprNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck() const;
-
+        InterCodesClass* codeGen();  
     private: 
         unsigned int arity_;
         OpCode   opCode_;
@@ -207,6 +211,7 @@ class ValueNode: public ExprNode {
         ValueNode(Value* val=0, int line=0, int column=0, string file="")
             : ExprNode(ExprNode::ExprNodeType::VALUE_NODE, val, line,column,file) {
                 if (val != NULL) type((Type*)(val->type()));
+                refnode_ = this;
             }
         ValueNode(const ValueNode& val): ExprNode(val) {};
         ExprNode* clone() const { return new ValueNode(*this); }
@@ -214,6 +219,28 @@ class ValueNode: public ExprNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck() const;
+        InterCodesClass* codeGen();  
+        string getRefName() {
+
+  	    ostringstream os;
+	    Type* tp = (Type*)coercedType();
+	    if (tp==NULL) {
+	    	tp = type();
+	    }
+	    if (Type::isBool(tp->tag())) {
+	    	os << value()->bval();
+	    } else {
+	    	if (Type::isFloat(tp->tag())) {
+	    	  	os.precision(1);
+	    	  	os.setf(ios::fixed,ios::floatfield);
+	    	  	os << value()->dval();
+	    	}
+	    	else {
+	    		value()->print(os,0);
+	    	}
+	    }
+	    return os.str();
+        }
 
     private:
         /* val_ field is already included in ExprNode, so no new data members */
@@ -484,6 +511,7 @@ class ExprStmtNode: public StmtNode {
 
         void print(ostream& os, int indent) const;
         const Type* typeCheck() const;
+        InterCodesClass* codeGen();  
 
     private:
         ExprNode* expr_;
@@ -510,6 +538,7 @@ class CompoundStmtNode: public StmtNode {
         void  printWithoutBraces(ostream& os, int indent) const;
         void  print(ostream& os, int indent) const;
         const Type* typeCheck() const;
+        InterCodesClass* codeGen();  
     private:
         CompoundStmtNode(const CompoundStmtNode&);
         list<StmtNode*>   *stmts_;
@@ -542,6 +571,7 @@ class IfNode: public StmtNode {
 
         void print(ostream& os, int indent) const;
         const Type* typeCheck() const;
+        InterCodesClass* codeGen();  
 
     private: 
         ExprNode *cond_;
@@ -611,6 +641,20 @@ class RuleNode: public AstNode {
 
         RuleNode(const RuleNode&);
 };
+
+/****************************************************************/
+
+class VregNode: public ExprNode
+{
+    public:
+        VregNode (int line, int column, string file); 
+        ExprNode* clone() const {return NULL; }
+        void print(ostream& os, int indent=0) const {}
+        string getRefName() { return name_; }
+    private:
+        string name_;
+};
+
 
 /****************************************************************/
 #endif

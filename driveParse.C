@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "SymTabMgr.h"
 #include "STEClasses.h"
+#include "InterCode.h"
 #include "SymTab.h"
 #include "Value.h"
 
@@ -253,7 +254,9 @@ main(int argc, char *argv[], char *envp[]) {
 
         DEBUG("======================Memory Allocation======================\n");
         ge->memAlloc(); 
-
+        InterCodesClass* cls = ge->codeGen();
+        if(cls)
+            cls->print(cout);
         cout << endl;
     }
 #endif

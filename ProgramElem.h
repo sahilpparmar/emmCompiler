@@ -7,6 +7,10 @@
 #include <string>
 #include "Type.h"
 
+class InterCode;
+class InterCodesClass;
+class ExprNode;
+
 extern int yylineno, yycolumnno;
 extern const char* yyfilename;
 
@@ -55,16 +59,32 @@ class ProgramElem {
   int column_;
   string file_;
   Type* type_;
+
+ public:
+  /* To store referece of exprnode in ast */ 
+  ExprNode* refnode_;
+  /* corresponds to following intermediate code instruction on 
+   * true condition, false condition or next, begin*/ 
+  InterCode* onTrue_;
+  InterCode* onFalse_;
+  InterCode* begin_;
+  InterCode* next_;
+  
+  void OnTrue  (InterCode* i) { onTrue_  = i; }
+  void OnFalse (InterCode* i) { onFalse_ = i; }
+  void begin   (InterCode* i) { begin_   = i; }
+  void next    (InterCode* i) { next_    = i; }
+  
+  InterCode* OnTrue  () { return onTrue_;  }
+  InterCode* OnFalse () { return onFalse_; }
+  InterCode* begin   () { return begin_;   }
+  InterCode* next    () { return next_;    }
+  
+  ExprNode* getRefNode      () { return NULL; }
+  virtual string getRefName () { return NULL; }
+  
+  virtual InterCodesClass* codeGen () { return NULL; }
 };
 
 #endif
-
-
-
-
-
-
-
-
-
 

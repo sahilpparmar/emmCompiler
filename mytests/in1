@@ -1,13 +1,7 @@
-int x;
-class abc {
-    int m;
-    int n;
+int a = 5;
+void foo(int b) {
+    if (a==5) 
+        b = 2;
+    else
+        b = 7 + 8 + 9;
 };
-
-void foo(int a) {
-    int b;
-    int c = 5;
-    abc obj;
-}
-
-int a = 2;

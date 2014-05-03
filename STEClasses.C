@@ -1,6 +1,7 @@
 #include "STEClasses.h"
 #include "Value.h"
 #include "ParserUtil.h"
+#include "InterCode.h"
 
 #define PRINT_OFFSET(s, i) DEBUG((string)"Variable: " + (string)s + (string)", Offset: " + (string)itoa(i));
 
@@ -26,6 +27,26 @@ const Type* GlobalEntry::typeCheck() const
         (*it)->typeCheck();    
     }
     return type();
+}
+
+
+InterCodesClass* GlobalEntry::codeGen()
+{
+    //assign new label Global
+    InterCodesClass *cls = NULL;
+
+    if (symTab()) {
+        cls = new InterCodesClass();
+        cls->addCode (LabelClass::assignLabel ());
+        
+        SymTab::iterator it = symTab()->begin();
+        for(; it != symTab()->end(); ++it) {
+            if (*it) 
+                cls->addCode((*it)->codeGen());
+        }
+    }
+    //TODO: Handle for RUle Node
+    return cls;
 }
 
 void GlobalEntry::memAlloc() 
@@ -69,6 +90,18 @@ void VariableEntry::print(ostream& out, int indent) const
     }   
 }
 
+InterCodesClass* VariableEntry::codeGen() 
+{
+    InterCodesClass *cls = NULL;
+    //if initval exists, create a refexprnode
+    if (initVal_) {
+           cls               = new InterCodesClass(); 
+           RefExprNode *node = new RefExprNode (name(), this);
+           cls->addCode (initVal_->codeGen()); 
+           cls->addCode (InterCode::OPNTYPE::EXPR, node, initVal_->getRefNode(), NULL, OpNode::OpCode::ASSIGN); 
+    }
+    return cls;
+}
 const Type* VariableEntry::typeCheck() const
 {
     const Type* t1 = type();
@@ -102,6 +135,27 @@ void VariableEntry::memAlloc()
     
     if (off != -1)
         PRINT_OFFSET(name().c_str(), off);
+}
+
+InterCodesClass* FunctionEntry:: codeGen() {
+    InterCodesClass* cls = NULL;
+    if(body_) {
+        cls = new InterCodesClass();
+        cls->addCode (LabelClass::assignLabel (name()));
+        cls->addCode (InterCode::OPNTYPE::ENTER, (void *)this);
+        
+        if (symTab()) {
+            
+            SymTab::iterator it = symTab()->begin();
+            for(; it != symTab()->end(); ++it) {
+                if ((*it) && (*it)->kind() == SymTabEntry::Kind::VARIABLE_KIND ) 
+                    cls->addCode((*it)->codeGen());
+            }
+            cls->addCode (body_->codeGen());
+        }
+        return cls; 
+    }
+    return NULL;
 }
 
 void FunctionEntry::print(ostream& out, int indent) const
@@ -147,7 +201,6 @@ const Type* FunctionEntry::typeCheck() const
         typeCheckST(numParams, 10000); 
         body_->typeCheck();
     }
-
     return type();
 }    
 
@@ -165,6 +218,7 @@ void FunctionEntry::memAlloc()
         addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
         memAllocST (numParams, 10000);
     }
+    DEBUG("\n");
 }
 
 void EventEntry::print(ostream& out, int indent) const
@@ -185,6 +239,7 @@ void EventEntry::memAlloc()
     DEBUG("\n====Event " + name());
     addr_mng.setAddress (AddressManage::OffKind::NONGLOBAL, 0);
     memAllocST();
+    DEBUG("\n");
 }
 
 void BlockEntry::print(ostream& out, int indent) const
