@@ -65,103 +65,137 @@ mytests/in18:60:Error: Incompatible type for agrument 2 for operator `&&'
 
 ====Global Declarations
 
-====Class CString
+====Class 'CString'
 
-====Function get
+
+====Function 'get'
+==Formal Parameters
 Variable: c, Offset: 8
 
-====Class ArgV
 
-====Class pid_t
+====Class 'ArgV'
 
-====Function getpid_t
+
+====Class 'pid_t'
+
+
+====Function 'getpid_t'
+==Formal Parameters
 Variable: t, Offset: 8
 
-====Class SchedParamP
 
-====Class StatP
+====Class 'SchedParamP'
 
-====Class NewStatP
 
-====Function logMessage
+====Class 'StatP'
+
+
+====Class 'NewStatP'
+
+
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
 
-====Function logMessageInt
+
+====Function 'logMessageInt'
+==Formal Parameters
 Variable: x, Offset: 8
 Variable: y, Offset: 12
 
-====Function getpid
 
-====Function isChild
+====Function 'getpid'
+
+
+====Function 'isChild'
+==Formal Parameters
 Variable: a, Offset: 8
 
-====Event open
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
 
-====Event close
-Variable: a1, Offset: 4
+====Event 'open'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
 
-====Event lstat
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
 
-====Event execve
+====Event 'close'
+Variable: a1, Offset: 0
 
-====Event fork
 
-====Event clone
+====Event 'lstat'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
 
-====Event unlink
-Variable: a1, Offset: 4
 
-====Event kill
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
+====Event 'execve'
 
-====Event ptrace
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
-Variable: a4, Offset: 16
 
-====Event sched_setscheduler
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
+====Event 'fork'
 
-====Event umask
-Variable: a1, Offset: 4
 
-====Event write
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
+====Event 'clone'
 
-====Event chmod
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
 
-====Event truncate
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
+====Event 'unlink'
+Variable: a1, Offset: 0
 
-====Event sysinfo
-Variable: a1, Offset: 4
 
-====Event sched_setparam
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
+====Event 'kill'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
 
-====Event setpriority
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
-Variable: tmp, Offset: 4
-Variable: i, Offset: 8
-Variable: j, Offset: 12
-Variable: k, Offset: 16
-Variable: f, Offset: 20
-Variable: y, Offset: 24
-Variable: state_var, Offset: 28
+
+====Event 'ptrace'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+Variable: a4, Offset: 12
+
+
+====Event 'sched_setscheduler'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+
+====Event 'umask'
+Variable: a1, Offset: 0
+
+
+====Event 'write'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+
+====Event 'chmod'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+
+====Event 'truncate'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+
+====Event 'sysinfo'
+Variable: a1, Offset: 0
+
+
+====Event 'sched_setparam'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+
+
+====Event 'setpriority'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+Variable: tmp, Offset: 0
+Variable: i, Offset: 4
+Variable: j, Offset: 8
+Variable: k, Offset: 12
+Variable: f, Offset: 16
+Variable: y, Offset: 20
+Variable: state_var, Offset: 24

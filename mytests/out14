@@ -57,21 +57,24 @@
 
 ====Global Declarations
 
-====Event open
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
+====Event 'open'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
 
-====Function logMessage
+
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
-Variable: condition, Offset: 4
-Variable: i, Offset: 8
-Variable: j, Offset: 12
-Variable: k, Offset: 16
-Variable: f, Offset: 20
-Variable: s, Offset: 24
-Variable: bt, Offset: 28
-Variable: bo, Offset: 32
-Variable: bo1, Offset: 36
-Variable: bo2, Offset: 40
-Variable: bo3, Offset: 44
+
+Variable: condition, Offset: 0
+Variable: i, Offset: 4
+Variable: j, Offset: 8
+Variable: k, Offset: 12
+Variable: f, Offset: 16
+Variable: s, Offset: 20
+Variable: bt, Offset: 24
+Variable: bo, Offset: 28
+Variable: bo1, Offset: 32
+Variable: bo2, Offset: 36
+Variable: bo3, Offset: 40

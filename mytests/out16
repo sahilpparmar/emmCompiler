@@ -38,15 +38,17 @@
 
 ====Global Declarations
 
-====Event a
-Variable: x, Offset: 4
+====Event 'a'
+Variable: x, Offset: 0
 
-====Event b
-Variable: y, Offset: 4
-Variable: z, Offset: 8
+
+====Event 'b'
+Variable: y, Offset: 0
 Variable: z, Offset: 4
-Variable: f, Offset: 8
-Variable: g, Offset: 12
-Variable: w, Offset: 16
-Variable: j, Offset: 20
-Variable: y, Offset: 24
+
+Variable: z, Offset: 0
+Variable: f, Offset: 4
+Variable: g, Offset: 8
+Variable: w, Offset: 12
+Variable: j, Offset: 16
+Variable: y, Offset: 20

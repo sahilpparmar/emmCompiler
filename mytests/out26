@@ -1,28 +1,40 @@
 
 =================Lexical and Syntax Parsing==================
+mytests/in26:12:Error: Undeclared identifier "hi"
+mytests/in26:18:Error: Undeclared identifier "z"
 
 =========================AST Builder=========================
  
-  int x;
   class abc{
     int m;
     int n;
   };
   void foo(int a) {
-    int b;
+    double b;
     int c = 5;
     class abc obj;
-    };
-  int a = 2;
+    bool d;
+  
+    print();
+    print("hello");
+    print(hi);
+    print((b+c), b*c, 5, obj);
+    print(b, c);
+    print(d, b);
+    print((d+b));
+    print(d, z);
+    print((b+"hi"));
+  };
  
 
 ========================Type Checking========================
+mytests/in26:17:Error: Incompatible type for agrument 1 for operator `+'
+mytests/in26:19:Error: Incompatible type for agrument 2 for operator `+'
 
 ======================Memory Allocation======================
 
 
 ====Global Declarations
-Variable: x, Offset: 0
 
 ====Class 'abc'
 Variable: m, Offset: 0
@@ -36,5 +48,5 @@ Variable: a, Offset: 8
 Variable: b, Offset: -4
 Variable: c, Offset: -8
 Variable: obj, Offset: -16
+Variable: d, Offset: -20
 
-Variable: a, Offset: 4

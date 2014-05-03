@@ -21,11 +21,19 @@
     else ;
     while (a<3)     {
       a=10;
+      if (a==10)       {
+        continue;
+      };
       logMessage("Assignment in condition");
       break;
       while (a>10)       {
         a=(b+c);
-        break 3;
+        if (a>20)         {
+          continue 2;
+        };
+        else         {
+          break 2;
+        };
       };
     };
   };
@@ -38,14 +46,17 @@
 
 ====Global Declarations
 
-====Function logMessage
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
-Variable: a, Offset: 4
-Variable: b, Offset: 8
-Variable: c, Offset: 12
 
-====Event open
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
-Variable: condition, Offset: 16
+Variable: a, Offset: 0
+Variable: b, Offset: 4
+Variable: c, Offset: 8
+
+====Event 'open'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+Variable: condition, Offset: 12

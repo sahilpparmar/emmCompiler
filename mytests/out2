@@ -17,7 +17,8 @@
 
 ====Global Declarations
 
-====Event open
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
+====Event 'open'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+

@@ -10,7 +10,7 @@
         int x;
         int yy;
         int classTest(string x);
-        void g() {
+        void gg() {
             int a1, a2;
             a1=1.0;
         };

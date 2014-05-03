@@ -7,13 +7,21 @@
   class abc{
     int m;
     int n;
+    void f(int l);
   };
   void foo(int a) {
     int b;
     int c = 5;
     class abc obj;
-    };
-  int a = 2;
+    class abc xyz;
+  
+    obj.m=5;
+    obj.m=obj.n;
+    obj.f(c);
+    xyz.m=obj.m*2;
+    xyz.n=(obj.m+xyz.n);
+    xyz.f(obj.m);
+  };
  
 
 ========================Type Checking========================
@@ -24,11 +32,22 @@
 ====Global Declarations
 Variable: x, Offset: 0
 
-====Class abc
+====Class 'abc'
+Variable: m, Offset: 0
+Variable: n, Offset: 4
 
-====Function foo
+====Function 'f'
+==Formal Parameters
+Variable: l, Offset: 8
+
+
+
+====Function 'foo'
+==Formal Parameters
 Variable: a, Offset: 8
+==Local Variables
 Variable: b, Offset: -4
 Variable: c, Offset: -8
 Variable: obj, Offset: -16
-Variable: a, Offset: 4
+Variable: xyz, Offset: -24
+

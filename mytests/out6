@@ -44,31 +44,37 @@
 
 ====Global Declarations
 
-====Class CString
-Variable: x, Offset: 4
-Variable: y, Offset: 8
-Variable: i1, Offset: 12
-Variable: i2, Offset: 16
-Variable: i3, Offset: 20
-Variable: d1, Offset: 24
-Variable: d2, Offset: 28
-Variable: d3, Offset: 32
-Variable: i4, Offset: 36
-Variable: b1, Offset: 40
-Variable: b2, Offset: 44
-Variable: y2, Offset: 48
-Variable: cs1, Offset: 52
-Variable: cs2, Offset: 56
-Variable: cs3, Offset: 60
+====Class 'CString'
 
-====Event open
-Variable: a1, Offset: 4
-Variable: a2, Offset: 8
-Variable: a3, Offset: 12
+Variable: x, Offset: 0
+Variable: y, Offset: 4
+Variable: i1, Offset: 8
+Variable: i2, Offset: 12
+Variable: i3, Offset: 16
+Variable: d1, Offset: 20
+Variable: d2, Offset: 24
+Variable: d3, Offset: 28
+Variable: i4, Offset: 32
+Variable: b1, Offset: 36
+Variable: b2, Offset: 40
+Variable: y2, Offset: 44
+Variable: cs1, Offset: 48
+Variable: cs2, Offset: 52
+Variable: cs3, Offset: 56
 
-====Function logMessage
+====Event 'open'
+Variable: a1, Offset: 0
+Variable: a2, Offset: 4
+Variable: a3, Offset: 8
+
+
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
 
-====Function g
+
+====Function 'g'
+==Local Variables
 Variable: a1, Offset: -4
 Variable: a2, Offset: -8
+

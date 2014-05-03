@@ -7,7 +7,7 @@
     int x;
     int yy;
     int classTest(string x);
-    void g() {
+    void gg() {
       int a1;
       int a2;
     
@@ -40,23 +40,35 @@ mytests/in4:15:Error: Assigned expression must be a subtype of target
 
 ====Global Declarations
 
-====Class CString
+====Class 'CString'
+Variable: x, Offset: 0
+Variable: yy, Offset: 4
 
-====Function classTest
+====Function 'classTest'
+==Formal Parameters
 Variable: x, Offset: 8
 
-====Function g
+
+====Function 'gg'
+==Local Variables
 Variable: a1, Offset: -4
 Variable: a2, Offset: -8
 
-====Event open
-Variable: a1, Offset: 4
+
+
+====Event 'open'
+Variable: a1, Offset: 0
 Variable: a2, Offset: 8
 Variable: a3, Offset: 12
 
-====Function logMessage
+
+====Function 'logMessage'
+==Formal Parameters
 Variable: x, Offset: 8
 
-====Function g
+
+====Function 'g'
+==Local Variables
 Variable: a1, Offset: -4
 Variable: a2, Offset: -8
+

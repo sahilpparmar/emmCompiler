@@ -92,7 +92,8 @@ class ExprNode: public AstNode {
             OP_NODE, 
             VALUE_NODE, 
             INV_NODE,
-            VREG_NODE
+            VREG_NODE,
+            PRINT_NODE
         };
 
     public:
@@ -286,6 +287,112 @@ class InvocationNode: public ExprNode {
         const SymTabEntry *ste_; // reference semantics
 };
 
+
+class PrintFunctionNode: public ExprNode {
+    // Used to represent function invocation
+    public:
+        PrintFunctionNode( vector<ExprNode*>* param=0, int line=0, int column=0, string file="");
+        PrintFunctionNode(const PrintFunctionNode&);
+        ExprNode* clone() const { return new PrintFunctionNode(*this); }
+        ~PrintFunctionNode() {};
+
+        const vector<ExprNode*>* params() const { return params_;};
+
+        vector<ExprNode*>* params() { return params_;}
+
+        void params(vector<ExprNode*>* args) { params_ = args;};
+
+        const ExprNode* param(unsigned int i) const {
+            return (params_ != NULL && i < params_->size()) ? (const ExprNode*)((*params_)[i]) : NULL; 
+        }
+
+        ExprNode* param(unsigned int i) {
+            return (ExprNode*)((const PrintFunctionNode*)this->param(i));
+        }
+
+        void param(ExprNode* arg, unsigned int i) { 
+            if (params_ != NULL && i < params_->size())
+                (*params_)[i] = arg;
+        }
+
+        void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
+
+    private:
+        vector<ExprNode*>* params_;
+};
+
+/****************************************************************/
+
+class ClassFuncInvocationNode: public ExprNode {
+    // Used to represent function invocation
+    public:
+        ClassFuncInvocationNode(const SymTabEntry *oste, const SymTabEntry *fste, vector<ExprNode*>* param=0, 
+                int line=0, int column=0, string file="");
+        ClassFuncInvocationNode(const ClassFuncInvocationNode&);
+        ExprNode* clone() const { return new ClassFuncInvocationNode(*this); }
+        ~ClassFuncInvocationNode() {};
+
+        const SymTabEntry* symTabEntryObject() const { return oste_; };
+        
+        const SymTabEntry* symTabEntryFunction() const { return fste_; };
+
+        const vector<ExprNode*>* params() const { return params_;};
+
+        vector<ExprNode*>* params() { return params_;}
+
+        void params(vector<ExprNode*>* args) { params_ = args;};
+
+        const ExprNode* param(unsigned int i) const {
+            return (params_ != NULL && i < params_->size()) ? (const ExprNode*)((*params_)[i]) : NULL; 
+        }
+
+        ExprNode* param(unsigned int i) {
+            return (ExprNode*)((const ClassFuncInvocationNode*)this->param(i));
+        }
+
+        void param(ExprNode* arg, unsigned int i) { 
+            if (params_ != NULL && i < params_->size())
+                (*params_)[i] = arg;
+        }
+
+        void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
+
+    private:
+        vector<ExprNode*>* params_;
+        const SymTabEntry *oste_; // reference symbol table entry for object.
+        const SymTabEntry *fste_; // reference symbol table entry for function.
+};
+
+/****************************************************************/
+
+class ClassRefExprNode: public ExprNode {
+    public:
+        ClassRefExprNode(string ext, const SymTabEntry* objSte=NULL, const SymTabEntry* varSte = NULL,
+                int line=0, int column=0, string file="");
+        ClassRefExprNode(const ClassRefExprNode&);
+        ExprNode* clone() const { return new ClassRefExprNode(*this); }
+
+        ~ClassRefExprNode() {};
+
+        string ext() const { return ext_;};
+        void ext(string str) { ext_ = str;}; 
+
+        const SymTabEntry* symTabEntryObject() const { return objSym_;};
+        const SymTabEntry* symTabEntryVariable() const { return varSym_;};
+        void symTabEntryObject(const SymTabEntry *objSte)  { objSym_ = objSte;};
+        void symTabEntryVariable(const SymTabEntry *varSte)  { varSym_ = varSte;};
+
+        void print(ostream& os, int indent=0) const;
+        const Type* typeCheck() const;
+
+    private:
+        string ext_;
+        const SymTabEntry* objSym_;
+        const SymTabEntry* varSym_;
+};
+
 /****************************************************************/
 // There are 3 kinds of PatNodes:
 //   PrimitivePatNodes are of the form: event|cond
@@ -448,7 +555,7 @@ class PatNode: public BasePatNode {
 
 class StmtNode: public AstNode {
     public:
-        enum class StmtNodeKind { ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE, BREAK};
+        enum class StmtNodeKind { ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE, BREAK, CONTINUE};
     public: 
         StmtNode(StmtNodeKind skm, int line=0, int column=0, string file=""):
             AstNode(AstNode::NodeType::STMT_NODE, line, column, file) { skind_ = skm; };
@@ -486,9 +593,8 @@ class ReturnStmtNode: public StmtNode {
 
 class BreakStmtNode: public StmtNode {
     public:
-        BreakStmtNode(ExprNode *e, //FunctionEntry* fe, 
-                int line=0, int column=0, string file=""):
-            StmtNode(StmtNode::StmtNodeKind::BREAK,line,column,file) { expr_ = e; };//fun_ = fe;};
+        BreakStmtNode(ExprNode *e, int line=0, int column=0, string file=""):
+            StmtNode(StmtNode::StmtNodeKind::BREAK,line,column,file) { expr_ = e; };
         ~BreakStmtNode() {};
 
         void print(ostream& os, int indent) const;
@@ -496,7 +602,21 @@ class BreakStmtNode: public StmtNode {
 
     private:
         ExprNode* expr_;
-        // FunctionEntry* fun_;
+};
+
+/****************************************************************/
+
+class ContinueStmtNode: public StmtNode {
+    public:
+        ContinueStmtNode(ExprNode *e, int line=0, int column=0, string file=""):
+            StmtNode(StmtNode::StmtNodeKind::CONTINUE,line,column,file) { expr_ = e; };
+        ~ContinueStmtNode() {};
+
+        void print(ostream& os, int indent) const;
+        const Type* typeCheck() const;
+
+    private:
+        ExprNode* expr_;
 };
 
 /****************************************************************/

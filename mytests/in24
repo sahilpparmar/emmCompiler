@@ -1,5 +1,5 @@
 /* 
- * Tests: Empty if-then-else stmt
+ * Tests: Empty if-then-else stmt; While, Break, Continue, Statements
  */
 
     int logMessage(string x) ;	
@@ -21,26 +21,27 @@
     }
     	else;
     
-
-/*    if (condition)
-		if (condition) ;
-		else;		
-
-    if (condition)
-		if (condition) ;
-		else;
-	else if (condition) ;
-	else ;
-  */  
     while (a < 3) 
     {
                 a = 10;
+
+                if (a == 10)
+                {
+                    continue;
+                }
 		logMessage("Assignment in condition") ; 
                     break;
                 while (a > 10)
                 {
                     a = b + c;
-                    break 3;
+                    if (a > 20)
+                        {
+                            continue 2;
+                        }
+                        else
+                        {
+                            break 2;
+                        }
                 }
 
                 }
