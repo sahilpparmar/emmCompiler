@@ -77,7 +77,6 @@ const Type* RefExprNode::typeCheck() const
     return typ;
 }
 
-
 InterCodesClass* RefExprNode::codeGen()
 {
     return NULL;
@@ -182,7 +181,7 @@ InterCodesClass* IfNode::codeGen()
         }
         cond_->refnode_ = cond_;
 
-        InterCodesClass* ic_cond = NULL;
+        InterCodesClass* ic_cond;
         if ((ic_cond = cond_->codeGen()) != NULL) {
             cls->addCode(ic_cond);
         } else {
@@ -242,6 +241,19 @@ const Type* ReturnStmtNode::typeCheck() const
     return return_type;
 }
 
+InterCodesClass* ReturnStmtNode::codeGen()
+{
+    InterCodesClass *cls = new InterCodesClass();
+    
+    if (expr_ != NULL) {
+        cls->addCode(expr_->codeGen());
+        cls->addCode(InterCode::OPNTYPE::RETURN, expr_->getRefNode());
+    } else {
+        cls->addCode(InterCode::OPNTYPE::RETURN);
+    }
+
+    return cls;
+}
 /****************************************************************/
 
 void BreakStmtNode::print(ostream& os, int indent) const 
@@ -379,17 +391,6 @@ InvocationNode::InvocationNode(const InvocationNode& ref) : ExprNode(ref)
 
 }
 
-PrintFunctionNode::PrintFunctionNode( vector<ExprNode*>* param, int line, int column, string file):
-    ExprNode(ExprNode::ExprNodeType::PRINT_NODE, 0, line, column, file)
-{
-    params_ = param;
-}
-
-PrintFunctionNode::PrintFunctionNode(const PrintFunctionNode& ref) : ExprNode(ref)
-{
-
-}
-
 void InvocationNode::print(ostream& out, int indent) const
 {
     assert(ste_);
@@ -404,6 +405,77 @@ void InvocationNode::print(ostream& out, int indent) const
     out << ")";
 }
 
+const Type* InvocationNode::typeCheck() const
+{
+    FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
+    vector<Type*>* argtypes    = func_entry->type()->argTypes();
+
+    int caller_param = params_ ? params_->size() : 0;
+    int callee_param = argtypes ? argtypes->size() : 0;
+
+    if (caller_param != callee_param) {
+        errMsg((string)itoa(callee_param) + " arguments expected for " + func_entry->name(), this);
+        return NULL; 
+
+    } else if (params_) {
+        unsigned int i = 1; 
+        vector<Type*>::iterator t_iter    = argtypes->begin();
+        vector<ExprNode*>::iterator p_iter = params_->begin();
+
+        for (; t_iter != argtypes->end(); ++t_iter) {
+
+            ExprNode* expr_node    = *p_iter; 
+            const Type* param_type = expr_node->typeCheck(); 
+
+            if (*t_iter && param_type && (*t_iter)->isSubType (param_type->tag(), param_type)) {
+
+                expr_node->coercedType (*t_iter);
+
+            } else {
+                errMsg("Type Mismatch for argument " + (string)itoa(i) + " to " + func_entry->name(), expr_node); 
+            }
+            ++i;
+            ++p_iter;
+        }
+    }
+
+    if (func_entry)
+        return func_entry->type()->retType();
+    
+    return NULL;
+}
+
+InterCodesClass* InvocationNode::codeGen()
+{
+    InterCodesClass *cls = new InterCodesClass();
+    FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
+
+    if (params_) {
+        vector<ExprNode*>::iterator p_iter = params_->begin();
+
+        for (; p_iter != params_->end(); ++p_iter) {
+            ExprNode* expr_node = *p_iter; 
+            cls->addCode(expr_node->codeGen());
+            cls->addCode(InterCode::OPNTYPE::PARAM, expr_node->getRefNode());
+        }
+    }
+    cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str());
+
+    return cls;
+}
+
+/****************************************************************/
+
+PrintFunctionNode::PrintFunctionNode( vector<ExprNode*>* param, int line, int column, string file):
+    ExprNode(ExprNode::ExprNodeType::PRINT_NODE, 0, line, column, file)
+{
+    params_ = param;
+}
+
+PrintFunctionNode::PrintFunctionNode(const PrintFunctionNode& ref) : ExprNode(ref)
+{
+
+}
 
 void PrintFunctionNode::print(ostream& out, int indent) const
 {
@@ -418,49 +490,23 @@ void PrintFunctionNode::print(ostream& out, int indent) const
     out<<")";
 }
 
-const Type* InvocationNode::typeCheck() const
+const Type* PrintFunctionNode::typeCheck() const
 {
-    FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
-    vector<Type*>* argtypes    = func_entry->type()->argTypes();
-    
-    int caller_param = params_ ? params_->size() : 0;
-    int callee_param = argtypes ? argtypes->size() : 0;
-       
-    if (caller_param != callee_param) {
-        errMsg((string)itoa(callee_param) + " arguments expected for " + func_entry->name(), this);
-        return NULL; 
-
-    } else if (params_) {
-        unsigned int i = 1; 
-        vector<Type*>::iterator t_iter    = argtypes->begin();
+    if (params_) {
         vector<ExprNode*>::iterator p_iter = params_->begin();
-         
-        for (; t_iter != argtypes->end(); ++t_iter) {
-            
-            ExprNode* expr_node    = *p_iter; 
-            const Type* param_type = expr_node->typeCheck(); 
-            
-            if (*t_iter && param_type && (*t_iter)->isSubType (param_type->tag(), param_type)) {
-                
-                expr_node->coercedType (*t_iter);
-            
-            } else {
-               errMsg("Type Mismatch for argument " + (string)itoa(i) + " to " + func_entry->name(), expr_node); 
-            }
-            ++i;
-            ++p_iter;
+        for (; p_iter != params_->end(); ++p_iter) {
+            ExprNode* expr_node = *p_iter; 
+            expr_node->typeCheck(); 
         }
     }
-
-    if (func_entry)
-        return func_entry->type()->retType();
-    
-    return NULL;
+    // 'print' function has return type VOID
+    return new Type(Type::TypeTag::VOID);
 }
+
 /****************************************************************/
 
-ClassFuncInvocationNode::ClassFuncInvocationNode(const SymTabEntry *oste, const SymTabEntry *fste, vector<ExprNode*>* param, 
-        int line, int column, string file):
+ClassFuncInvocationNode::ClassFuncInvocationNode(const SymTabEntry *oste, const SymTabEntry *fste,
+                        vector<ExprNode*>* param, int line, int column, string file):
     ExprNode(ExprNode::ExprNodeType::INV_NODE, 0, line, column, file)
 {
     assert(oste);
@@ -493,8 +539,8 @@ void ClassFuncInvocationNode::print(ostream& out, int indent) const
 
 const Type* ClassFuncInvocationNode::typeCheck() const
 {
-    FunctionEntry* func_entry  = (FunctionEntry *) symTabEntryFunction();  
-    vector<Type*>* argtypes    = func_entry->type()->argTypes();
+    FunctionEntry* func_entry = (FunctionEntry *) symTabEntryFunction();  
+    vector<Type*>* argtypes   = func_entry->type()->argTypes();
     
     int caller_param = params_ ? params_->size() : 0;
     int callee_param = argtypes ? argtypes->size() : 0;
@@ -560,20 +606,6 @@ const Type* ClassRefExprNode::typeCheck() const {
         typ = varSym_->type();
 
     return typ;
-}
-
-
-const Type* PrintFunctionNode::typeCheck() const
-{
-    if (params_) {
-        vector<ExprNode*>::iterator p_iter = params_->begin();
-        for (; p_iter != params_->end(); ++p_iter) {
-            ExprNode* expr_node = *p_iter; 
-            expr_node->typeCheck(); 
-        }
-    }
-    // 'print' function has return type VOID
-    return new Type(Type::TypeTag::VOID);
 }
 
 /****************************************************************/
@@ -1087,7 +1119,7 @@ const Type* OpNode::typeCheck() const {
 InterCodesClass* OpNode::codeGen() 
 {
     InterCodesClass *cls = new InterCodesClass();
-    InterCodesClass* ic_cond = NULL;
+    InterCodesClass* ic_cond;
 
     switch (opCode()) {
 
@@ -1202,5 +1234,4 @@ InterCodesClass* OpNode::codeGen()
     
     return cls;
 }
-
 

@@ -82,8 +82,11 @@ L0:
         k = 4.0
 g:
         enter g
+        return 1
         leave g
 f:
         enter f
+        __vreg1 = a + b
+        return __vreg1
         leave f
 

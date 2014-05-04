@@ -1,7 +1,14 @@
 int a = 5;
+
+int f(int i, int j) {
+    a = (i + j)/2;
+    return a*2;
+}
+
 void foo(int b) {
-    if (a==5) 
+    if (a && a==b && b) 
         b = 2;
     else
-        b = 7 + 8 + 9;
+        b = 3;
+    f(b, b*b-1);
 };

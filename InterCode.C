@@ -37,7 +37,7 @@ void InterCode::print(ostream &os) {
                     }                
                     break;
 
-        case GOTO : {
+        case GOTO:  {
                         InterCode* goto_lab = (InterCode*) op[0];
                         prtSpace(os, TAB_SPACE);
                         os << "goto "; 
@@ -95,8 +95,28 @@ void InterCode::print(ostream &os) {
                     }
                     break;
 
-        default:;
-            //assert(0 && "Unsupported 3AddrCode");
+        case CALL:  {
+                        prtSpace(os, TAB_SPACE);
+                        os << "call " << (char*)op[0];
+                    }
+                    break;
+
+        case RETURN:{
+                        prtSpace(os, TAB_SPACE);
+                        os << "return";
+                        if (op[0]) {
+                            os << " " << op[0]->getRefName();
+                        }
+                    }
+                    break;
+
+        case PARAM: {
+                        prtSpace(os, TAB_SPACE);
+                        os << "param " << op[0]->getRefName();
+                    }
+                    break;
+        default:
+            assert(0 && "Unsupported 3AddrCode");
     }
 }
 

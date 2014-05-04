@@ -15,7 +15,7 @@ using namespace std;
  */
 class InterCode {
     public:
-       enum OPNTYPE { IF, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE}; 
+       enum OPNTYPE {CALL, PARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE}; 
        
        InterCode (OPNTYPE op, OpNode::OpCode subopc = OpNode::OpCode::INVALID, 
                    void *a = NULL, void *b  = NULL, void *c = NULL) {

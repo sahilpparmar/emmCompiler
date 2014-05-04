@@ -282,6 +282,7 @@ class InvocationNode: public ExprNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck() const;
+        InterCodesClass* codeGen();
 
     private:
         vector<ExprNode*>* params_;
@@ -582,8 +583,7 @@ class ReturnStmtNode: public StmtNode {
 
         void print(ostream& os, int indent) const;
         const Type* typeCheck() const;
-
-
+        InterCodesClass* codeGen();  
 
     private:
         ExprNode* expr_;
