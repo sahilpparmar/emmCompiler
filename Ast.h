@@ -66,8 +66,8 @@ class AstNode: public ProgramElem {
 
         NodeType nodeType() const { return nodeType_;}
 
-        virtual const Type* typeCheck() const {return NULL;};
-        virtual void print(ostream& os, int indent=0) const=0;
+        virtual const Type* typeCheck() = 0;
+        virtual void print(ostream& os, int indent=0) const = 0;
 
         virtual void renameRV(string prefix) {}; // new names start with given prefix
         virtual bool operator==(const AstNode&) const { return false; };
@@ -138,7 +138,7 @@ class RefExprNode: public ExprNode {
         void symTabEntry(const SymTabEntry *ste)  { sym_ = ste;};
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         InterCodesClass* codeGen();  
         string getRefName() { return ext_; }
     private:
@@ -197,7 +197,7 @@ class OpNode: public ExprNode {
         { return &arg_; }
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         InterCodesClass* codeGen();  
     private: 
         unsigned int arity_;
@@ -219,7 +219,7 @@ class ValueNode: public ExprNode {
         ~ValueNode() {};
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         InterCodesClass* codeGen();  
 
         string getRefName() {
@@ -281,7 +281,7 @@ class InvocationNode: public ExprNode {
         }
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         InterCodesClass* codeGen();
 
     private:
@@ -318,7 +318,7 @@ class PrintFunctionNode: public ExprNode {
         }
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
 
     private:
         vector<ExprNode*>* params_;
@@ -359,7 +359,7 @@ class ClassFuncInvocationNode: public ExprNode {
         }
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
 
     private:
         vector<ExprNode*>* params_;
@@ -387,7 +387,7 @@ class ClassRefExprNode: public ExprNode {
         void symTabEntryVariable(const SymTabEntry *varSte)  { varSym_ = varSte;};
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
 
     private:
         string ext_;
@@ -493,7 +493,7 @@ class PrimitivePatNode: public BasePatNode {
         bool hasAnyOrOther() const;
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
 
     private:
 
@@ -544,7 +544,7 @@ class PatNode: public BasePatNode {
             return true;
         }
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
     private: 
         PatNode(const PatNode&);
 
@@ -582,42 +582,12 @@ class ReturnStmtNode: public StmtNode {
         ~ReturnStmtNode() {};
 
         void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         InterCodesClass* codeGen();  
 
     private:
         ExprNode* expr_;
         FunctionEntry* fun_;
-};
-
-/****************************************************************/
-
-class BreakStmtNode: public StmtNode {
-    public:
-        BreakStmtNode(ExprNode *e, int line=0, int column=0, string file=""):
-            StmtNode(StmtNode::StmtNodeKind::BREAK,line,column,file) { expr_ = e; };
-        ~BreakStmtNode() {};
-
-        void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
-
-    private:
-        ExprNode* expr_;
-};
-
-/****************************************************************/
-
-class ContinueStmtNode: public StmtNode {
-    public:
-        ContinueStmtNode(ExprNode *e, int line=0, int column=0, string file=""):
-            StmtNode(StmtNode::StmtNodeKind::CONTINUE,line,column,file) { expr_ = e; };
-        ~ContinueStmtNode() {};
-
-        void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
-
-    private:
-        ExprNode* expr_;
 };
 
 /****************************************************************/
@@ -631,7 +601,7 @@ class ExprStmtNode: public StmtNode {
         //  { return new ExprStmtNode(*this); }
 
         void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         InterCodesClass* codeGen();  
 
     private:
@@ -658,7 +628,7 @@ class CompoundStmtNode: public StmtNode {
 
         void  printWithoutBraces(ostream& os, int indent) const;
         void  print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         InterCodesClass* codeGen();  
     private:
         CompoundStmtNode(const CompoundStmtNode&);
@@ -691,7 +661,7 @@ class IfNode: public StmtNode {
         StmtNode* thenStmt() { return then_;};
 
         void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         InterCodesClass* codeGen();  
 
     private: 
@@ -724,13 +694,56 @@ class WhileNode: public StmtNode {
         StmtNode* bodyStmt() { return body_;};
 
         void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
+        InterCodesClass* codeGen();  
 
     private: 
         ExprNode *cond_;
         StmtNode *body_;
 
         WhileNode(const WhileNode&);
+};
+
+/****************************************************************/
+
+class BreakStmtNode: public StmtNode {
+    public:
+        BreakStmtNode(ExprNode *e, int line=0, int column=0, string file=""):
+            StmtNode(StmtNode::StmtNodeKind::BREAK,line,column,file)
+        {
+            expr_ = e;
+            wnode_ = NULL;
+        }
+        ~BreakStmtNode() {}
+
+        void print(ostream& os, int indent) const;
+        const Type* typeCheck();
+        InterCodesClass* codeGen();  
+
+    private:
+        ExprNode* expr_;    // Depth of outer while
+        WhileNode* wnode_;  // Reference to the WhileNode it would jump to the end of
+};
+
+/****************************************************************/
+
+class ContinueStmtNode: public StmtNode {
+    public:
+        ContinueStmtNode(ExprNode *e, int line=0, int column=0, string file=""):
+            StmtNode(StmtNode::StmtNodeKind::CONTINUE,line,column,file) 
+        {
+            expr_ = e;
+            wnode_ = NULL;
+        }
+        ~ContinueStmtNode() {}
+
+        void print(ostream& os, int indent) const;
+        const Type* typeCheck();
+        InterCodesClass* codeGen();  
+
+    private:
+        ExprNode* expr_;    // Depth of outer while
+        WhileNode* wnode_;  // Reference to the WhileNode it would jump to the start of
 };
 
 /****************************************************************/
@@ -753,7 +766,7 @@ class RuleNode: public AstNode {
         StmtNode* reaction() { return reaction_; };   
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
 
     private:
         BlockEntry  *rste_;
@@ -771,6 +784,7 @@ class VregNode: public ExprNode
         VregNode (int line, int column, string file); 
         ExprNode* clone() const {return NULL; }
         void print(ostream& os, int indent=0) const {}
+        virtual const Type* typeCheck() { return NULL; };
         string getRefName() { return name_; }
     private:
         string name_;

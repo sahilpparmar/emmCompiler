@@ -18,7 +18,7 @@ void GlobalEntry::print(ostream& out, int indent) const
     }
 }
 
-const Type* GlobalEntry::typeCheck() const
+const Type* GlobalEntry::typeCheck()
 {
     typeCheckST(); 
 
@@ -64,7 +64,7 @@ void ClassEntry::print(ostream& out, int indent) const
     out<<";";
 }
 
-const Type* ClassEntry::typeCheck() const
+const Type* ClassEntry::typeCheck()
 {
     typeCheckST();
     return type();
@@ -103,7 +103,7 @@ InterCodesClass* VariableEntry::codeGen()
     }
     return cls;
 }
-const Type* VariableEntry::typeCheck() const
+const Type* VariableEntry::typeCheck()
 {
     const Type* t1 = type();
     if (initVal()) {
@@ -199,9 +199,9 @@ void FunctionEntry::print(ostream& out, int indent) const
     out << ";";
 }
 
-const Type* FunctionEntry::typeCheck() const
+const Type* FunctionEntry::typeCheck()
 {
-    const vector<const Type*>* param_l = type()->argTypes();
+    vector<Type*>* param_l = type()->argTypes();
     int numParams = param_l ? param_l->size() : 0;
     
     if (numParams) {
@@ -240,7 +240,7 @@ void EventEntry::print(ostream& out, int indent) const
     out << ";";
 }
 
-const Type* EventEntry::typeCheck() const
+const Type* EventEntry::typeCheck()
 {
     typeCheckST();
     return type();

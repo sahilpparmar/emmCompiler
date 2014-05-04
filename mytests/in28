@@ -1,0 +1,33 @@
+int logMessage(string x) ;	
+int a = 5, b, c;
+bool condition;
+
+int open(string file, int flags, unsigned int mode)
+{
+    while (a < 3) 
+    {
+        a = 10;
+
+        if (a == 10)
+        {
+            continue;
+        }
+        logMessage("Assignment in condition") ; 
+        break;
+        while (a > 10)
+        {
+            a = b + c;
+            if (a > 20)
+            {
+                continue 2;
+            }
+            else
+            {
+                break 2;
+            }
+        }
+
+    }
+
+};
+

@@ -15,7 +15,6 @@ extern const OpNode::OpInfo opInfo[];
 #define prt(x) //cout << x << endl;
 
 static Type                   *curType        =  NULL;
-static Value                  *tempValNode    =  NULL;
 static vector<ExprNode*>      *curExprList    =  NULL;
 static vector<ExprNode*>      *funcParamList  =  NULL;
 static list<StmtNode*>        *curStmtList1   =  NULL;
@@ -207,15 +206,16 @@ static ExprStmtNode* allocExprStmtNode(ExprNode* e) {
 static ReturnStmtNode* allocReturnNode(ExprNode* e) {
     if (IsCurRuleBlockEntry())
         errMsg((string)"Return statement is valid only within a function");
-    return new ReturnStmtNode(e, (FunctionEntry*)stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND));
+    return new ReturnStmtNode(e, (FunctionEntry*)stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND),
+            yylinenum, yycolumnno, string(yyfilename));
 }
 
 static BreakStmtNode* allocBreakNode(ExprNode* e) {
-    return new BreakStmtNode(e);
+    return new BreakStmtNode(e, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static ContinueStmtNode* allocContinueNode(ExprNode* e) {
-    return new ContinueStmtNode(e);
+    return new ContinueStmtNode(e, yylinenum, yycolumnno, string(yyfilename));
 }
 
 static IfNode* allocIfNode(ExprNode* cond, StmtNode* thenStmt, StmtNode* elseStmt) {
@@ -358,7 +358,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %type <ruleNode> rule
 %type <patVal> primitive_all binary_event_oprs
 
-%type <cVal> TOK_IDENT TOK_PRINT func_name
+%type <cVal> TOK_IDENT TOK_PRINT
 %type <uVal> TOK_UINTNUM 
 %type <dVal> TOK_DOUBLENUM 
 %type <cVal> TOK_STRCONST
@@ -486,28 +486,27 @@ return_stmt:        TOK_RETURN expression semi_colon                        {   
                   | TOK_RETURN semi_colon                                   {   $$ = allocReturnNode(NULL); prt("ReturnStmt");              }
                   ;
 
-break_stmt:         TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(NULL);   prt("BreakStmt");		    }
-		  | TOK_BREAK TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocBreakNode(allocValueNode(tempValNode));     prt("BreakStmt");    }
+break_stmt:         TOK_BREAK semi_colon  				    {	$$ = allocBreakNode(allocValueNode(new Value(1,  Type::UINT)));     prt("BreakStmt");   }
+                  | TOK_BREAK TOK_UINTNUM semi_colon			    {   $$ = allocBreakNode(allocValueNode(new Value($2, Type::UINT)));     prt("BreakStmt");   }
                   ;
 
-continue_stmt:      TOK_CONTINUE semi_colon  				    {	$$ = allocContinueNode(NULL);   prt("ContinueStmt");	    }
-		  | TOK_CONTINUE TOK_UINTNUM semi_colon			    {   tempValNode = new Value($2, Type::UINT); $$ = allocContinueNode(allocValueNode(tempValNode));     prt("ContinueStmt"); }
+continue_stmt:      TOK_CONTINUE semi_colon  				    {   $$ = allocContinueNode(allocValueNode(new Value(1,  Type::UINT)));  prt("ContinueStmt");}
+                  | TOK_CONTINUE TOK_UINTNUM semi_colon			    {   $$ = allocContinueNode(allocValueNode(new Value($2, Type::UINT)));  prt("ContinueStmt");}
                   ;
 
 empty_block:        TOK_LBRACE semi_colon TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
                   | TOK_LBRACE semi_colon TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
+                  | TOK_LBRACE            TOK_RBRACE semi_colon             {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
+                  | TOK_LBRACE            TOK_RBRACE                        {   $$ = allocCompStmtNode(new list<StmtNode*>); prt("CompoundStmt");  }
                   ;
 
 condition:          TOK_LPAREN expression TOK_RPAREN                        {   $$ = $2;    prt("(Expr)"); }
                   ;
 
-func_invocation:    func_name TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocInvNode  ($1, curExprList); curExprList = NULL;   prt("FunctionInvocation"); }
-                  | func_name TOK_LPAREN TOK_RPAREN                         {   $$ = allocInvNode  ($1, NULL);                              prt("FunctionInvocation"); }
+func_invocation:    TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocInvNode  ($1, curExprList); curExprList = NULL;   prt("FunctionInvocation"); }
+                  | TOK_IDENT TOK_LPAREN                TOK_RPAREN          {   $$ = allocInvNode  ($1, NULL);                              prt("FunctionInvocation"); }
                   | TOK_PRINT TOK_LPAREN caller_param_l TOK_RPAREN          {   $$ = allocPrintNode(curExprList);     curExprList = NULL;   prt("PrintFunctionNode");  }
-                  | TOK_PRINT TOK_LPAREN TOK_RPAREN                         {   $$ = allocPrintNode  ( NULL);                                 prt("FunctionInvocation"); }
-                  ;
-
-func_name:          TOK_IDENT                                               {   $$ = $1;                }
+                  | TOK_PRINT TOK_LPAREN                TOK_RPAREN          {   $$ = allocPrintNode  ( NULL);                               prt("FunctionInvocation"); }
                   ;
 
 caller_param_l:     caller_param_l TOK_COMMA expression                     {   curExprList->push_back($3);                                             }
@@ -598,8 +597,8 @@ obj_var:            TOK_IDENT TOK_DOT TOK_IDENT                             {   
 obj_func:           TOK_IDENT TOK_DOT class_func_invocation semi_colon      {   $$ = allocClassFuncInvNode($1, funcName, funcParamList); prt("classFuntionInvocation");   }
                   ;
 
-class_func_invocation:    func_name TOK_LPAREN caller_param_l TOK_RPAREN    {   funcName = $1; funcParamList = curExprList; curExprList = NULL; prt("ClassFunctionInvocation"); }
-                  | func_name TOK_LPAREN TOK_RPAREN                         {   funcName = $1; funcParamList = NULL;                            prt("ClassFunctionInvocation"); }
+class_func_invocation:    TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN    {   funcName = $1; funcParamList = curExprList; curExprList = NULL; prt("ClassFunctionInvocation"); }
+                  | TOK_IDENT TOK_LPAREN TOK_RPAREN                         {   funcName = $1; funcParamList = NULL;                            prt("ClassFunctionInvocation"); }
                   ;
 
 function_proto:     function_decl semi_colon                                {   $$ = $1;                    }

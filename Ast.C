@@ -68,7 +68,7 @@ void RefExprNode::print(ostream& os, int indent) const
     os << ext_;
 }
 
-const Type* RefExprNode::typeCheck() const
+const Type* RefExprNode::typeCheck()
 {
     const Type* typ = NULL; 
     if (symTabEntry())    
@@ -89,7 +89,7 @@ void ValueNode::print(ostream& os, int indent) const
     value()->print(os, indent); 
 }
 
-const Type* ValueNode::typeCheck() const
+const Type* ValueNode::typeCheck()
 {
     return value()->type(); 
 }
@@ -109,7 +109,7 @@ void ExprStmtNode::print(ostream& os, int indent) const {
     os << ";"; 
 }
 
-const Type* ExprStmtNode::typeCheck() const {
+const Type* ExprStmtNode::typeCheck() {
     if (expr_ != NULL) { 
         return expr_->typeCheck();
     }
@@ -117,9 +117,12 @@ const Type* ExprStmtNode::typeCheck() const {
 }
 
 InterCodesClass* ExprStmtNode::codeGen() {
-    InterCodesClass *cls = new InterCodesClass();
-    cls->addCode (expr_->codeGen());
-    return cls;
+    if (expr_ != NULL) { 
+        InterCodesClass *cls = new InterCodesClass();
+        cls->addCode (expr_->codeGen());
+        return cls;
+    }
+    return NULL;
 }
 
 /****************************************************************/
@@ -145,7 +148,7 @@ void IfNode::print(ostream& os, int indent) const
     }
 }
 
-const Type* IfNode::typeCheck() const 
+const Type* IfNode::typeCheck() 
 {
     if (cond_) {
         const Type* cond_type = cond_->typeCheck();
@@ -165,9 +168,9 @@ const Type* IfNode::typeCheck() const
 
 InterCodesClass* IfNode::codeGen()
 {
-    InterCodesClass* cls = new InterCodesClass();    
-
-    if (then_ && cond_) {
+    assert(cond_ && "If Condition Expected");
+    if (then_) {
+        InterCodesClass* cls = new InterCodesClass();    
         InterCode* nxt = LabelClass::assignLabel();
 
         cond_->OnTrue(LabelClass::assignLabel()); 
@@ -179,7 +182,6 @@ InterCodesClass* IfNode::codeGen()
             cond_->OnFalse(LabelClass::assignLabel());   
             else_->next (nxt);
         }
-        cond_->refnode_ = cond_;
 
         InterCodesClass* ic_cond;
         if ((ic_cond = cond_->codeGen()) != NULL) {
@@ -214,7 +216,7 @@ void ReturnStmtNode::print(ostream& os, int indent) const
     os << ";";
 }
 
-const Type* ReturnStmtNode::typeCheck() const 
+const Type* ReturnStmtNode::typeCheck() 
 {   
     const Type* return_type = NULL;
     const Type* func_type   = NULL;
@@ -254,51 +256,6 @@ InterCodesClass* ReturnStmtNode::codeGen()
 
     return cls;
 }
-/****************************************************************/
-
-void BreakStmtNode::print(ostream& os, int indent) const 
-{
-    prtSpace(os, indent);
-    os << "break";
-    if (expr_ != NULL) {
-        os << " ";
-        expr_->print(os, indent);
-    }
-    os << ";";
-}
-
-const Type* BreakStmtNode::typeCheck() const 
-{   
-    const Type* return_type = NULL;
-
-    if (expr_) 
-        return_type = expr_->typeCheck(); 
-    
-    return return_type;
-}
-
-/****************************************************************/
-
-void ContinueStmtNode::print(ostream& os, int indent) const 
-{
-    prtSpace(os, indent);
-    os << "continue";
-    if (expr_ != NULL) {
-        os << " ";
-        expr_->print(os, indent);
-    }
-    os << ";";
-}
-
-const Type* ContinueStmtNode::typeCheck() const 
-{   
-    const Type* return_type = NULL;
-
-    if (expr_) 
-        return_type = expr_->typeCheck(); 
-    
-    return return_type;
-}
 
 /****************************************************************/
 
@@ -316,8 +273,12 @@ void WhileNode::print(ostream& os, int indent) const
 
 }
 
-const Type* WhileNode::typeCheck() const 
+static vector<const WhileNode*> nested_while_l;
+
+const Type* WhileNode::typeCheck() 
 {
+    nested_while_l.push_back(this);
+
     if (cond_) {
         const Type* cond_type = cond_->typeCheck();
         
@@ -329,10 +290,99 @@ const Type* WhileNode::typeCheck() const
             body_->typeCheck();
 
     }
+    nested_while_l.pop_back();
     return NULL;
 }
 
+InterCodesClass* WhileNode::codeGen()
+{
+    InterCodesClass *cls = new InterCodesClass();
+    InterCode* loop_l = LabelClass::assignLabel();
+    InterCode* body_l = LabelClass::assignLabel();
+    InterCode* end_l = LabelClass::assignLabel();
+    InterCodesClass* ic_cond;
+
+    body_->next(loop_l);
+    cls->addCode(loop_l);
+
+    cond_->OnTrue(body_l); 
+    cond_->OnFalse(end_l);
+    if ((ic_cond = cond_->codeGen()) != NULL) {
+        cls->addCode(ic_cond);
+    } else {
+        cls->addCode(InterCode::OPNTYPE::IFREL, cond_);
+    }
+
+    cls->addCode(body_l);
+    cls->addCode(body_->codeGen());
+    cls->addCode (InterCode::OPNTYPE::GOTO, loop_l);
+    cls->addCode(end_l);
+    
+    return cls;
+}
+
 /****************************************************************/
+
+void BreakStmtNode::print(ostream& os, int indent) const 
+{
+    prtSpace(os, indent);
+    os << "break ";
+    expr_->print(os, indent);
+    os << ";";
+}
+
+const Type* BreakStmtNode::typeCheck()
+{   
+    int depth = ((ValueNode*)expr_)->value()->ival();
+    int curDepth = nested_while_l.size();
+
+    if (depth > 0 && (curDepth - depth) < 0)
+        errMsg("Invalid reference to outer While loops", this);
+
+    wnode_ = (WhileNode*) nested_while_l[curDepth-depth];
+
+    return expr_->typeCheck(); 
+}
+
+InterCodesClass* BreakStmtNode::codeGen()
+{
+    InterCodesClass *cls = new InterCodesClass();
+    cls->addCode (InterCode::OPNTYPE::GOTO, wnode_->cond()->OnFalse());
+    return cls;
+}
+
+/****************************************************************/
+
+void ContinueStmtNode::print(ostream& os, int indent) const 
+{
+    prtSpace(os, indent);
+    os << "continue ";
+    expr_->print(os, indent);
+    os << ";";
+}
+
+const Type* ContinueStmtNode::typeCheck()
+{   
+    int depth = ((ValueNode*)expr_)->value()->ival();
+    int curDepth = nested_while_l.size();
+
+    if (depth > 0 && (curDepth - depth) < 0)
+        errMsg("Invalid reference to outer While loops", this);
+
+    wnode_ = (WhileNode*) nested_while_l[curDepth-depth];
+
+    return expr_->typeCheck(); 
+}
+
+InterCodesClass* ContinueStmtNode::codeGen()
+{
+    InterCodesClass *cls = new InterCodesClass();
+    cls->addCode (InterCode::OPNTYPE::GOTO, wnode_->bodyStmt()->next());
+    return cls;
+}
+
+/****************************************************************/
+
 void CompoundStmtNode::printWithoutBraces(ostream& os, int indent) const
 {
     if (stmts_ == NULL || stmts_->size() == 0) return;
@@ -353,7 +403,7 @@ void CompoundStmtNode::print(ostream& os, int indent) const
     os << "};";
 }
 
-const Type* CompoundStmtNode::typeCheck() const {
+const Type* CompoundStmtNode::typeCheck() {
 
     if (stmts_ == NULL || stmts_->size() == 0) return NULL;
 
@@ -405,7 +455,7 @@ void InvocationNode::print(ostream& out, int indent) const
     out << ")";
 }
 
-const Type* InvocationNode::typeCheck() const
+const Type* InvocationNode::typeCheck()
 {
     FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
     vector<Type*>* argtypes    = func_entry->type()->argTypes();
@@ -490,7 +540,7 @@ void PrintFunctionNode::print(ostream& out, int indent) const
     out<<")";
 }
 
-const Type* PrintFunctionNode::typeCheck() const
+const Type* PrintFunctionNode::typeCheck()
 {
     if (params_) {
         vector<ExprNode*>::iterator p_iter = params_->begin();
@@ -537,7 +587,7 @@ void ClassFuncInvocationNode::print(ostream& out, int indent) const
     out << ")";
 }
 
-const Type* ClassFuncInvocationNode::typeCheck() const
+const Type* ClassFuncInvocationNode::typeCheck()
 {
     FunctionEntry* func_entry = (FunctionEntry *) symTabEntryFunction();  
     vector<Type*>* argtypes   = func_entry->type()->argTypes();
@@ -600,7 +650,7 @@ void ClassRefExprNode::print(ostream& os, int indent) const
     os << ext_;
 }
 
-const Type* ClassRefExprNode::typeCheck() const {
+const Type* ClassRefExprNode::typeCheck() {
     const Type* typ = NULL; 
     if (symTabEntryVariable())    
         typ = varSym_->type();
@@ -633,7 +683,7 @@ void RuleNode::print(ostream& out, int indent) const
 }
 
 
-const Type* RuleNode::typeCheck() const 
+const Type* RuleNode::typeCheck() 
 {
     if (pat_)
         pat_->typeCheck();
@@ -692,7 +742,7 @@ void PrimitivePatNode::print(ostream& out, int indent) const
     out << ")";
 }
 
-const Type* PrimitivePatNode::typeCheck() const 
+const Type* PrimitivePatNode::typeCheck() 
 {   //TODO: Blindly copied from print, need to check for segfaults. code seems bit susceptible to segfaults
     //TODO: type mismatch condition is not there in any input files. need to look into if correct.
 
@@ -760,7 +810,7 @@ void PatNode::print(ostream& out, int indent) const
     out << ")";
 }
 
-const Type* PatNode::typeCheck() const 
+const Type* PatNode::typeCheck() 
 {
   switch(kind()) {
     case PatNodeKind::PRIMITIVE:    break;
@@ -944,7 +994,7 @@ void OpNode::print(ostream& os, int indent) const {
 }
 
 
-const Type* OpNode::typeCheck() const {
+const Type* OpNode::typeCheck() {
 
     int iopcode = static_cast<int>(opCode_);
     const Type* targ1, *targ2;
@@ -1136,6 +1186,7 @@ InterCodesClass* OpNode::codeGen()
                     arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
             break;
 
+        // Short Circuit '&&' Operator
         case OpCode::AND:
         {
             InterCode* arg0_true_l = LabelClass::assignLabel();
@@ -1163,6 +1214,7 @@ InterCodesClass* OpNode::codeGen()
             break;
         }
 
+        // Short Circuit '||' Operator
         case OpCode::OR:
         {
             InterCode* arg0_false_l = LabelClass::assignLabel();

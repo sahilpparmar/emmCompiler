@@ -23,7 +23,7 @@ mytests/in25:9:Warning: Unsupported datatype, converting 'short' to 'int'
       a=10;
       logMessage("Assignment in condition");
       b=987654321;
-      break;
+      break 1;
       while (a>10)       {
         c=1;
         break 2;

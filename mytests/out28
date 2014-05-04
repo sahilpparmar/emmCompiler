@@ -7,18 +7,9 @@
   int a = 5;
   int b;
   int c;
-  event open(string a1, int a2, unsigned int a3);
   bool condition;
- 
-  (open(string file, int flags, unsigned int mode))-->   {
-    if (a==0)     {
-      logMessage("Assignment in condition");
-      if (a<5)       {
-        b=3;
-      };
-      else ;
-    };
-    else ;
+  int open(string file, int flags, unsigned int mode) {
+    
     while (a<3)     {
       a=10;
       if (a==10)       {
@@ -37,7 +28,7 @@
       };
     };
   };
-  ;;
+ 
 
 ========================Type Checking========================
 
@@ -53,13 +44,49 @@ Variable: x, Offset: 8
 Variable: a, Offset: 0
 Variable: b, Offset: 4
 Variable: c, Offset: 8
+Variable: condition, Offset: 12
 
-====Event 'open'
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
-Variable: a3, Offset: 8
-
-Variable: condition, Offset: 12======================3 Addr Generation======================
+====Function 'open'
+==Formal Parameters
+Variable: file, Offset: 8
+Variable: flags, Offset: 12
+Variable: mode, Offset: 16
+==Local Variables
+======================3 Addr Generation======================
 L0:
         a = 5
+open:
+        enter open
+L2:
+        if a < 3 goto L3:
+        goto L4:
+L3:
+        a = 10
+        if a == 10 goto L6:
+        goto L5:
+L6:
+        goto L2:
+L5:
+        param "Assignment in condition"
+        call logMessage
+        goto L4:
+L7:
+        if a > 10 goto L8:
+        goto L9:
+L8:
+        __vreg0 = b + c
+        a = __vreg0
+        if a > 20 goto L11:
+        goto L12:
+L11:
+        goto L2:
+        goto L10:
+L12:
+        goto L4:
+L10:
+        goto L7:
+L9:
+        goto L2:
+L4:
+        leave open
 

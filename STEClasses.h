@@ -33,7 +33,7 @@ class GlobalEntry: public SymTabEntry {
         RuleNode* rule(int i) { return rules_[i];}
         void addRule(RuleNode* re) { rules_.push_back(re);};
 
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         void print(ostream&, int indent=0) const;
         void memAlloc();
         InterCodesClass* codeGen();     
@@ -46,7 +46,7 @@ class BlockEntry: public SymTabEntry {
         BlockEntry(string name, int line=0, int column=0, string file=""):
             SymTabEntry(name, SymTabEntry::Kind::BLOCK_KIND, line, column, file, (Type*)&Type::voidType) {};
         ~BlockEntry() {};
-        const Type* typeCheck() const {return NULL;}
+        const Type* typeCheck() {return NULL;}
         void print(ostream& out, int indent=0) const;
 };
 
@@ -89,7 +89,7 @@ class VariableEntry: public SymTabEntry {
         void initVal(ExprNode *init) { initVal_ = init;};
 
         void print(ostream& os, int indent=0) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         void memAlloc();
         InterCodesClass* codeGen();
     private:
@@ -105,7 +105,7 @@ class ClassEntry: public SymTabEntry {
         ~ClassEntry() {};
 
         void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         void memAlloc();
 };
 
@@ -124,7 +124,7 @@ class FunctionEntry: public SymTabEntry {
         void body(CompoundStmtNode* n) { body_ = n;}
 
         void print(ostream& os, int indent) const;
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         void memAlloc();
         InterCodesClass* codeGen();
     private:
@@ -138,7 +138,7 @@ class EventEntry: public SymTabEntry {
         ~EventEntry() {};
 
         void print(ostream& out, int indent=0) const; 
-        const Type* typeCheck() const;
+        const Type* typeCheck();
         void memAlloc();
 };
 
