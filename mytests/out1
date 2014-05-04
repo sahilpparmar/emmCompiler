@@ -3,17 +3,12 @@
 
 =========================AST Builder=========================
  
-  int x;
-  class abc{
-    int m;
-    int n;
+  int a = 5;
+  void foo(int b) {
+    
+    if (a==5)     b=2;
+    else     b=((7+8)+9);
   };
-  void foo(int a) {
-    int b;
-    int c = 5;
-    class abc obj;
-    };
-  int a = 2;
  
 
 ========================Type Checking========================
@@ -22,19 +17,28 @@
 
 
 ====Global Declarations
-Variable: x, Offset: 0
-
-====Class 'abc'
-Variable: m, Offset: 0
-Variable: n, Offset: 4
-
+Variable: a, Offset: 0
 
 ====Function 'foo'
 ==Formal Parameters
-Variable: a, Offset: 8
+Variable: b, Offset: 8
 ==Local Variables
-Variable: b, Offset: -4
-Variable: c, Offset: -8
-Variable: obj, Offset: -16
+======================3 Addr Generation======================
 
-Variable: a, Offset: 4
+L0:
+    a = 5;
+
+foo:
+Enter foo
+    IF a == 5 GOTO 0x1d61de0;
+
+L3:
+    b = 2;
+    GOTO L30809312;
+
+L4:
+    b = __vreg1;
+
+L2:
+Leave foo
+

@@ -75,4 +75,18 @@ Variable: c, Offset: -12
 ==Local Variables
 Variable: a, Offset: -4
 Variable: b, Offset: -8
+======================3 Addr Generation======================
+
+L0:
+    i = 2;
+    j = 3;
+    k = 4.0;
+
+g:
+Enter g
+Leave g
+
+f:
+Enter f
+Leave f
 

@@ -149,7 +149,7 @@ InterCodesClass* FunctionEntry:: codeGen() {
     if(body_) {
         cls = new InterCodesClass();
         cls->addCode (LabelClass::assignLabel (name()));
-        cls->addCode (InterCode::OPNTYPE::ENTER, (void *)this);
+        cls->addCode (InterCode::OPNTYPE::ENTER, (void *)name().c_str());
         
         if (symTab()) {
             
@@ -158,8 +158,11 @@ InterCodesClass* FunctionEntry:: codeGen() {
                 if ((*it) && (*it)->kind() == SymTabEntry::Kind::VARIABLE_KIND ) 
                     cls->addCode((*it)->codeGen());
             }
-            cls->addCode (body_->codeGen());
         }
+        cls->addCode (body_->codeGen());
+
+        cls->addCode (InterCode::OPNTYPE::LEAVE, (void *)name().c_str());
+
         return cls; 
     }
     return NULL;

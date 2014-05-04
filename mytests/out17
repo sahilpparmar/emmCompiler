@@ -124,4 +124,9 @@ Variable: a2, Offset: 4
 Variable: i, Offset: 0
 Variable: j, Offset: 4
 Variable: rv, Offset: 8
-Variable: t2, Offset: 12
+Variable: t2, Offset: 12======================3 Addr Generation======================
+
+L0:
+    i = 0;
+    j = 1;
+

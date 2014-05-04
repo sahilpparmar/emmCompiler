@@ -15,7 +15,7 @@ using namespace std;
  */
 class InterCode {
     public:
-       enum OPNTYPE { IF, EXPR, LABEL, GOTO, IFREL, ENTER }; 
+       enum OPNTYPE { IF, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE}; 
        
        InterCode (OPNTYPE op, OpNode::OpCode subopc = OpNode::OpCode::INVALID, 
                    void *a = NULL, void *b  = NULL, void *c = NULL) {
@@ -53,11 +53,11 @@ class InterCodesClass {
 };
 
 class LabelClass {
-    static int labelCount;
+    static long labelCount;
     public:
         friend class InterCodesClass; 
-        int getLabelCount() { return labelCount; } 
-        void setLabelCount (int c) { labelCount = c; }
+        long getLabelCount() { return labelCount; } 
+        void setLabelCount (long c) { labelCount = c; }
         
         static InterCode* assignLabel (string name="") {
             InterCode* ic = new InterCode (InterCode::OPNTYPE::LABEL, OpNode::OpCode::INVALID, 

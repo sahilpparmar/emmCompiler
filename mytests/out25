@@ -52,4 +52,11 @@ Variable: d, Offset: 12
 Variable: a1, Offset: 0
 Variable: a2, Offset: 4
 Variable: a3, Offset: 8
+======================3 Addr Generation======================
+
+L0:
+    a = 5;
+    b = 12345678;
+    c = 1;
+    d = 1;
 

@@ -29,7 +29,6 @@ ExprNode* ExprNode:: getRefNode ()
     if (refnode_ == NULL) {
         refnode_ = new VregNode();
         //TODO: add type info
-
     }
     return (ExprNode *)refnode_;
 }
@@ -80,10 +79,11 @@ const Type* RefExprNode::typeCheck() const {
 
 InterCodesClass* RefExprNode::codeGen()
 {
-    InterCodesClass* cls = new InterCodesClass();
-    cls->addCode(InterCode::OPNTYPE::IF, onTrue_, this);
-    cls->addCode(InterCode::OPNTYPE::GOTO, onFalse_);
-    return cls;
+    return NULL;
+    //InterCodesClass* cls = new InterCodesClass();
+    //cls->addCode(InterCode::OPNTYPE::IF, onTrue_, this);
+    //cls->addCode(InterCode::OPNTYPE::GOTO, onFalse_);
+    //return cls;
 }
 
 
@@ -100,15 +100,15 @@ const Type* ValueNode::typeCheck() const {
 }
 
 InterCodesClass* ValueNode::codeGen() {
-    InterCodesClass *cls = new InterCodesClass();
-    const Value *v = value(); 
-    if(v != NULL) { 
-        if (v->ival() || v->dval() || v->bval())
-            cls->addCode (InterCode::OPNTYPE::GOTO, (void *)onTrue_); 
-        else 
-            cls->addCode (InterCode::OPNTYPE::GOTO, (void *)onFalse_); 
-        return cls;
-    }
+    //InterCodesClass *cls = new InterCodesClass();
+    //const Value *v = value(); 
+    //if(v != NULL) { 
+    //    if (v->ival() || v->dval() || v->bval())
+    //        cls->addCode (InterCode::OPNTYPE::GOTO, (void *)onTrue_); 
+    //    else 
+    //        cls->addCode (InterCode::OPNTYPE::GOTO, (void *)onFalse_); 
+    //    return cls;
+    //}
     
     return NULL;
 }
@@ -1099,38 +1099,62 @@ const Type* OpNode::typeCheck() const {
 InterCodesClass* OpNode::codeGen() 
 {
     InterCodesClass *cls = new InterCodesClass();
-    switch(opCode()) {
-        
-        case OpCode::EQ  :
-        case OpCode::NE  :
-        case OpCode::GT  :
-        case OpCode::LT  :
-        case OpCode::GE  :
-        case OpCode::LE  :
-        case OpCode::AND :
-        case OpCode::OR  :
-        case OpCode::NOT : 
-                 cls->addCode (arg_[0]->codeGen());
-                 cls->addCode (arg_[1]->codeGen());
-                 cls->addCode (InterCode::OPNTYPE::IFREL, getRefNode(), 
-                                 arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
-                   
-                 break;
-        
-        
-        case OpCode::PLUS : 
-                 cls->addCode (arg_[0]->codeGen());
-                 cls->addCode (arg_[1]->codeGen());
-                 cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(), 
-                                 arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
-                 break;
-        
-        case OpCode::ASSIGN : 
-                 cls->addCode (arg_[0]->codeGen()); 
-                 cls->addCode (InterCode::OPNTYPE::EXPR, arg_[0]->getRefNode(), 
-                                arg_[1]->getRefNode(), NULL, opCode_);
-                 break; 
-        default           : DEBUG("ERROR-----------"); 
+    switch (opCode()) {
+
+        // BINARY Conditional Operators
+        case OpCode::EQ:
+        case OpCode::NE:
+        case OpCode::GT:
+        case OpCode::LT:
+        case OpCode::GE:
+        case OpCode::LE:
+        case OpCode::AND:
+        case OpCode::OR:
+            cls->addCode (arg_[0]->codeGen());
+            cls->addCode (arg_[1]->codeGen());
+            cls->addCode (InterCode::OPNTYPE::IFREL, getRefNode(), 
+                    arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
+            break;
+
+        // UNARY Conditional Operators
+        case OpCode::NOT: 
+            cls->addCode (arg_[0]->codeGen());
+            cls->addCode (InterCode::OPNTYPE::IFREL, getRefNode(), 
+                    arg_[0]->getRefNode(), NULL, opCode_);
+            break;
+
+        // BINARY Arithmetic Operators
+        case OpCode::PLUS: 
+        case OpCode::MINUS:
+        case OpCode::MULT:
+        case OpCode::DIV:
+        case OpCode::MOD:
+        case OpCode::BITAND:
+        case OpCode::BITOR:
+        case OpCode::BITXOR:
+            cls->addCode (arg_[0]->codeGen());
+            cls->addCode (arg_[1]->codeGen());
+            cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(), 
+                    arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
+            break;
+
+        // UNARY Arithmetic Operators
+        case OpCode::BITNOT:
+        case OpCode::UMINUS:
+            cls->addCode (arg_[0]->codeGen());
+            cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(), 
+                    arg_[0]->getRefNode(), NULL, opCode_);
+            break;
+
+        case OpCode::ASSIGN:
+            cls->addCode (arg_[0]->codeGen()); 
+            cls->addCode (InterCode::OPNTYPE::EXPR, arg_[0]->getRefNode(), 
+                    arg_[1]->getRefNode(), NULL, opCode_);
+            break; 
+
+        case OpCode::INVALID:
+        default:
+            assert(0 && "Unhandled Opcode"); 
     }
     
     return cls;

@@ -254,8 +254,10 @@ main(int argc, char *argv[], char *envp[]) {
 
         DEBUG("======================Memory Allocation======================\n");
         ge->memAlloc(); 
+
+        cout<<"======================3 Addr Generation======================\n";
         InterCodesClass* cls = ge->codeGen();
-        if(cls)
+        if (cls)
             cls->print(cout);
         cout << endl;
     }

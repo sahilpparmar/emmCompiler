@@ -423,4 +423,10 @@ Variable: check_file, Offset: 40
 Variable: a, Offset: 44
 Variable: b, Offset: 48
 Variable: tmp, Offset: 52
-Variable: processname, Offset: 56
+Variable: processname, Offset: 56======================3 Addr Generation======================
+
+L0:
+    admin_file = 0;
+    foundFlag = 0;
+    b = 0;
+

@@ -1,57 +1,84 @@
 #include "InterCode.h"
+#define TAB_SPACE 4
 
-int LabelClass::labelCount = 0;
+long LabelClass::labelCount = 0;
 
 void InterCode::print(ostream &os) {
-            ExprNode** op = (ExprNode**)opnds_;
-            
-            switch (optype_) {
-                case EXPR : {
-                    switch (subCode_) {
-                        default : 
-                        case OpNode::OpCode::PLUS       :  if (op[0] && op[1] && op[2]) {
-                                                                os << op[0]->getRefName() << "=" << op[1]->getRefName();
-                                                                os << OpNode::opInfo[(int )subCode_].name_ << op[2]->getRefName();
-                                                           }
-                                                           break;
-                        case OpNode::OpCode::ASSIGN     :  os << op[0]->getRefName() << "=" << op[1]->getRefName();
-                                                           break;
+    ExprNode** op = (ExprNode**)opnds_;
+
+    //os << "NEXT\n";
+    switch (optype_) {
+        case EXPR:  {
+                        switch (subCode_) {
+                            default: 
+                                if (op[0] && op[1] && op[2]) {
+                                    prtSpace(os, TAB_SPACE);
+                                    os << op[0]->getRefName() << " = " << op[1]->getRefName();
+                                    os << " " << OpNode::opInfo[(int )subCode_].name_ << " ";
+                                    os << op[2]->getRefName() << ";";
+                                }
+                                break;
+
+                            case OpNode::OpCode::BITNOT:
+                            case OpNode::OpCode::UMINUS:
+                                if (op[0] && op[1]) {
+                                    prtSpace(os, TAB_SPACE);
+                                    os << op[0]->getRefName() << " = ";
+                                    os << OpNode::opInfo[(int )subCode_].name_;
+                                    os << op[2]->getRefName() << ";";
+                                }
+                                break;
+
+                            case OpNode::OpCode::ASSIGN:  
+                                prtSpace(os, TAB_SPACE);
+                                os << op[0]->getRefName() << " = " << op[1]->getRefName() << ";";
+                                break;
+                        }
+                    }                
+                    break;
+
+        case GOTO : {
+                        if (op[0]) {
+                            prtSpace(os, TAB_SPACE);
+                            os << "GOTO "; 
+                            os << "L" << (long )op[0] << ";";
+                        }
                     }
-                }                
-                break;
-                
-                case GOTO :  {
-                    if (op[0]) {
-                        os << "GOTO" << " "; 
-                        os << "L" << (long )op[0]; 
+                    break; 
+
+        case LABEL: {
+                        os << endl;
+                        string *n = (string *)op[1];
+                        if (n && n->length()) { 
+                            os << *n << ":";
+                        } else {
+                            os << "L" << (long )op[0] << ":";
+                        } 
                     }
-                }
-                break; 
-                
-                case LABEL : {
-                    string *n = (string *)op[1];
-                    if (n && n->length()) { 
-                       os << *n << ":";
-                    } else {
-                       os << "L" << (long )op[0] << ":";
-                    } 
-                }
-                break;
-                
-                case IFREL : {
-                    if (op[0] && op[1] && op[2]) {
-                         os << "IF " << op[1]->getRefName() <<  OpNode::opInfo[(int )subCode_].name_;
-                         os << op[2]->getRefName() << "GOTO "<< op[0];
+                     break;
+
+        case IFREL: {
+                        if (op[0] && op[1] && op[2]) {
+                            prtSpace(os, TAB_SPACE);
+                            os << "IF " << op[1]->getRefName() << " " << OpNode::opInfo[(int )subCode_].name_;
+                            os << " " << op[2]->getRefName() << " GOTO "<< op[0] << ";";
+                        }
                     }
-                }
-                break; 
-                
-                case ENTER: {
-                    os << "Enter " << op[0];
-                }
-                break;
-                default : DEBUG ("LaterOn");
-            }
+                     break; 
+
+        case ENTER: {
+                        os << "Enter " << (char*)op[0];
+                    }
+                    break;
+
+        case LEAVE: {
+                        os << "Leave " << (char*)op[0];
+                    }
+                    break;
+
+        default:;
+            //assert(0 && "Unsupported 3AddrCode");
+    }
 }
 
 void InterCodesClass::addCode (InterCode *code) {

@@ -55,4 +55,11 @@ Variable: j, Offset: 4
 Variable: k, Offset: 8
 Variable: f, Offset: 12
 Variable: b, Offset: 16
-Variable: s, Offset: 20
+Variable: s, Offset: 20======================3 Addr Generation======================
+
+L0:
+    i = 2;
+    j = 3;
+    k = 4.0;
+    f = 3.3;
+

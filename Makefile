@@ -11,7 +11,7 @@ E--_lexer.o:	E--_lexer.C E--.tab.h
 E--_parser.o: E--_parser.C E--.tab.h
 
 E--_parser.C: E--_parser.y++
-	$(BISON) -t -d -v -o E--_parser.C E--_parser.y++; \
+	$(BISON) -t -d -o E--_parser.C E--_parser.y++; \
   mv E--_parser.H E--.tab.h
 
 SymTabMgr.o: SymTabMgr.h SymTabMgr.C

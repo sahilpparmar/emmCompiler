@@ -27,4 +27,7 @@ Variable: a3, Offset: 8
 ====Function 'logMessage'
 ==Formal Parameters
 Variable: x, Offset: 8
+======================3 Addr Generation======================
+
+L0:
 
