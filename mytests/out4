@@ -72,11 +72,9 @@ Variable: x, Offset: 8
 Variable: a1, Offset: -4
 Variable: a2, Offset: -8
 ======================3 Addr Generation======================
-
 L0:
-
 g:
-Enter g
-    a1 = 1;
-Leave g
+        enter g
+        a1 = 1
+        leave g
 

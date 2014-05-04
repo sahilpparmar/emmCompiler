@@ -68,7 +68,8 @@ void RefExprNode::print(ostream& os, int indent) const
     os << ext_;
 }
 
-const Type* RefExprNode::typeCheck() const {
+const Type* RefExprNode::typeCheck() const
+{
     const Type* typ = NULL; 
     if (symTabEntry())    
         typ = sym_->type();
@@ -80,12 +81,7 @@ const Type* RefExprNode::typeCheck() const {
 InterCodesClass* RefExprNode::codeGen()
 {
     return NULL;
-    //InterCodesClass* cls = new InterCodesClass();
-    //cls->addCode(InterCode::OPNTYPE::IF, onTrue_, this);
-    //cls->addCode(InterCode::OPNTYPE::GOTO, onFalse_);
-    //return cls;
 }
-
 
 /****************************************************************/
 
@@ -94,24 +90,16 @@ void ValueNode::print(ostream& os, int indent) const
     value()->print(os, indent); 
 }
 
-const Type* ValueNode::typeCheck() const {
-    //cout<<"\n valnode";
+const Type* ValueNode::typeCheck() const
+{
     return value()->type(); 
 }
 
-InterCodesClass* ValueNode::codeGen() {
-    //InterCodesClass *cls = new InterCodesClass();
-    //const Value *v = value(); 
-    //if(v != NULL) { 
-    //    if (v->ival() || v->dval() || v->bval())
-    //        cls->addCode (InterCode::OPNTYPE::GOTO, (void *)onTrue_); 
-    //    else 
-    //        cls->addCode (InterCode::OPNTYPE::GOTO, (void *)onFalse_); 
-    //    return cls;
-    //}
-    
+InterCodesClass* ValueNode::codeGen()
+{
     return NULL;
 }
+
 /****************************************************************/
 
 void ExprStmtNode::print(ostream& os, int indent) const {
@@ -134,6 +122,7 @@ InterCodesClass* ExprStmtNode::codeGen() {
     cls->addCode (expr_->codeGen());
     return cls;
 }
+
 /****************************************************************/
 
 void IfNode::print(ostream& os, int indent) const
@@ -175,46 +164,45 @@ const Type* IfNode::typeCheck() const
     return NULL;
 }
 
-
 InterCodesClass* IfNode::codeGen()
 {
     InterCodesClass* cls = new InterCodesClass();    
-    
+
     if (then_ && cond_) {
         InterCode* nxt = LabelClass::assignLabel();
-        if(!else_) {
-           cond_->OnTrue (LabelClass::assignLabel()); 
-           cond_->OnFalse (nxt);   
-           then_->next (nxt);
 
-           cls->addCode (cond_->codeGen());     
-           cls->addCode (cond_->onTrue_);
-           cls->addCode (then_->codeGen());
-           cls->addCode (nxt); 
+        cond_->OnTrue(LabelClass::assignLabel()); 
+        then_->next (nxt);
+
+        if (!else_) {
+            cond_->OnFalse (nxt);
         } else {
-           cond_->OnTrue  (LabelClass::assignLabel()); 
-           cond_->OnFalse (LabelClass::assignLabel());   
-           then_->next (nxt);
-           else_->next (nxt);
-            
-           cls->addCode (cond_->codeGen());
-           cls->addCode (cond_->onTrue_);
-           cls->addCode (then_->codeGen());
-           cls->addCode (InterCode::OPNTYPE::GOTO, nxt); 
-           cls->addCode (cond_->onFalse_);
-           cls->addCode (else_->codeGen());
-           cls->addCode (nxt); 
+            cond_->OnFalse(LabelClass::assignLabel());   
+            else_->next (nxt);
         }
-        
+        cond_->refnode_ = cond_;
+
+        InterCodesClass* ic_cond = NULL;
+        if ((ic_cond = cond_->codeGen()) != NULL) {
+            cls->addCode(ic_cond);
+        } else {
+            cls->addCode(InterCode::OPNTYPE::IFREL, cond_);
+        }
+
+        cls->addCode(cond_->onTrue_);
+        cls->addCode(then_->codeGen());
+
+        if (else_) {
+            cls->addCode (InterCode::OPNTYPE::GOTO, nxt); 
+            cls->addCode (cond_->onFalse_);
+            cls->addCode (else_->codeGen());
+        }
+        cls->addCode (nxt); 
+
         return cls;
     }
     return NULL;
 }
-
-
-
-
-
 
 /****************************************************************/
 
@@ -1026,7 +1014,7 @@ const Type* OpNode::typeCheck() const {
     /*************** For logical operator**************************************/
         
         if (!targ1->isBool(targ1->tag())) {
-            errMsg("Incompatible type for agrument 1 for operator `" + (string)opInfo[iopcode].name_ + "'", this);
+            warnMsg("Incompatible type for agrument 1 for operator `" + (string)opInfo[iopcode].name_ + "'", this);
         }
         
         if(!(iopcode == (int)OpNode::OpCode::NOT)) {
@@ -1034,7 +1022,7 @@ const Type* OpNode::typeCheck() const {
              targ2 = arg_[1]->typeCheck();
              assert(arg_[0] && arg_[1] && "Invalid args");
              if (!targ2->isBool(targ2->tag())) {
-                 errMsg("Incompatible type for agrument 2 for operator `" + (string)opInfo[iopcode].name_ + "'", this);
+                 warnMsg("Incompatible type for agrument 2 for operator `" + (string)opInfo[iopcode].name_ + "'", this);
              }
         } 
         return (new Type(opInfo[iopcode].outType_)); 
@@ -1099,6 +1087,8 @@ const Type* OpNode::typeCheck() const {
 InterCodesClass* OpNode::codeGen() 
 {
     InterCodesClass *cls = new InterCodesClass();
+    InterCodesClass* ic_cond = NULL;
+
     switch (opCode()) {
 
         // BINARY Conditional Operators
@@ -1108,18 +1098,70 @@ InterCodesClass* OpNode::codeGen()
         case OpCode::LT:
         case OpCode::GE:
         case OpCode::LE:
-        case OpCode::AND:
-        case OpCode::OR:
             cls->addCode (arg_[0]->codeGen());
             cls->addCode (arg_[1]->codeGen());
-            cls->addCode (InterCode::OPNTYPE::IFREL, getRefNode(), 
+            cls->addCode (InterCode::OPNTYPE::IFREL, this,
                     arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
             break;
+
+        case OpCode::AND:
+        {
+            InterCode* arg0_true_l = LabelClass::assignLabel();
+
+            arg_[0]->OnTrue(arg0_true_l);
+            arg_[0]->OnFalse(this->OnFalse());
+
+            if ((ic_cond = arg_[0]->codeGen()) != NULL) {
+                cls->addCode(ic_cond);
+            } else {
+                cls->addCode(InterCode::OPNTYPE::IFREL, arg_[0]);
+            }
+
+            cls->addCode(arg0_true_l);
+             
+            arg_[1]->OnTrue(this->OnTrue());
+            arg_[1]->OnFalse(this->OnFalse());
+
+            if ((ic_cond = arg_[1]->codeGen()) != NULL) {
+                cls->addCode(ic_cond);
+            } else {
+                cls->addCode(InterCode::OPNTYPE::IFREL, arg_[1]);
+            }
+
+            break;
+        }
+
+        case OpCode::OR:
+        {
+            InterCode* arg0_false_l = LabelClass::assignLabel();
+
+            arg_[0]->OnTrue(this->OnTrue());
+            arg_[0]->OnFalse(arg0_false_l);
+
+            if ((ic_cond = arg_[0]->codeGen()) != NULL) {
+                cls->addCode(ic_cond);
+            } else {
+                cls->addCode(InterCode::OPNTYPE::IFREL, arg_[0]);
+            }
+
+            cls->addCode(arg0_false_l);
+             
+            arg_[1]->OnTrue(this->OnTrue());
+            arg_[1]->OnFalse(this->OnFalse());
+
+            if ((ic_cond = arg_[1]->codeGen()) != NULL) {
+                cls->addCode(ic_cond);
+            } else {
+                cls->addCode(InterCode::OPNTYPE::IFREL, arg_[1]);
+            }
+
+            break;
+        }
 
         // UNARY Conditional Operators
         case OpCode::NOT: 
             cls->addCode (arg_[0]->codeGen());
-            cls->addCode (InterCode::OPNTYPE::IFREL, getRefNode(), 
+            cls->addCode (InterCode::OPNTYPE::IFREL, this,
                     arg_[0]->getRefNode(), NULL, opCode_);
             break;
 
@@ -1134,7 +1176,7 @@ InterCodesClass* OpNode::codeGen()
         case OpCode::BITXOR:
             cls->addCode (arg_[0]->codeGen());
             cls->addCode (arg_[1]->codeGen());
-            cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(), 
+            cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(),
                     arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
             break;
 
@@ -1148,6 +1190,7 @@ InterCodesClass* OpNode::codeGen()
 
         case OpCode::ASSIGN:
             cls->addCode (arg_[0]->codeGen()); 
+            cls->addCode (arg_[1]->codeGen()); 
             cls->addCode (InterCode::OPNTYPE::EXPR, arg_[0]->getRefNode(), 
                     arg_[1]->getRefNode(), NULL, opCode_);
             break; 

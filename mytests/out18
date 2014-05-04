@@ -55,10 +55,10 @@
   ;;
 
 ========================Type Checking========================
-mytests/in18:60:Error: Incompatible type for agrument 1 for operator `&&'
-mytests/in18:60:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in18:60:Warning: Incompatible type for agrument 1 for operator `&&'
+mytests/in18:60:Warning: Incompatible type for agrument 2 for operator `&&'
 mytests/in18:60:Error: Assigned expression must be a subtype of target
-mytests/in18:60:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in18:60:Warning: Incompatible type for agrument 2 for operator `&&'
 
 ======================Memory Allocation======================
 
@@ -199,10 +199,9 @@ Variable: k, Offset: 12
 Variable: f, Offset: 16
 Variable: y, Offset: 20
 Variable: state_var, Offset: 24======================3 Addr Generation======================
-
 L0:
-    i = 2;
-    j = 3;
-    k = 4;
-    f = 3.3;
+        i = 2
+        j = 3
+        k = 4
+        f = 3.3
 

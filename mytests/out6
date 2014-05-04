@@ -78,17 +78,15 @@ Variable: x, Offset: 8
 Variable: a1, Offset: -4
 Variable: a2, Offset: -8
 ======================3 Addr Generation======================
-
 L0:
-    i3 = 0;
-    d1 = 3.0;
-    i4 = 0;
-    b1 = 1;
-    b2 = 0;
-    cs3 = "sdsd";
-
+        i3 = 0
+        d1 = 3.0
+        i4 = 0
+        b1 = 1
+        b2 = 0
+        cs3 = "sdsd"
 g:
-Enter g
-    a1 = 1;
-Leave g
+        enter g
+        a1 = 1
+        leave g
 

@@ -51,15 +51,15 @@ Variable: c, Offset: -8
 Variable: obj, Offset: -16
 Variable: xyz, Offset: -24
 ======================3 Addr Generation======================
-
 L0:
-
 foo:
-Enter foo
-    c = 5;
-    __vreg0 = 5;
-    __vreg2 = __vreg1;
-    __vreg4 = __vreg3;
-    __vreg6 = __vreg5;
-Leave foo
+        enter foo
+        c = 5
+        __vreg0 = 5
+        __vreg2 = __vreg1
+        __vreg4 = __vreg3 * 2
+        __vreg5 = __vreg4
+        __vreg8 = __vreg7 + __vreg6
+        __vreg9 = __vreg8
+        leave foo
 

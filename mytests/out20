@@ -124,12 +124,12 @@
   ;;
 
 ========================Type Checking========================
-mytests/in20:110:Error: Incompatible type for agrument 1 for operator `&&'
-mytests/in20:110:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:110:Warning: Incompatible type for agrument 1 for operator `&&'
+mytests/in20:110:Warning: Incompatible type for agrument 2 for operator `&&'
 mytests/in20:110:Error: Assigned expression must be a subtype of target
-mytests/in20:110:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:110:Warning: Incompatible type for agrument 2 for operator `&&'
 mytests/in20:114:Error: Assigned expression must be a subtype of target
-mytests/in20:114:Error: Incompatible type for agrument 2 for operator `&&'
+mytests/in20:114:Warning: Incompatible type for agrument 2 for operator `&&'
 mytests/in20:115:Error: Assigned expression must be a subtype of target
 mytests/in20:118:Error: 1 arguments expected for logMessageStr
 
@@ -424,9 +424,8 @@ Variable: a, Offset: 44
 Variable: b, Offset: 48
 Variable: tmp, Offset: 52
 Variable: processname, Offset: 56======================3 Addr Generation======================
-
 L0:
-    admin_file = 0;
-    foundFlag = 0;
-    b = 0;
+        admin_file = 0
+        foundFlag = 0
+        b = 0
 

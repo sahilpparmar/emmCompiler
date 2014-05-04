@@ -28,6 +28,5 @@ Variable: a3, Offset: 8
 ==Formal Parameters
 Variable: x, Offset: 8
 ======================3 Addr Generation======================
-
 L0:
 

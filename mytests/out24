@@ -60,7 +60,6 @@ Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
 Variable: condition, Offset: 12======================3 Addr Generation======================
-
 L0:
-    a = 5;
+        a = 5
 

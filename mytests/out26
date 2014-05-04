@@ -50,11 +50,9 @@ Variable: c, Offset: -8
 Variable: obj, Offset: -16
 Variable: d, Offset: -20
 ======================3 Addr Generation======================
-
 L0:
-
 foo:
-Enter foo
-    c = 5;
-Leave foo
+        enter foo
+        c = 5
+        leave foo
 

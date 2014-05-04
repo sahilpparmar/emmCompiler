@@ -79,7 +79,6 @@ Variable: str1, Offset: 48
 ==Formal Parameters
 Variable: a, Offset: 8
 ======================3 Addr Generation======================
-
 L0:
-    i = 65536;
+        i = 65536
 Segmentation fault (core dumped)

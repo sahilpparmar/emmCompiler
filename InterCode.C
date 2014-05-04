@@ -1,5 +1,5 @@
 #include "InterCode.h"
-#define TAB_SPACE 4
+#define TAB_SPACE 8
 
 long LabelClass::labelCount = 0;
 
@@ -15,7 +15,7 @@ void InterCode::print(ostream &os) {
                                     prtSpace(os, TAB_SPACE);
                                     os << op[0]->getRefName() << " = " << op[1]->getRefName();
                                     os << " " << OpNode::opInfo[(int )subCode_].name_ << " ";
-                                    os << op[2]->getRefName() << ";";
+                                    os << op[2]->getRefName();
                                 }
                                 break;
 
@@ -25,29 +25,27 @@ void InterCode::print(ostream &os) {
                                     prtSpace(os, TAB_SPACE);
                                     os << op[0]->getRefName() << " = ";
                                     os << OpNode::opInfo[(int )subCode_].name_;
-                                    os << op[2]->getRefName() << ";";
+                                    os << op[2]->getRefName();
                                 }
                                 break;
 
                             case OpNode::OpCode::ASSIGN:  
                                 prtSpace(os, TAB_SPACE);
-                                os << op[0]->getRefName() << " = " << op[1]->getRefName() << ";";
+                                os << op[0]->getRefName() << " = " << op[1]->getRefName();
                                 break;
                         }
                     }                
                     break;
 
         case GOTO : {
-                        if (op[0]) {
-                            prtSpace(os, TAB_SPACE);
-                            os << "GOTO "; 
-                            os << "L" << (long )op[0] << ";";
-                        }
+                        InterCode* goto_lab = (InterCode*) op[0];
+                        prtSpace(os, TAB_SPACE);
+                        os << "goto "; 
+                        goto_lab->print(os);
                     }
                     break; 
 
         case LABEL: {
-                        os << endl;
                         string *n = (string *)op[1];
                         if (n && n->length()) { 
                             os << *n << ":";
@@ -55,24 +53,45 @@ void InterCode::print(ostream &os) {
                             os << "L" << (long )op[0] << ":";
                         } 
                     }
-                     break;
+                    break;
 
         case IFREL: {
-                        if (op[0] && op[1] && op[2]) {
-                            prtSpace(os, TAB_SPACE);
-                            os << "IF " << op[1]->getRefName() << " " << OpNode::opInfo[(int )subCode_].name_;
-                            os << " " << op[2]->getRefName() << " GOTO "<< op[0] << ";";
+                        assert(op[0] && "Expected Operand 0");
+
+                        prtSpace(os, TAB_SPACE);
+                        os << "if ";
+                        ExprNode* cond = (ExprNode*) op[0];
+                        InterCode* true_lab = cond->OnTrue();
+                        InterCode* false_lab = cond->OnFalse();
+
+                        if (op[2] && op[1]) {
+                            os << op[1]->getRefName() << " ";
+                            os << OpNode::opInfo[(int )subCode_].name_;
+                            os << " " << op[2]->getRefName();
+                        } else if (op[1]) {
+                            os << OpNode::opInfo[(int )subCode_].name_ << op[1]->getRefName();
+                        } else {
+                            os << op[0]->getRefName();
                         }
+
+                        os << " goto ";
+                        true_lab->print(os);
+                        os << endl;
+                        prtSpace(os, TAB_SPACE);
+                        os << "goto ";
+                        false_lab->print(os);
                     }
-                     break; 
+                    break; 
 
         case ENTER: {
-                        os << "Enter " << (char*)op[0];
+                        prtSpace(os, TAB_SPACE);
+                        os << "enter " << (char*)op[0];
                     }
                     break;
 
         case LEAVE: {
-                        os << "Leave " << (char*)op[0];
+                        prtSpace(os, TAB_SPACE);
+                        os << "leave " << (char*)op[0];
                     }
                     break;
 

@@ -221,26 +221,27 @@ class ValueNode: public ExprNode {
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck() const;
         InterCodesClass* codeGen();  
+
         string getRefName() {
 
-  	    ostringstream os;
-	    Type* tp = (Type*)coercedType();
-	    if (tp==NULL) {
-	    	tp = type();
-	    }
-	    if (Type::isBool(tp->tag())) {
-	    	os << value()->bval();
-	    } else {
-	    	if (Type::isFloat(tp->tag())) {
-	    	  	os.precision(1);
-	    	  	os.setf(ios::fixed,ios::floatfield);
-	    	  	os << value()->dval();
-	    	}
-	    	else {
-	    		value()->print(os,0);
-	    	}
-	    }
-	    return os.str();
+            ostringstream os;
+            Type* tp = (Type*)coercedType();
+            if (tp==NULL) {
+                tp = type();
+            }
+            if (Type::isBool(tp->tag())) {
+                os << value()->bval();
+            } else {
+                if (Type::isFloat(tp->tag())) {
+                    os.precision(1);
+                    os.setf(ios::fixed,ios::floatfield);
+                    os << value()->dval();
+                }
+                else {
+                    value()->print(os,0);
+                }
+            }
+            return os.str();
         }
 
     private:

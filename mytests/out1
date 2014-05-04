@@ -24,21 +24,19 @@ Variable: a, Offset: 0
 Variable: b, Offset: 8
 ==Local Variables
 ======================3 Addr Generation======================
-
 L0:
-    a = 5;
-
+        a = 5
 foo:
-Enter foo
-    IF a == 5 GOTO 0x1d61de0;
-
+        enter foo
+        if a == 5 goto L3:
+        goto L4:
 L3:
-    b = 2;
-    GOTO L30809312;
-
+        b = 2
+        goto L2:
 L4:
-    b = __vreg1;
-
+        __vreg0 = 7 + 8
+        __vreg1 = __vreg0 + 9
+        b = __vreg1
 L2:
-Leave foo
+        leave foo
 
