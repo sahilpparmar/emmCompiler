@@ -41,7 +41,6 @@ ExprNode::ExprNode(ExprNodeType et, const Value* val, int line, int column,
     val_      = val;
 }
 
-
 ExprNode::ExprNode(const ExprNode& e) : AstNode(e)
 {
 
@@ -553,6 +552,21 @@ const Type* PrintFunctionNode::typeCheck()
     return new Type(Type::TypeTag::VOID);
 }
 
+InterCodesClass* PrintFunctionNode::codeGen() 
+{
+    if (params_) {
+        InterCodesClass *cls = new InterCodesClass();
+        vector<ExprNode*>::iterator p_iter = params_->begin();
+        for (; p_iter != params_->end(); ++p_iter) {
+            ExprNode* expr_node = *p_iter; 
+            cls->addCode(expr_node->codeGen());
+            cls->addCode(InterCode::OPNTYPE::PRINT, expr_node->getRefNode());
+        }
+        return cls;
+    }
+    return NULL;
+}
+
 /****************************************************************/
 
 ClassFuncInvocationNode::ClassFuncInvocationNode(const SymTabEntry *oste, const SymTabEntry *fste,
@@ -627,6 +641,13 @@ const Type* ClassFuncInvocationNode::typeCheck()
     return NULL;
 }
 
+InterCodesClass* ClassFuncInvocationNode::codeGen()
+{
+    InterCodesClass *cls = new InterCodesClass();
+    //TODO:
+    return cls;
+}
+
 /****************************************************************/
 
 ClassRefExprNode::ClassRefExprNode(string ext, const SymTabEntry* objSte, const SymTabEntry* varSte,
@@ -656,6 +677,13 @@ const Type* ClassRefExprNode::typeCheck() {
         typ = varSym_->type();
 
     return typ;
+}
+
+InterCodesClass* ClassRefExprNode::codeGen()
+{
+    InterCodesClass *cls = new InterCodesClass();
+    //TODO:
+    return cls;
 }
 
 /****************************************************************/

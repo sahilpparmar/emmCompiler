@@ -54,5 +54,23 @@ L0:
 foo:
         enter foo
         c = 5
+        print "hello"
+        print hi
+        __vreg0 = b + c
+        print __vreg0
+        __vreg1 = b * c
+        print __vreg1
+        print 5
+        print obj
+        print b
+        print c
+        print d
+        print b
+        __vreg2 = d + b
+        print __vreg2
+        print d
+        print z
+        __vreg3 = b + "hi"
+        print __vreg3
         leave foo
 

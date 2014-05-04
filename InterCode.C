@@ -115,6 +115,12 @@ void InterCode::print(ostream &os) {
                         os << "param " << op[0]->getRefName();
                     }
                     break;
+        case PRINT: {
+                        prtSpace(os, TAB_SPACE);
+                        os << "print " << op[0]->getRefName();
+                    }
+                    break;
+
         default:
             assert(0 && "Unsupported 3AddrCode");
     }

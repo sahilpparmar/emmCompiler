@@ -319,6 +319,7 @@ class PrintFunctionNode: public ExprNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck();
+        InterCodesClass* codeGen();  
 
     private:
         vector<ExprNode*>* params_;
@@ -360,6 +361,7 @@ class ClassFuncInvocationNode: public ExprNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck();
+        InterCodesClass* codeGen();  
 
     private:
         vector<ExprNode*>* params_;
@@ -388,6 +390,7 @@ class ClassRefExprNode: public ExprNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck();
+        InterCodesClass* codeGen();  
 
     private:
         string ext_;
