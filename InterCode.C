@@ -128,26 +128,26 @@ void InterCode::print(ostream &os) {
 
 void InterCodesClass::addCode (InterCode *code) {
     if (code != NULL) 
-        InterCodeList.push_back(code);  
+        InterCodeVector.push_back(code);  
 }
 
 void InterCodesClass::addCode (InterCodesClass* code) {
     if (code != NULL) {
-        vector <InterCode*> code_l = code->InterCodeList;
+        vector <InterCode*> code_l = code->InterCodeVector;
         for (int i = 0; i < (int )code_l.size(); ++i)
-            InterCodeList.push_back(code_l.at(i));
+            InterCodeVector.push_back(code_l.at(i));
     }
 }
 
 void InterCodesClass::addCode (InterCode::OPNTYPE op, void *a, 
                void *b, void *c, OpNode::OpCode subopc) { 
 
-    InterCodeList.push_back(new InterCode (op, subopc, a, b, c));     
+    InterCodeVector.push_back(new InterCode (op, subopc, a, b, c));     
 }
 
 void InterCodesClass::print (ostream &os) {
-    vector <InterCode*>::iterator it =  InterCodeList.begin();
-    for (; it != InterCodeList.end(); ++it)  {
+    vector <InterCode*>::iterator it =  InterCodeVector.begin();
+    for (; it != InterCodeVector.end(); ++it)  {
         (*it)->print(os);
         os << endl;
     }

@@ -27,7 +27,52 @@ class InterCode {
        }
      
        void print(ostream &os);
-    private:
+       void** get3Operands() { return opnds_; }
+       void set3Operands(void *opnd[3]) { *opnds_ = opnd; }
+       OPNTYPE getOPNType() { return optype_; }
+       OpNode::OpCode getsubCode() { return subCode_; }
+       void setSubCode(OpNode::OpCode opCode) { subCode_ = opCode; }
+    
+       string getLabel() { 
+           if (optype_ != LABEL) return "";
+           int id = (long)opnds_[0];
+           string *name = (string *) opnds_[1];
+           //if (name && name->length())
+           return *name;
+           /*else {
+                ostringstream os;
+                os << "L" << id;
+                return os.str();
+            }*/
+        }    
+        void xchgSubcode() { 
+            
+            switch (subCode_) {
+                case OpNode::OpCode::EQ:
+                        subCode_ = OpNode::OpCode::NE;
+                        break;
+                case OpNode::OpCode::NE:
+                        subCode_ = OpNode::OpCode::EQ;
+                        break;
+                case OpNode::OpCode::GT:
+                        subCode_ = OpNode::OpCode::LE;
+                        break;
+                case OpNode::OpCode::GE:
+                        subCode_ = OpNode::OpCode::LT;
+                        break;
+                case OpNode::OpCode::LE:
+                        subCode_ = OpNode::OpCode::GT;
+                        break;
+                case OpNode::OpCode::LT:
+                        subCode_ = OpNode::OpCode::GE;
+                        break;
+                default:
+                        cout<<"Cannot negate the subcode_";
+                        break;
+            }
+        }
+        
+        protected:
         void *opnds_[3]; 
         OpNode::OpCode subCode_; 
         OPNTYPE optype_;  
@@ -47,9 +92,17 @@ class InterCodesClass {
         void addCode (InterCode::OPNTYPE op, void *a = NULL, 
                void *b  = NULL, void *c = NULL, 
                 OpNode::OpCode subopc = OpNode::OpCode::INVALID);
+       
+        vector<InterCode*>* getICodeVector() {
+                return &InterCodeVector;
+        }
+
+        void setICodeVector(vector <InterCode*> *tempVector) {
+                InterCodeVector = *tempVector;
+        }
         
     protected:
-        vector <InterCode*> InterCodeList;       
+        vector <InterCode*> InterCodeVector;       
 };
 
 class LabelClass {

@@ -106,6 +106,7 @@ class ExprNode: public AstNode {
 
         ExprNodeType exprNodeType() const { return exprType_;};
         void exprNodeType(ExprNodeType t) { exprType_ = t; };
+        void exprVal(Value* val) { val_ = val; };
 
         const Value* value() const { return val_; }
 

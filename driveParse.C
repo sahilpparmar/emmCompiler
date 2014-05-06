@@ -8,6 +8,7 @@
 #include "SymTabMgr.h"
 #include "STEClasses.h"
 #include "InterCode.h"
+#include "CodeOpt.h"
 #include "SymTab.h"
 #include "Value.h"
 
@@ -256,10 +257,18 @@ main(int argc, char *argv[], char *envp[]) {
         ge->memAlloc(); 
 
         cout<<"======================3 Addr Generation======================\n";
-        InterCodesClass* cls = ge->codeGen();
-        if (cls)
-            cls->print(cout);
+        InterCodesClass* in = ge->codeGen();
+        if (in)
+            in->print(cout);
         cout << endl;
+/*        
+        cout<<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
+        CodeOpt* codeOpt = new CodeOpt();
+        InterCodesClass* out = codeOpt->codeOptimization(in);
+        if (out)
+            out->print(cout);
+        cout << endl;
+*/
     }
 #endif
 }
