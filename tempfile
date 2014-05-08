@@ -1,0 +1,21 @@
+mytests/in4:15:Error: Assigned expression must be a subtype of target
+======================3 Addr Generation======================
+L0:
+g:
+        enter g
+        a1 = 1
+        leave g
+
+======================Basic Block creation======================
+Block Label: Global_block
+Nextblocks:
+L0	
+Block Label: L0
+Nextblocks:
+g	
+Block Label: g
+        enter g
+        a1 = 1
+        leave g
+Nextblocks:
+

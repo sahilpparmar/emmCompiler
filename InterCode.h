@@ -37,13 +37,13 @@ class InterCode {
            if (optype_ != LABEL) return "";
            int id = (long)opnds_[0];
            string *name = (string *) opnds_[1];
-           //if (name && name->length())
-           return *name;
-           /*else {
+           if (name && name->length()) {
+             return *name;
+           } else {
                 ostringstream os;
                 os << "L" << id;
                 return os.str();
-            }*/
+            }
         }    
         void xchgSubcode() { 
             
@@ -72,7 +72,7 @@ class InterCode {
             }
         }
         
-        protected:
+    protected:
         void *opnds_[3]; 
         OpNode::OpCode subCode_; 
         OPNTYPE optype_;  
@@ -105,6 +105,14 @@ class InterCodesClass {
         vector <InterCode*> InterCodeVector;       
 };
 
+class Mapping {
+   public : 
+       static std::map <string, InterCode*> interCodeMap;  
+       static void insertInMap(string str, InterCode* ic) {
+          interCodeMap.insert(std::pair<string, InterCode*>(str, ic));
+       }
+};
+
 class LabelClass {
     static long labelCount;
     public:
@@ -114,10 +122,120 @@ class LabelClass {
         
         static InterCode* assignLabel (string name="") {
             InterCode* ic = new InterCode (InterCode::OPNTYPE::LABEL, OpNode::OpCode::INVALID, 
-                                          (void *)(labelCount++), (void *)(new string(name)));
+                                          (void *)(labelCount), (void *)(new string(name)));
+             
+            string str; 
+            if (name.length() == 0) {
+                str = "L";
+                str += itoa(labelCount);
+            } else {
+                str = name;
+            }
+
+            Mapping::insertInMap(str, ic);    
+            labelCount++;
             return ic; 
         }
 };
 
+
+
+class BasicBlock {
+    public : 
+        BasicBlock (string label) {
+           blocklabel.assign(label);
+        }
+        
+        vector<InterCode*>* getICodeVector() {
+                return &InterCodeVector;
+        }
+        
+        vector <BasicBlock*>* getNextBlocks() {
+                return &NextBlocks;
+        }
+        
+        void addNextBlock(string nextlabel) {
+           vector<string>::iterator it = NextBlockLabels.begin();
+           for(; it != NextBlockLabels.end(); ++it) {
+               if (nextlabel.compare(*it) == 0)
+                   return;
+           }
+           NextBlockLabels.push_back(nextlabel);
+        }
+
+        void setBlockLabel(string s) {
+            blocklabel.assign(s);
+        }
+
+        string getBlockLabel() {
+            return blocklabel;
+        }
+        
+        void addCode (InterCode* cs) {
+            if (cs) InterCodeVector.push_back (cs);
+        }
+       
+        void constantFolding();
+
+        void print(ostream &os) {
+            os << "Block Label: " << blocklabel << endl;
+            vector <InterCode*>::iterator it = InterCodeVector.begin();
+
+            for (; it != InterCodeVector.end(); ++it) {
+                (*it)->print(os);
+                os << endl;
+            }
+        
+            os << "Nextblocks: ";  
+            vector<string>::iterator iter = NextBlockLabels.begin();
+            
+            for ( ; iter != NextBlockLabels.end(); ++iter) {
+                os << *iter << "\t";
+            }
+            os << endl; 
+        }
+    private : 
+        string blocklabel; 
+        vector <InterCode*> InterCodeVector;       
+        vector <BasicBlock*> NextBlocks;
+        vector <string> NextBlockLabels;
+};
+
+
+class BasicBlocksClass {
+    private:
+        vector <BasicBlock*> bbVector;
+    
+    public:
+        BasicBlock* getBlockWithLabel (string label) {
+           vector <BasicBlock*>::iterator it = bbVector.begin();
+
+            for (; it != bbVector.end(); ++it) {
+                if (label.compare((*it)->getBlockLabel()) == 0)
+                    return (*it);
+            }
+            //if block does not exist,then create block with new label
+            BasicBlock *newbb = new BasicBlock(label);
+            bbVector.push_back(newbb);
+            return newbb;
+        }
+        
+        void createBlocks (InterCodesClass* ic);
+        
+        void constantOptimize () {
+           vector <BasicBlock*>::iterator it = bbVector.begin();
+            
+            for (; it != bbVector.end(); ++it) {
+                (*it)->constantFolding();
+            }
+        }
+        
+        void print(ostream &os) {
+             vector <BasicBlock*>::iterator it = bbVector.begin();
+             for (; it != bbVector.end(); ++it) {
+                 (*it)->print(os);
+             }
+        }
+};
 
 #endif

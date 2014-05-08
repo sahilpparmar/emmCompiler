@@ -126,6 +126,21 @@ void InterCode::print(ostream &os) {
     }
 }
 
+
+void constantFolding() {
+
+    vector <InterCode*>tempCodeVec (InterCodeVector);
+    InterCodeVector.erase(InterCodeVector.begin(), InterCodeVector.end()); 
+
+    vector <InterCode*>::iterator it = tempCodeVec.begin();
+    for(: it != tempCodeVec.end(); ++it) {
+
+
+
+    }
+}
+
+
 void InterCodesClass::addCode (InterCode *code) {
     if (code != NULL) 
         InterCodeVector.push_back(code);  
@@ -152,4 +167,58 @@ void InterCodesClass::print (ostream &os) {
         os << endl;
     }
 
+}
+
+void BasicBlocksClass::createBlocks (InterCodesClass* ic) {
+
+    vector <InterCode*>* icvec = ic->getICodeVector();
+    vector <InterCode*>::iterator it =  icvec->begin();
+    
+    string str;
+    bool isPrevJmp = false; 
+    BasicBlock* block = getBlockWithLabel("Global_block"); 
+    
+    for (; it != icvec->end(); ++it) {
+            InterCode::OPNTYPE op = (*it)->getOPNType();
+            void** opd = (*it)->get3Operands();
+            
+            if (op == InterCode::OPNTYPE::GOTO ) {
+                block->addCode (*it); 
+                
+                str = ((InterCode *)opd[0])->getLabel(); 
+                block->addNextBlock(str);
+                isPrevJmp = true;
+
+            } else if (op == InterCode::OPNTYPE::IFREL) {
+                block->addCode (*it); 
+                
+                ExprNode* cond       = (ExprNode*) opd[0];
+                InterCode* true_lab  = cond->OnTrue();
+                InterCode* false_lab = cond->OnFalse();
+
+                if(true_lab)
+                    block->addNextBlock(true_lab->getLabel());
+                
+                if(false_lab)
+                    block->addNextBlock(false_lab->getLabel());
+                
+                isPrevJmp = true;
+            
+            } else if (op == InterCode::OPNTYPE::LABEL) {
+                str = (*it)->getLabel();
+                // to check if previous stmt was a jmp
+                if (isPrevJmp == false)
+                   block->addNextBlock(str); 
+                
+                block = getBlockWithLabel(str);
+            
+            } else if (op == InterCode::OPNTYPE::LEAVE ) {
+                block->addCode (*it); 
+                isPrevJmp = true;
+            
+            } else {
+                block->addCode (*it); 
+                isPrevJmp = false;
+            }
+    }
 }

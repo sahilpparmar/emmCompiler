@@ -261,6 +261,11 @@ main(int argc, char *argv[], char *envp[]) {
         if (in)
             in->print(cout);
         cout << endl;
+
+        cout<<"======================Basic Block creation======================\n";
+        BasicBlocksClass *bb = new BasicBlocksClass();
+        bb->createBlocks(in);
+        bb->print(cout);
 /*        
         cout<<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
         CodeOpt* codeOpt = new CodeOpt();
