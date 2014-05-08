@@ -1286,6 +1286,8 @@ InterCodesClass* OpNode::codeGen()
         case OpCode::BITAND:
         case OpCode::BITOR:
         case OpCode::BITXOR:
+        case OpCode::SHL:
+        case OpCode::SHR:
             cls->addCode (arg_[0]->codeGen());
             cls->addCode (arg_[1]->codeGen());
             cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(),

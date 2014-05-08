@@ -3,7 +3,26 @@
 
 =========================AST Builder=========================
  
+  int x;
   int a = (10+20);
+  int b = (5-2);
+  int c = (1+10*100);
+  int d = a*b;
+  int e = (1-c);
+  int f = (b/4);
+  int g = (10/2);
+  int h = (10%2);
+  int i = (1|(1&0));
+  int j = (0&1);
+  int k = 1^1;
+  int l = (1<<2);
+  int m = (100>>2);
+  void foo(int a) {
+    
+    a=10;
+    if (a==1)     a=2;
+    else     a=3;
+  };
  
 
 ========================Type Checking========================
@@ -12,8 +31,65 @@
 
 
 ====Global Declarations
-Variable: a, Offset: 0======================3 Addr Generation======================
+Variable: x, Offset: 0
+Variable: a, Offset: 4
+Variable: b, Offset: 8
+Variable: c, Offset: 12
+Variable: d, Offset: 16
+Variable: e, Offset: 20
+Variable: f, Offset: 24
+Variable: g, Offset: 28
+Variable: h, Offset: 32
+Variable: i, Offset: 36
+Variable: j, Offset: 40
+Variable: k, Offset: 44
+Variable: l, Offset: 48
+Variable: m, Offset: 52
+
+====Function 'foo'
+==Formal Parameters
+Variable: a, Offset: 8
+==Local Variables
+======================3 Addr Generation======================
 L0:
         __vreg0 = 10 + 20
         a = __vreg0
+        __vreg1 = 5 - 2
+        b = __vreg1
+        __vreg2 = 10 * 100
+        __vreg3 = 1 + __vreg2
+        c = __vreg3
+        __vreg4 = a * b
+        d = __vreg4
+        __vreg5 = 1 - c
+        e = __vreg5
+        __vreg6 = b / 4
+        f = __vreg6
+        __vreg7 = 10 / 2
+        g = __vreg7
+        __vreg8 = 10 % 2
+        h = __vreg8
+        __vreg9 = 1 & 0
+        __vreg10 = 1 | __vreg9
+        i = __vreg10
+        __vreg11 = 0 & 1
+        j = __vreg11
+        __vreg12 = 1 ^ 1
+        k = __vreg12
+        __vreg13 = 1 << 2
+        l = __vreg13
+        __vreg14 = 100 >> 2
+        m = __vreg14
+foo:
+        enter foo
+        a = 10
+        if a == 1 goto L3:
+        goto L4:
+L3:
+        a = 2
+        goto L2:
+L4:
+        a = 3
+L2:
+        leave foo
 
