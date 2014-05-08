@@ -3,7 +3,19 @@
 
 =========================AST Builder=========================
  
+  void foo(int a) {
+    
+    a=10;
+  };
+  int x;
   int a = (10+20);
+  int b = (5-2);
+  int c = (1+10*100);
+  int d = a*b;
+  int e = (1-c);
+  int f = (b/4);
+  int g = (10/2);
+  int h = (10%2);
  
 
 ========================Type Checking========================
@@ -12,8 +24,41 @@
 
 
 ====Global Declarations
-Variable: a, Offset: 0======================3 Addr Generation======================
+
+====Function 'foo'
+==Formal Parameters
+Variable: a, Offset: 8
+==Local Variables
+
+Variable: x, Offset: 0
+Variable: a, Offset: 4
+Variable: b, Offset: 8
+Variable: c, Offset: 12
+Variable: d, Offset: 16
+Variable: e, Offset: 20
+Variable: f, Offset: 24
+Variable: g, Offset: 28
+Variable: h, Offset: 32======================3 Addr Generation======================
 L0:
+foo:
+        enter foo
+        a = 10
+        leave foo
         __vreg0 = 10 + 20
         a = __vreg0
+        __vreg1 = 5 - 2
+        b = __vreg1
+        __vreg2 = 10 * 100
+        __vreg3 = 1 + __vreg2
+        c = __vreg3
+        __vreg4 = a * b
+        d = __vreg4
+        __vreg5 = 1 - c
+        e = __vreg5
+        __vreg6 = b / 4
+        f = __vreg6
+        __vreg7 = 10 / 2
+        g = __vreg7
+        __vreg8 = 10 % 2
+        h = __vreg8
 

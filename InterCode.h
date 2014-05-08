@@ -35,7 +35,7 @@ class InterCode {
     
        string getLabel() { 
            if (optype_ != LABEL) return "";
-           int id = (long)opnds_[0];
+//           int id = (long)opnds_[0];
            string *name = (string *) opnds_[1];
            //if (name && name->length())
            return *name;
