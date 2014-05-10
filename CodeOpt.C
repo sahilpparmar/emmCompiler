@@ -7,97 +7,97 @@ InterCodesClass* CodeOpt::codeOptimization(InterCodesClass* org) {
 
     cout << "\n Basic Block Code Optimization \n";
 
-    bool optStatus = true;
+    //bool optStatus = true;
 
     InterCodesClass* opt;
-    opt = constant_folding(org);
+    //opt = constant_folding(org);
     //opt = peephole_optimization(org, &(optStatus));
     return opt;
 }
 
-InterCodesClass* CodeOpt::constant_folding(InterCodesClass* org) {
-
-    cout<< "\n Constant Folding Optimization \n";
-    int result = 0;
-    unsigned int i;
-    
-    //InterCodesClass* out = new InterCodesClass();
-    vector<InterCode*> *tempICodeVector, *dupICodeVector;
-
-    dupICodeVector = org->getICodeVector();
-    tempICodeVector = new vector<InterCode*> ();
-    
-    //ExprNode** tempOperands;
-    
-    for ( i = 0; i < dupICodeVector->size(); i++)
-    {
-            tempICodeVector->push_back(dupICodeVector->at(i)); 
-
-        if (dupICodeVector->at(i)->getOPNType() != InterCode::OPNTYPE::EXPR)
-        {
-            continue;
-        }
-        ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
-     
-        if (operands[0] && operands[1] && operands[2]) {
-            ExprNode* new1 = operands[1]; 
-            ExprNode* new2 = operands[2]; 
-
-            if ((new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) && (new2->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE))   {
-                cout << operands[0]->getRefName() << " = ";
-                switch(dupICodeVector->at(i)->getsubCode()) {
-                    case OpNode::OpCode::PLUS :
-                                        result = atoi(operands[1]->getRefName().c_str()) + atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::MINUS :
-                                        result = atoi(operands[1]->getRefName().c_str()) - atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::MULT :
-                                        result = atoi(operands[1]->getRefName().c_str()) * atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::DIV :
-                                        result = atoi(operands[1]->getRefName().c_str()) / atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::MOD :
-                                        result = atoi(operands[1]->getRefName().c_str()) % atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::BITOR :
-                                        result = atoi(operands[1]->getRefName().c_str()) | atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::BITAND :
-                                        result = atoi(operands[1]->getRefName().c_str()) & atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::BITXOR :
-                                        result = atoi(operands[1]->getRefName().c_str()) ^ atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::SHL :
-                                        result = atoi(operands[1]->getRefName().c_str()) << atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    case OpNode::OpCode::SHR :
-                                        result = atoi(operands[1]->getRefName().c_str()) >> atoi(operands[2]->getRefName().c_str());
-                                        break;
-                    default : 
-                            cout << "\nUnhandled OpCode \n";
-                            break;
-                }
-                cout << result << "\n";
-                Value *temp = new Value(result, Type::UINT);
-                new1->exprVal(temp);
-                Value *temp1 = new Value(0, Type::UINT);
-                new2->exprVal(temp1);
-                operands[1] = new1;
-                operands[2] = new2;
-                tempICodeVector->at(i)->setSubCode(OpNode::OpCode::ASSIGN);
-                 
-            }
-        }
-    }
-
-    org->setICodeVector(tempICodeVector);
-    cout << "\nReturned \n";
-    return org;
-
-}
+//InterCodesClass* CodeOpt::constant_folding(InterCodesClass* org) {
+//
+//    cout<< "\n Constant Folding Optimization \n";
+//    int result = 0;
+//    unsigned int i;
+//    
+//    //InterCodesClass* out = new InterCodesClass();
+//    vector<InterCode*> *tempICodeVector, *dupICodeVector;
+//
+//    dupICodeVector = org->getICodeVector();
+//    tempICodeVector = new vector<InterCode*> ();
+//    
+//    //ExprNode** tempOperands;
+//    
+//    for ( i = 0; i < dupICodeVector->size(); i++)
+//    {
+//            tempICodeVector->push_back(dupICodeVector->at(i)); 
+//
+//        if (dupICodeVector->at(i)->getOPNType() != InterCode::OPNTYPE::EXPR)
+//        {
+//            continue;
+//        }
+//        ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+//     
+//        if (operands[0] && operands[1] && operands[2]) {
+//            ExprNode* new1 = operands[1]; 
+//            ExprNode* new2 = operands[2]; 
+//
+//            if ((new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) && (new2->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE))   {
+//                cout << operands[0]->getRefName() << " = ";
+//                switch(dupICodeVector->at(i)->getsubCode()) {
+//                    case OpNode::OpCode::PLUS :
+//                                        result = atoi(operands[1]->getRefName().c_str()) + atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::MINUS :
+//                                        result = atoi(operands[1]->getRefName().c_str()) - atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::MULT :
+//                                        result = atoi(operands[1]->getRefName().c_str()) * atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::DIV :
+//                                        result = atoi(operands[1]->getRefName().c_str()) / atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::MOD :
+//                                        result = atoi(operands[1]->getRefName().c_str()) % atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::BITOR :
+//                                        result = atoi(operands[1]->getRefName().c_str()) | atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::BITAND :
+//                                        result = atoi(operands[1]->getRefName().c_str()) & atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::BITXOR :
+//                                        result = atoi(operands[1]->getRefName().c_str()) ^ atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::SHL :
+//                                        result = atoi(operands[1]->getRefName().c_str()) << atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    case OpNode::OpCode::SHR :
+//                                        result = atoi(operands[1]->getRefName().c_str()) >> atoi(operands[2]->getRefName().c_str());
+//                                        break;
+//                    default : 
+//                            cout << "\nUnhandled OpCode \n";
+//                            break;
+//                }
+//                cout << result << "\n";
+//                Value *temp = new Value(result, Type::UINT);
+//                new1->exprVal(temp);
+//                Value *temp1 = new Value(0, Type::UINT);
+//                new2->exprVal(temp1);
+//                operands[1] = new1;
+//                operands[2] = new2;
+//                tempICodeVector->at(i)->setSubCode(OpNode::OpCode::ASSIGN);
+//                 
+//            }
+//        }
+//    }
+//
+//    org->setICodeVector(tempICodeVector);
+//    cout << "\nReturned \n";
+//    return org;
+//
+//}
 
 InterCodesClass* CodeOpt::peephole_optimization(InterCodesClass* org, bool* optStatus)    {
 

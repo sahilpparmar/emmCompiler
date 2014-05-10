@@ -265,6 +265,7 @@ main(int argc, char *argv[], char *envp[]) {
         cout<<"======================Basic Block creation======================\n";
         BasicBlocksClass *bb = new BasicBlocksClass();
         bb->createBlocks(in);
+        bb->constantOptimize();
         bb->print(cout);
 /*        
         cout<<"======================Code Optimization (Optimized 3 Addr Code)======================\n";

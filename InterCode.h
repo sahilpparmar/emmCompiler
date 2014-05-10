@@ -6,6 +6,8 @@
 #include "ParserUtil.h"
 #include "all.h"
 #include "Ast.h"
+#include <map>
+#include <utility>
 
 using namespace std;
 
@@ -35,7 +37,7 @@ class InterCode {
     
        string getLabel() { 
            if (optype_ != LABEL) return "";
-//           int id = (long)opnds_[0];
+           int id = (long)opnds_[0];
            string *name = (string *) opnds_[1];
            if (name && name->length()) {
              return *name;
@@ -105,18 +107,17 @@ class InterCodesClass {
         vector <InterCode*> InterCodeVector;       
 };
 
-class Mapping {
-   public : 
-       static std::map <string, InterCode*> interCodeMap;  
-       static void insertInMap(string str, InterCode* ic) {
-          interCodeMap.insert(std::pair<string, InterCode*>(str, ic));
-       }
-};
 
 class LabelClass {
     static long labelCount;
+    static map <string, InterCode*> label_interCode_map;  
+    
     public:
         friend class InterCodesClass; 
+        static void insertInMap(string str, InterCode* ic) {
+           label_interCode_map.insert(pair<string, InterCode*>(str, ic));
+        }
+        
         long getLabelCount() { return labelCount; } 
         void setLabelCount (long c) { labelCount = c; }
         
@@ -132,7 +133,7 @@ class LabelClass {
                 str = name;
             }
 
-            Mapping::insertInMap(str, ic);    
+            insertInMap(str, ic);    
             labelCount++;
             return ic; 
         }
@@ -150,9 +151,11 @@ class BasicBlock {
                 return &InterCodeVector;
         }
         
-        vector <BasicBlock*>* getNextBlocks() {
-                return &NextBlocks;
+        void setICodeVector(vector<InterCode*>* vec) {
+            InterCodeVector.erase(InterCodeVector.begin(), InterCodeVector.end());
+            InterCodeVector.assign(vec->begin(), vec->end());
         }
+        
         
         void addNextBlock(string nextlabel) {
            vector<string>::iterator it = NextBlockLabels.begin();
@@ -175,7 +178,6 @@ class BasicBlock {
             if (cs) InterCodeVector.push_back (cs);
         }
        
-        void constantFolding();
 
         void print(ostream &os) {
             os << "Block Label: " << blocklabel << endl;
@@ -194,10 +196,12 @@ class BasicBlock {
             }
             os << endl; 
         }
+        
+        void constantFolding();
+        void constantPropogation();
     private : 
         string blocklabel; 
         vector <InterCode*> InterCodeVector;       
-        vector <BasicBlock*> NextBlocks;
         vector <string> NextBlockLabels;
 };
 
@@ -223,10 +227,11 @@ class BasicBlocksClass {
         void createBlocks (InterCodesClass* ic);
         
         void constantOptimize () {
-           vector <BasicBlock*>::iterator it = bbVector.begin();
+           vector <BasicBlock*>::iterator it; 
             
-            for (; it != bbVector.end(); ++it) {
+            for (it = bbVector.begin(); it != bbVector.end(); ++it) {
                 (*it)->constantFolding();
+                (*it)->constantPropogation();
             }
         }
         

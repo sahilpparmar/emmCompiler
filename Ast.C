@@ -28,7 +28,9 @@ ExprNode* ExprNode:: getRefNode ()
 {
     if (refnode_ == NULL) {
         refnode_ = new VregNode();
-        //TODO: add type info
+        refnode_->type((Type *)coercedType());
+        if (refnode_->type() == NULL)
+            refnode_->type(type());
     }
     return (ExprNode *)refnode_;
 }
