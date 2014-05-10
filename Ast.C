@@ -1,6 +1,7 @@
 #include "Ast.h"
 #include "ParserUtil.h"
 #include "InterCode.h"
+#include "AbstractMachineCode.h"
 
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) 
@@ -22,8 +23,21 @@ VregNode::VregNode (int line=0, int column=0, string file="") :
     refnode_ = this;
 }
 
-/****************************************************************/
+string VregNode::getRegisterName()
+{
+    if(registerName_.length() != 0) return registerName_ ;
+    Type *type_ = (Type*)coercedType();
+    if(!type_) type_ = type();
+    (type_ && type_->isFloat(type_->tag())) ? setRegisterName(allocateNewRegName(true)) : setRegisterName(allocateNewRegName(false)) ; 
+    return registerName_;
+}
 
+void   VregNode::setRegisterName(string reg_name)
+{
+    registerName_ = reg_name;
+}
+
+/****************************************************************/
 ExprNode* ExprNode:: getRefNode () 
 {
     if (refnode_ == NULL) {
@@ -81,6 +95,16 @@ InterCodesClass* RefExprNode::codeGen()
     return NULL;
 }
 
+string RefExprNode::getRegisterName()
+{
+    return ((SymTabEntry*)sym_)->getRegisterName();
+}
+
+void   RefExprNode::setRegisterName(string reg_name)
+{
+    SymTabEntry* ste = (SymTabEntry *)sym_ ;
+    if(ste) ste -> setRegisterName(reg_name);
+}
 /****************************************************************/
 
 void ValueNode::print(ostream& os, int indent) const

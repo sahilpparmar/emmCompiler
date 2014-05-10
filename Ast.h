@@ -142,6 +142,10 @@ class RefExprNode: public ExprNode {
         const Type* typeCheck();
         InterCodesClass* codeGen();  
         string getRefName() { return ext_; }
+
+        string getRegisterName();
+        void setRegisterName(string reg_name);
+
     private:
         string ext_;
         const SymTabEntry* sym_;
@@ -790,8 +794,13 @@ class VregNode: public ExprNode
         void print(ostream& os, int indent=0) const {}
         virtual const Type* typeCheck() { return NULL; };
         string getRefName() { return name_; }
+        
+        string getRegisterName();
+        void   setRegisterName(string reg_name); 
+
     private:
         string name_;
+        string registerName_ ;
 };
 
 
