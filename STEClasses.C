@@ -38,7 +38,7 @@ InterCodesClass* GlobalEntry::codeGen()
 
     if (symTab()) {
         cls = new InterCodesClass();
-        cls->addCode (LabelClass::assignLabel ());
+        cls->addCode (LabelClass::assignLabel ("GLOBAL"));
         
         SymTab::iterator it = symTab()->begin();
         for(; it != symTab()->end(); ++it) {

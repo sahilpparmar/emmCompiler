@@ -1,0 +1,38 @@
+======================3 Addr Generation======================
+GLOBAL:
+        a = 5
+f:
+        enter f
+        __vreg0 = 2 + 3
+        b = __vreg0
+        d = 5
+        e = 8
+        __vreg1 = e + b
+        __vreg2 = __vreg1 + d
+        c = __vreg2
+        return c
+        leave f
+
+======================Basic Block creation======================
+
+ ENTER
+
+ ENTER
+
+ string: __vreg0
+map e1
+map __vreg11before final folding
+Block Label: Global_block
+Nextblocks: f	
+Block Label: f
+        __vreg0 = 5
+        __vreg1 = e + b
+        __vreg2 = __vreg1 + d
+Nextblocks: 
+final folding
+Block Label: Global_block
+Nextblocks: f	
+Block Label: f
+        __vreg1 = e + b
+        __vreg2 = __vreg1 + d
+Nextblocks: 
