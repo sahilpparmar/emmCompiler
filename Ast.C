@@ -28,7 +28,9 @@ ExprNode* ExprNode:: getRefNode ()
 {
     if (refnode_ == NULL) {
         refnode_ = new VregNode();
-        refnode_->type((Type *)coercedType());
+          
+        Type* t = const_cast<Type*>(typeCheck());
+        refnode_->type(t);
         if (refnode_->type() == NULL)
             refnode_->type(type());
     }
@@ -57,6 +59,7 @@ RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
     ext_     = ext;
     sym_     = ste;
     refnode_ = this;
+    type((Type*)ste->type());
 }
 
 RefExprNode::RefExprNode(const RefExprNode& ref) : ExprNode(ref)

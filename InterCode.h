@@ -197,6 +197,22 @@ class BasicBlock {
             os << endl; 
         }
         
+        void check() {
+            vector<InterCode*>::iterator it = InterCodeVector.begin(); 
+            
+            for (; it != InterCodeVector.end(); ++it) {
+
+            if ((*it)->getOPNType() == InterCode::OPNTYPE::EXPR ) { 
+               ExprNode **op =  (ExprNode **)(*it)->get3Operands();
+                for (int i = 0; i < 1; ++i) { 
+                    if (op[i] && op[i]->coercedType())
+                        cout <<"\n---------"<< op[i]->coercedType()->name();
+                    else if (op[i] && op[i]->type())
+                        cout << endl<<op[i]->type()->name();
+                }
+            }
+            }
+        }
         void constantFolding();
         void constantPropogation();
     private : 
@@ -229,6 +245,7 @@ class BasicBlocksClass {
         void constantOptimize () {
            vector <BasicBlock*>::iterator it; 
             
+            //TODO : Need to convert this to iterative 
             for (it = bbVector.begin(); it != bbVector.end(); ++it) {
                 (*it)->constantFolding();
                 (*it)->constantPropogation();
@@ -241,6 +258,14 @@ class BasicBlocksClass {
                  (*it)->print(os);
              }
         }
+        void check() {
+             cout << "DEBUG ON"; 
+             vector <BasicBlock*>::iterator it = bbVector.begin();
+             for (; it != bbVector.end(); ++it) {
+                 (*it)->check();
+             }
+        }
+
 };
 
 #endif

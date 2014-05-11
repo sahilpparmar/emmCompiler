@@ -149,7 +149,6 @@ void BasicBlock::constantFolding() {
             ExprNode* new2 = operands[2]; 
 
              // Check if op[1] and op[2] are valuenodes and intercode type is expression
-             // TODO: Hanlde for floating types 
             
             if ((new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) && (new2->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE)) {
                 
