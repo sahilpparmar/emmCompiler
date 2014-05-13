@@ -56,6 +56,7 @@ Variable: f, Offset: 4
 Variable: g, Offset: 8
 Variable: w, Offset: 12
 Variable: j, Offset: 16
-Variable: y, Offset: 20======================3 Addr Generation======================
-L0:
-
+Variable: y, Offset: 20
+======================3 Addr Generation======================
+GLOBAL:
+Compilation Successful

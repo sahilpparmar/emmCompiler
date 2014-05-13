@@ -112,13 +112,19 @@ InterCodesClass* VariableEntry::codeGen()
     InterCodesClass *cls = NULL;
     //if initval exists, create a refexprnode
     if (initVal_) {
-           cls               = new InterCodesClass(); 
-           RefExprNode *node = new RefExprNode (name(), this);
-           cls->addCode (initVal_->codeGen()); 
-           cls->addCode (InterCode::OPNTYPE::EXPR, node, initVal_->getRefNode(), NULL, OpNode::OpCode::ASSIGN); 
+        cls               = new InterCodesClass(); 
+        RefExprNode *node = new RefExprNode (name(), this);
+        cls->addCode(initVal_->codeGen()); 
+        cls->addCode(InterCode::OPNTYPE::EXPR, node, initVal_->getRefNode(), NULL, OpNode::OpCode::ASSIGN); 
+
+    } else if (varKind() == PARAM_VAR) {
+        cls               = new InterCodesClass(); 
+        RefExprNode *node = new RefExprNode (name(), this);
+        cls->addCode(InterCode::OPNTYPE::FPARAM, node);
     }
     return cls;
 }
+
 const Type* VariableEntry::typeCheck()
 {
     const Type* t1 = type();
@@ -162,7 +168,7 @@ void VariableEntry::memAlloc()
 
 InterCodesClass* FunctionEntry:: codeGen() {
     InterCodesClass* cls = NULL;
-    if(body_) {
+    if (body_) {
         cls = new InterCodesClass();
         cls->addCode (LabelClass::assignLabel (name()));
         cls->addCode (InterCode::OPNTYPE::ENTER, (void *)name().c_str());

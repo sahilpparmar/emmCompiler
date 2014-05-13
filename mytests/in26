@@ -1,7 +1,6 @@
 class abc {
     int m;
     int n;
-//    print(m, n);            if added does not allow further parsing
 };
 void foo(int a) {
     double b;
@@ -17,6 +16,6 @@ void foo(int a) {
     print(d+b);
     print(d,z);
     print(b+"hi");
-//print(d+z)            results in segfault
+    print(d+z);
 }
 

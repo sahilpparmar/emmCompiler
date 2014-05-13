@@ -1,8 +1,8 @@
 int a = 2;
-//void foo(int x, double z)
-//{
-//     z = x+1;
-//}
+void foo(int x, double z)
+{
+     z = x+1;
+}
 int foo1(int x)
 {
     x=x+1;
@@ -14,10 +14,10 @@ void main()
 {
     int  k  = 4;
     int  kk = 8;
-    kk = k<< (2);
+//    kk = k<< (2);
 //    string s = "hi";
 //    foo(k, kk, "hi");
-//    foo(k, kk);
+    foo(k, kk);
 //    int j = k + a;
 //    foo1(j);
 //      bool b =true;

@@ -1,4 +1,5 @@
 #include "AbstractMachineCode.h"
+#include "InterCode.h"
 #include  <stack>
 
 #define     IS_FLOAT(type)   Type::isFloat(type->tag())
@@ -40,22 +41,40 @@ string convertToFloat(ExprNode *expr, ostream &os)
     return new_reg;
 }
 
-void   AbstractMachineCode::genAMC(InterCodesClass *interCodesClass, ostream & os)
+void   AbstractMachineCode::genAMC(BasicBlocksClass *basicBlocksClass, ostream & os)
 {
-        vector <InterCode*> *interCodeVector = interCodesClass->getICodeVector();      
-        vector <InterCode*>::iterator iter   = (*interCodeVector).begin();
-        
-        LabelClass *l = new LabelClass();
-        InterCode* interCode = l->assignLabel("begin");
+          vector <BasicBlock*> basicBlock       = basicBlocksClass->getBasicBlock();      
+          vector <BasicBlock*>::iterator iter1   = (basicBlock).begin();
  
-        os<<"JMP begin: "<<endl;
-        os<<"begin: "<<endl;
-        os<<"MOVI "<<RSP<<" "<<10000<<endl;
+           LabelClass *l = new LabelClass();
+           InterCode* interCode = l->assignLabel("begin");
+    
+           os<<"JMP begin: "<<endl;
+           os<<"begin: "<<endl;
+           os<<"MOVI "<<RSP<<" "<<10000<<endl;
 
-        for(; iter != (*interCodeVector).end(); iter++)
-        {
-            convert_IC_AMC(*iter, os);
-        }
+            for(; iter1 != (basicBlock).end(); iter1++)
+            {
+           vector <InterCode*> *interCodeVector = (*iter1)->getICodeVector();
+           vector <InterCode*>::iterator iter2  = (*interCodeVector).begin();
+           for(; iter2 != (*interCodeVector).end(); iter2++)
+            {
+                convert_IC_AMC(*iter2, os);
+            }
+            }
+//        vector <InterCode*>::iterator iter   = (*interCodeVector).begin();
+//        
+//        LabelClass *l = new LabelClass();
+//        InterCode* interCode = l->assignLabel("begin");
+// 
+//        os<<"JMP begin: "<<endl;
+//        os<<"begin: "<<endl;
+//        os<<"MOVI "<<RSP<<" "<<10000<<endl;
+//
+//        for(; iter != (*interCodeVector).end(); iter++)
+//        {
+//            convert_IC_AMC(*iter, os);
+//        }
 }
     
 
@@ -67,8 +86,8 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
         switch(interCode->getOPNType())
         {
               case CALL   :   { 
-                                ExprNode **opndsList = (ExprNode **)interCode->get3Operands();
-                                if(function_call_status)
+                               ExprNode **opndsList = (ExprNode **)interCode->get3Operands();
+/*                                if(function_call_status)
                                 {
                                     ExprNode* temp;
                                     string    str;
@@ -84,7 +103,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                     os<<endl;
                                     os<<"SUB "<<RSP<<" 4 "<<RSP;
                                     os<<endl;
-                                }
+                                }*/
                                    LabelClass *l = new LabelClass();
                                    InterCode* interCode = l->assignLabel("RET_ADDR");
 //                                 long labelCount = l->getLabelCount();
@@ -95,15 +114,27 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                    os<<"SUB "<<RSP<<" 4 "<<RSP << endl;
                                    os<<"JMP "<<(char*)opndsList[0];
                                 function_call_status = false;
-                                }
+                                //}
                                 break;
                               }
-              case PARAM  :   {
+              case FPARAM  :  {
+                                
+                              } 
+              case APARAM  :   {
                                 ExprNode **opndsList = (ExprNode **)interCode->get3Operands();
                                 ExprNode *param       = opndsList[0];
+                                    string    str;
                                 if(param)
                                     {
-                                    formal_param_list.push(param);
+                                   // formal_param_list.push(param);
+                                    str  = param->getRegisterName();
+                                    if(IS_FLOAT(param->type()))
+                                            os<<"STF "<<str<<" "<<RSP;
+                                    else if(IS_INT(param->type()))
+                                            os<<"STI "<<str<<" "<<RSP;
+                                    os<<endl;
+                                    os<<"SUB "<<RSP<<" 4 "<<RSP;
+                                    os<<endl;
                                     }
                                 function_call_status = true;
                                 break;
@@ -127,7 +158,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                 
                               break;
                               }
-              case EXPR   :   { 
+              case EXPR   :   {
                                 ExprNode **opndsList = (ExprNode **)interCode->get3Operands();
                                 ExprNode *dst        = opndsList[0];
                                 ExprNode *src1       = opndsList[1];
@@ -314,6 +345,6 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                              break;}
              case PRINT  :   { cout<<"\n in print";break;}
                          
-
+             default:       { cout<<"\n in default"; }
       }
 }

@@ -28,12 +28,15 @@ static int                    curClassSize    =  0;
 static char                   *funcName       =  NULL;
 
 static EventEntry* getEventEntry(char *eventName) {
-    SymTabEntry *sym = stm.lookUp(string(eventName));
+    EventEntry *sym = (EventEntry*) stm.lookUp(string(eventName));
     if (sym && sym->type()->tag() == Type::EVENT) {
-        return (EventEntry*) sym;
+        return sym;
     }
     errMsg((string)"Expected an event name, but got \"" + (string)eventName + (string)"\"");
-    return NULL;
+    sym = new EventEntry(string(eventName), yylinenum, yycolumnno, string(yyfilename));
+    sym->kind(SymTabEntry::Kind::ERROR_KIND);
+
+    return sym;
 }
 
 static Type* getUserType(char *typeName) {
@@ -102,7 +105,6 @@ static ClassFuncInvocationNode* allocClassFuncInvNode(char *objName, char* funcN
         }
     if (!(IsFuncSymEntry(funcSym) || IsEventSymEntry(funcSym))) {
         errMsg((string)"\"" + (string)funcName + (string)"\" is not a function or module name");
-        return NULL;
     }
     return new ClassFuncInvocationNode(objSym, funcSym, param_l, yylinenum, yycolumnno, string(yyfilename));
 }
@@ -112,13 +114,16 @@ static ClassRefExprNode* allocClassRefExprNode(char* objName, char* varName) {
     assert(varName != NULL);
     SymTabEntry *objSym = stm.lookUpInScope(string(objName), stm.currentScope()->kind());
     SymTabEntry *classSym = NULL, *varSym = NULL; 
+
     if (objSym == NULL) {
         errMsg((string)"Undeclared identifier \"" + (string)objName + (string)"\"");
-    }
+    } 
+
     if (objSym && objSym->type()->tag() == Type::CLASS) {
         classSym = stm.lookUp(objSym->type()->typeDesc()->name());
         varSym = classSym->symTab()->lookUp(string(varName));
-        }
+    }
+
     if (varSym == NULL) {
         errMsg((string)"Undeclared identifier \"" + (string)varName + (string)"\"");
     }
@@ -171,6 +176,8 @@ static RefExprNode* allocRefExprNode(char* str) {
     SymTabEntry *sym = stm.lookUp(string(str));
     if (sym == NULL) {
         errMsg((string)"Undeclared identifier \"" + (string)str + (string)"\"");
+        sym = new SymTabEntry(string(str), SymTabEntry::Kind::ERROR_KIND, 
+                    yylinenum, yycolumnno, string(yyfilename), new Type(Type::VOID));
     }
     return new RefExprNode(string(str), sym, yylinenum, yycolumnno, string(yyfilename));
 }
@@ -179,9 +186,11 @@ static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
     assert(str != NULL);
     SymTabEntry *sym = stm.lookUp(string(str));
 
- if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
+    if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
         errMsg((string)"\"" + (string)str + (string)"\" is not a function or module name");
-        return NULL;
+
+        sym = new SymTabEntry(string(str), SymTabEntry::Kind::ERROR_KIND, 
+                    yylinenum, yycolumnno, string(yyfilename), new Type(Type::VOID));
     }
     return new InvocationNode(sym, param_l, yylinenum, yycolumnno, string(yyfilename));
 }

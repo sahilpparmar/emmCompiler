@@ -50,10 +50,12 @@ Variable: b, Offset: -4
 Variable: c, Offset: -8
 Variable: obj, Offset: -16
 Variable: xyz, Offset: -24
+
 ======================3 Addr Generation======================
-L0:
+GLOBAL:
 foo:
         enter foo
+        fparam a
         c = 5
         __vreg0 = 5
         __vreg2 = __vreg1
@@ -62,4 +64,4 @@ foo:
         __vreg8 = __vreg7 + __vreg6
         __vreg9 = __vreg8
         leave foo
-
+Compilation Successful

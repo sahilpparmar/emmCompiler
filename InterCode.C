@@ -112,11 +112,18 @@ void InterCode::print(ostream &os) {
                     }
                     break;
 
-        case PARAM: {
+        case APARAM:{
                         prtSpace(os, TAB_SPACE);
-                        os << "param " << op[0]->getRefName();
+                        os << "aparam " << op[0]->getRefName();
                     }
                     break;
+
+        case FPARAM:{
+                        prtSpace(os, TAB_SPACE);
+                        os << "fparam " << op[0]->getRefName();
+                    }
+                    break;
+
         case PRINT: {
                         prtSpace(os, TAB_SPACE);
                         os << "print " << op[0]->getRefName();
@@ -149,7 +156,6 @@ void BasicBlock::constantFolding() {
             ExprNode* new2 = operands[2]; 
 
              // Check if op[1] and op[2] are valuenodes and intercode type is expression
-             // TODO: Hanlde for floating types 
             
             if ((new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) && (new2->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE)) {
                 

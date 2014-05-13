@@ -47,7 +47,9 @@ ExprNode* ExprNode:: getRefNode ()
 {
     if (refnode_ == NULL) {
         refnode_ = new VregNode();
-        refnode_->type((Type *)coercedType());
+          
+        Type* t = const_cast<Type*>(typeCheck());
+        refnode_->type(t);
         if (refnode_->type() == NULL)
        {
          //refnode_->type(type()); }
@@ -82,6 +84,7 @@ RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
     ext_     = ext;
     sym_     = ste;
     refnode_ = this;
+    type((Type*)ste->type());
 }
 
 RefExprNode::RefExprNode(const RefExprNode& ref) : ExprNode(ref)
@@ -537,12 +540,10 @@ InterCodesClass* InvocationNode::codeGen()
     FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
 
     if (params_) {
-        vector<ExprNode*>::iterator p_iter = params_->begin();
-
-        for (; p_iter != params_->end(); ++p_iter) {
-            ExprNode* expr_node = *p_iter; 
+        for (int ii = params_->size() - 1; ii >= 0; ii--) {
+            ExprNode* expr_node = (*params_)[ii];
             cls->addCode(expr_node->codeGen());
-            cls->addCode(InterCode::OPNTYPE::PARAM, expr_node->getRefNode());
+            cls->addCode(InterCode::OPNTYPE::APARAM, expr_node->getRefNode());
         }
     }
     cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str());

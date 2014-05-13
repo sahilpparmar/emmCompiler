@@ -9,7 +9,7 @@
 #define RSH_Cnt   " R002"           //Shift Register Counter 
 #define RSH_Val   " R003"           //Shift Register Value 
 
-enum OPNTYPE {CALL, PARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
+       enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
 
 string allocateNewRegName(bool isFloat = false);
 class AbstractMachineCode 
@@ -18,7 +18,7 @@ class AbstractMachineCode
     AbstractMachineCode()
     {}
 
-static    void   genAMC(InterCodesClass *interCodesClass, ostream & os);
+static    void   genAMC(BasicBlocksClass *basicBlocksClass, ostream & os);
 static    void   convert_IC_AMC(InterCode *interCode, ostream &os);
 
     };
