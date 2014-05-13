@@ -25,7 +25,6 @@ static FunctionEntry          *curFuncEnt     =  NULL;
 static EventEntry             *curEventEnt    =  NULL;
 static RuleBlockEntry         *curRBlkNode    =  NULL;
 static int                    curClassSize    =  0;
-static char                   *funcName       =  NULL;
 
 static EventEntry* getEventEntry(char *eventName) {
     EventEntry *sym = (EventEntry*) stm.lookUp(string(eventName));
@@ -366,6 +365,7 @@ static RuleBlockEntry* allocRuleBlockNode() {
 %type <continueVal> continue_stmt
 %type <ruleNode> rule
 %type <patVal> primitive_all binary_event_oprs
+%type <cVal> class_func_invocation
 
 %type <cVal> TOK_IDENT TOK_PRINT
 %type <uVal> TOK_UINTNUM 
@@ -603,11 +603,11 @@ class_var:          TOK_IDENT                                               {   
 obj_var:            TOK_IDENT TOK_DOT TOK_IDENT                             {   $$ = allocClassRefExprNode($1, $3); prt("classVariableCall");     }
                   ;
 
-obj_func:           TOK_IDENT TOK_DOT class_func_invocation semi_colon      {   $$ = allocClassFuncInvNode($1, funcName, funcParamList); prt("classFuntionInvocation");   }
+obj_func:           TOK_IDENT TOK_DOT class_func_invocation semi_colon      {   $$ = allocClassFuncInvNode($1, $3, funcParamList); prt("classFuntionInvocation"); }
                   ;
 
-class_func_invocation:    TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN    {   funcName = $1; funcParamList = curExprList; curExprList = NULL; prt("ClassFunctionInvocation"); }
-                  | TOK_IDENT TOK_LPAREN TOK_RPAREN                         {   funcName = $1; funcParamList = NULL;                            prt("ClassFunctionInvocation"); }
+class_func_invocation:  TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN      {   funcParamList = curExprList; curExprList = NULL; prt("ClassFunctionInvocation"); }
+                  |     TOK_IDENT TOK_LPAREN TOK_RPAREN                     {   funcParamList = NULL;                            prt("ClassFunctionInvocation"); }
                   ;
 
 function_proto:     function_decl semi_colon                                {   $$ = $1;                    }
