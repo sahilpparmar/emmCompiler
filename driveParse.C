@@ -239,7 +239,10 @@ main(int argc, char *argv[], char *envp[]) {
     
     DEBUG("=================Lexical and Syntax Parsing==================\n");
     yyparse();
-    // TODO: Terminate compilation if errCount() > 0
+    if (errCount() > 0) {
+        errMsg(itoa(errCount()) + " syntax error(s) reported.\nCompilation terminated.");
+        return 1;
+    }
 
     stm.leaveToScope(SymTabEntry::Kind::GLOBAL_KIND);
     GlobalEntry *ge = (GlobalEntry*)(stm.currentScope());
@@ -251,32 +254,36 @@ main(int argc, char *argv[], char *envp[]) {
 
         DEBUG("========================Type Checking========================\n");
         ge->typeCheck();
-        // TODO: Terminate compilation if errCount() > 0
+        if (errCount() > 0) {
+            errMsg(itoa(errCount()) + " error(s) reported.\nCompilation terminated.");
+            return 1;
+        }
 
         DEBUG("======================Memory Allocation======================\n");
         ge->memAlloc(); 
 
-        cout<<"======================3 Addr Generation======================\n";
+        DEBUG("======================3 Addr Generation======================\n");
         InterCodesClass* in = ge->codeGen();
-        if (in)
+        if (debugLevel > 0) {
             in->print(cout);
-        cout << endl;
+        }
 
-        cout<<"======================Basic Block creation======================\n";
-        BasicBlocksClass *bb = new BasicBlocksClass();
-        bb->createBlocks(in);
-        bb->constantOptimize();
-        bb->print(cout);
-        bb->check();
-
+        // TODO: Remove unwanted couts before uncommenting below code
+        //DEBUG("====================Basic Block creation=====================\n");
+        //BasicBlocksClass *bb = new BasicBlocksClass();
+        //bb->createBlocks(in);
+        //bb->constantOptimize();
+        //bb->print(cout);
+        //bb->check();
+ 
 /*        
-        cout<<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
+        cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
         CodeOpt* codeOpt = new CodeOpt();
         InterCodesClass* out = codeOpt->codeOptimization(in);
         if (out)
             out->print(cout);
-        cout << endl;
 */
+        cout << "Compilation Successful" << endl;
     }
 #endif
 }

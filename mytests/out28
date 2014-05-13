@@ -52,8 +52,9 @@ Variable: file, Offset: 8
 Variable: flags, Offset: 12
 Variable: mode, Offset: 16
 ==Local Variables
+
 ======================3 Addr Generation======================
-L0:
+GLOBAL:
         a = 5
 open:
         enter open
@@ -89,4 +90,4 @@ L9:
         goto L2:
 L4:
         leave open
-
+Compilation Successful

@@ -50,8 +50,9 @@ Variable: m, Offset: 52
 ==Formal Parameters
 Variable: a, Offset: 8
 ==Local Variables
+
 ======================3 Addr Generation======================
-L0:
+GLOBAL:
         __vreg0 = 10 + 20
         a = __vreg0
         __vreg1 = 5 - 2
@@ -92,4 +93,4 @@ L4:
         a = 3
 L2:
         leave foo
-
+Compilation Successful

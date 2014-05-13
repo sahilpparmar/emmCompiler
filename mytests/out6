@@ -77,8 +77,9 @@ Variable: x, Offset: 8
 ==Local Variables
 Variable: a1, Offset: -4
 Variable: a2, Offset: -8
+
 ======================3 Addr Generation======================
-L0:
+GLOBAL:
         i3 = 0
         d1 = 3.0
         i4 = 0
@@ -89,4 +90,4 @@ g:
         enter g
         a1 = 1
         leave g
-
+Compilation Successful

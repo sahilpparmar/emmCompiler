@@ -28,26 +28,5 @@
 
 ========================Type Checking========================
 mytests/in22:10:Error: Assignment between incompatible types
-
-======================Memory Allocation======================
-
-
-====Global Declarations
-
-====Event 'open'
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
-Variable: a3, Offset: 8
-
-Variable: i, Offset: 0
-Variable: j, Offset: 4
-Variable: k, Offset: 8
-Variable: f, Offset: 12
-Variable: b, Offset: 16
-Variable: s, Offset: 20======================3 Addr Generation======================
-L0:
-        i = 2
-        j = 3
-        k = 4.0
-        f = 3.3
-
+mytests/in22:36:Error: 1 error(s) reported.
+Compilation terminated.
