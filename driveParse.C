@@ -11,6 +11,7 @@
 #include "CodeOpt.h"
 #include "SymTab.h"
 #include "Value.h"
+#include "AbstractMachineCode.h"
 
 using namespace std;
 
@@ -262,11 +263,14 @@ main(int argc, char *argv[], char *envp[]) {
             in->print(cout);
         cout << endl;
 
-        cout<<"======================Basic Block creation======================\n";
-        BasicBlocksClass *bb = new BasicBlocksClass();
-        bb->createBlocks(in);
-        bb->constantOptimize();
-        bb->print(cout);
+        //cout<<"======================Basic Block creation======================\n";
+        //BasicBlocksClass *bb = new BasicBlocksClass();
+        //bb->createBlocks(in);
+        //bb->constantOptimize();
+        //bb->print(cout);
+
+        cout<<"=====================Abstract Code============================\n";
+        AbstractMachineCode::genAMC(in, cout);
 /*        
         cout<<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
         CodeOpt* codeOpt = new CodeOpt();

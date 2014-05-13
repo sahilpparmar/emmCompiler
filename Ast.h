@@ -249,6 +249,11 @@ class ValueNode: public ExprNode {
             return os.str();
         }
 
+        string getRegisterName()
+        {
+            return getRefName();
+            }
+
     private:
         /* val_ field is already included in ExprNode, so no new data members */
 };
@@ -792,7 +797,7 @@ class VregNode: public ExprNode
         VregNode (int line, int column, string file); 
         ExprNode* clone() const {return NULL; }
         void print(ostream& os, int indent=0) const {}
-        virtual const Type* typeCheck() { return NULL; };
+        const Type* typeCheck();
         string getRefName() { return name_; }
         
         string getRegisterName();

@@ -96,6 +96,7 @@ string VariableEntry::getRegisterName()
 {
     if(registerName_.length() != 0) return registerName_ ;
     Type *type_ = type();
+//    cout<<"\n tag is: "<<type_->tag();
     if(!type_) type_ = type();
     (type_ && type_->isFloat(type_->tag())) ? setRegisterName(allocateNewRegName(true)) : setRegisterName(allocateNewRegName(false)) ; 
     return registerName_;
