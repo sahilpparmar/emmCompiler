@@ -8,7 +8,6 @@ std::map <string, InterCode*> LabelClass::label_interCode_map;
 void InterCode::print(ostream &os) {
     ExprNode** op = (ExprNode**)opnds_;
 
-    //os << "NEXT\n";
     switch (optype_) {
         case EXPR:  {
                         switch (subCode_) {
@@ -99,6 +98,9 @@ void InterCode::print(ostream &os) {
 
         case CALL:  {
                         prtSpace(os, TAB_SPACE);
+                        if (op[1]) {
+                            os << op[1]->getRefName() << " = ";
+                        }
                         os << "call " << (char*)op[0];
                     }
                     break;

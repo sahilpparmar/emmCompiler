@@ -528,10 +528,8 @@ const Type* InvocationNode::typeCheck()
         }
     }
 
-    if (func_entry)
-        return func_entry->type()->retType();
+    return func_entry->type()->retType();
     
-    return NULL;
 }
 
 InterCodesClass* InvocationNode::codeGen()
@@ -546,7 +544,12 @@ InterCodesClass* InvocationNode::codeGen()
             cls->addCode(InterCode::OPNTYPE::APARAM, expr_node->getRefNode());
         }
     }
-    cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str());
+
+    if (func_entry->type()->retType()->tag() == Type::VOID) {
+        cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str());
+    } else {
+        cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str(), this->getRefNode());
+    }
 
     return cls;
 }
