@@ -9,6 +9,8 @@
 #include <map>
 #include <utility>
 
+#define TAB_SPACE 8
+
 using namespace std;
 
 /* Each InterCode class will store single three address Instruction 
@@ -180,7 +182,8 @@ class BasicBlock {
        
 
         void print(ostream &os) {
-            os << "Block Label: " << blocklabel << endl;
+            //os << "Block Label: " << blocklabel << endl;
+            os << blocklabel << ":" << endl;
             vector <InterCode*>::iterator it = InterCodeVector.begin();
 
             for (; it != InterCodeVector.end(); ++it) {
@@ -188,13 +191,15 @@ class BasicBlock {
                 os << endl;
             }
         
-            os << "Nextblocks: ";  
+            prtSpace(os, TAB_SPACE);
+            os << "(next ";  
             vector<string>::iterator iter = NextBlockLabels.begin();
             
             for ( ; iter != NextBlockLabels.end(); ++iter) {
-                os << *iter << "\t";
+                os << " " << *iter;
             }
-            os << endl; 
+            os << ")";  
+            os << endl << endl; 
         }
         
         void check() {
@@ -215,6 +220,8 @@ class BasicBlock {
         }
         void constantFolding();
         void constantPropogation();
+        void redundantGotoRemoval();
+        void zeroRemoval();
     private : 
         string blocklabel; 
         vector <InterCode*> InterCodeVector;       
@@ -249,6 +256,8 @@ class BasicBlocksClass {
             for (it = bbVector.begin(); it != bbVector.end(); ++it) {
                 (*it)->constantFolding();
                 (*it)->constantPropogation();
+                (*it)->redundantGotoRemoval();
+                (*it)->zeroRemoval();
             }
         }
         

@@ -267,9 +267,12 @@ main(int argc, char *argv[], char *envp[]) {
         bb->createBlocks(in);
         bb->constantOptimize();
         bb->print(cout);
-        bb->check();
+/*
+        cout<<"====================== Code Optimization ======================\n";
+        bb->constantOptimize();
+        bb->print(cout);
+        //bb->check();
 
-/*        
         cout<<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
         CodeOpt* codeOpt = new CodeOpt();
         InterCodesClass* out = codeOpt->codeOptimization(in);
