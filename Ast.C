@@ -505,12 +505,10 @@ InterCodesClass* InvocationNode::codeGen()
     FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
 
     if (params_) {
-        vector<ExprNode*>::iterator p_iter = params_->begin();
-
-        for (; p_iter != params_->end(); ++p_iter) {
-            ExprNode* expr_node = *p_iter; 
+        for (int ii = params_->size() - 1; ii >= 0; ii--) {
+            ExprNode* expr_node = (*params_)[ii];
             cls->addCode(expr_node->codeGen());
-            cls->addCode(InterCode::OPNTYPE::PARAM, expr_node->getRefNode());
+            cls->addCode(InterCode::OPNTYPE::APARAM, expr_node->getRefNode());
         }
     }
     cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str());

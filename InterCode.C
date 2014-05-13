@@ -112,11 +112,18 @@ void InterCode::print(ostream &os) {
                     }
                     break;
 
-        case PARAM: {
+        case APARAM:{
                         prtSpace(os, TAB_SPACE);
-                        os << "param " << op[0]->getRefName();
+                        os << "aparam " << op[0]->getRefName();
                     }
                     break;
+
+        case FPARAM:{
+                        prtSpace(os, TAB_SPACE);
+                        os << "fparam " << op[0]->getRefName();
+                    }
+                    break;
+
         case PRINT: {
                         prtSpace(os, TAB_SPACE);
                         os << "print " << op[0]->getRefName();

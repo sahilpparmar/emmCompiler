@@ -3,19 +3,19 @@
 
 =========================AST Builder=========================
  
-  int logMessage(string x);
+  int logMessage(string x, int aa);
   int a = 5;
   int b;
   int c;
   bool condition;
-  int open(string file, int flags, unsigned int mode) {
+  int open(string file, int a, unsigned int mode) {
     
     while (a<3)     {
       a=10;
       if (a==10)       {
         continue 1;
       };
-      logMessage("Assignment in condition");
+      logMessage("Assignment in condition", 1);
       break 1;
       while (a>10)       {
         a=(b+c);
@@ -40,6 +40,7 @@
 ====Function 'logMessage'
 ==Formal Parameters
 Variable: x, Offset: 8
+Variable: aa, Offset: 12
 
 Variable: a, Offset: 0
 Variable: b, Offset: 4
@@ -49,7 +50,7 @@ Variable: condition, Offset: 12
 ====Function 'open'
 ==Formal Parameters
 Variable: file, Offset: 8
-Variable: flags, Offset: 12
+Variable: a, Offset: 12
 Variable: mode, Offset: 16
 ==Local Variables
 
@@ -58,6 +59,9 @@ GLOBAL:
         a = 5
 open:
         enter open
+        fparam file
+        fparam a
+        fparam mode
 L2:
         if a < 3 goto L3:
         goto L4:
@@ -68,7 +72,8 @@ L3:
 L6:
         goto L2:
 L5:
-        param "Assignment in condition"
+        aparam 1
+        aparam "Assignment in condition"
         call logMessage
         goto L4:
 L7:

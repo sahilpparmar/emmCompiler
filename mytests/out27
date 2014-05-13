@@ -55,6 +55,7 @@ Variable: xyz, Offset: -24
 GLOBAL:
 foo:
         enter foo
+        fparam a
         c = 5
         __vreg0 = 5
         __vreg2 = __vreg1

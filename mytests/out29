@@ -83,6 +83,7 @@ GLOBAL:
         m = __vreg14
 foo:
         enter foo
+        fparam a
         a = 10
         if a == 1 goto L3:
         goto L4:
