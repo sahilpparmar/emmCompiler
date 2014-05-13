@@ -223,13 +223,10 @@ void ReturnStmtNode::print(ostream& os, int indent) const
 const Type* ReturnStmtNode::typeCheck() 
 {   
     const Type* return_type = NULL;
-    const Type* func_type   = NULL;
+    const Type* func_type = fun_->type()->retType();        
 
     if (expr_) {
         return_type = expr_->typeCheck(); 
-
-        if (fun_)
-            func_type = fun_->type()->retType();        
 
         if (return_type && func_type) {
 
@@ -243,6 +240,8 @@ const Type* ReturnStmtNode::typeCheck()
                 errMsg("Return value incompatible with current function type", expr_);
             }
         }
+    } else if (func_type->tag() != Type::TypeTag::VOID) {
+        errMsg("Return value expected", this);
     }
     return return_type;
 }
@@ -494,13 +493,13 @@ const Type* InvocationNode::typeCheck()
     }
 
     return func_entry->type()->retType();
-    
 }
 
 InterCodesClass* InvocationNode::codeGen()
 {
     InterCodesClass *cls = new InterCodesClass();
     FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
+    InterCode* nxt = LabelClass::assignLabel();
 
     if (params_) {
         for (int ii = params_->size() - 1; ii >= 0; ii--) {
@@ -511,10 +510,14 @@ InterCodesClass* InvocationNode::codeGen()
     }
 
     if (func_entry->type()->retType()->tag() == Type::VOID) {
-        cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str());
+        cls->addCode(InterCode::OPNTYPE::CALL, this);
     } else {
-        cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str(), this->getRefNode());
+        cls->addCode(InterCode::OPNTYPE::CALL, this, this->getRefNode());
     }
+
+    // Add next label for return address of call
+    this->next(nxt);
+    cls->addCode(nxt);
 
     return cls;
 }
