@@ -14,7 +14,7 @@ void main()
 {
     int  k  = 4;
     int  kk = 8;
-//    kk = k<< (2);
+    kk = k<< (2);
 //    string s = "hi";
 //    foo(k, kk, "hi");
     foo(k, kk);

@@ -162,6 +162,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                               break;
                               }
               case EXPR   :   {
+//TODO: To bit and logical operators
                                 ExprNode **opndsList = (ExprNode **)interCode->get3Operands();
                                 ExprNode *dst        = opndsList[0];
                                 ExprNode *src1       = opndsList[1];
@@ -199,6 +200,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                    case OpNode::OpCode::MULT :     os<<"FMUL "; break;     
                                    case OpNode::OpCode::DIV  :     os<<"FDIV "; break;
                                    case OpNode::OpCode::ASSIGN:    os<<"MOVF "; break; 
+                                   default                    :  break ;    
                                }
                                os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
                                }
@@ -228,16 +230,16 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                    case OpNode::OpCode::ASSIGN:    os<<"MOVI "; break; 
                     //TODO:        case OpNode::OpCode::NOT  :     cout<<"\n hi";  
                                   //                                 break;  
+                                   default                    :  break ;    
 
                                }
                                os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
                                }
-                               else
+                               else if(interCode->getsubCode() == OpNode::OpCode::SHL || interCode->getsubCode() == OpNode::OpCode::SHR)
                                {
-                               switch(interCode->getsubCode())
-                               {
-                                   case OpNode::OpCode::SHL  :     isSHL = true;
-                                   case OpNode::OpCode::SHR  :    
+                                   if(interCode->getsubCode() == OpNode::OpCode::SHL)   isSHL = true;
+                                   else if(interCode->getsubCode() == OpNode::OpCode::SHL)   isSHL = false;
+
                                                                    LabelClass *l1  = new LabelClass();
                                                                    InterCode  *ic1 = l1->assignLabel();
                                                                    LabelClass *l2  = new LabelClass();
@@ -254,9 +256,8 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                                                    os<<"SUB "<<RSH_Cnt<<" 1 "<<RSH_Cnt<<endl;
                                                                    os<<"JMP "<<ic2->getLabel()<<endl;
                                                                    os<<ic1->getLabel()<<":"<<endl;
-                                                                   os<<"MOVI "<<RSH_Val<<" "<<dst_regName;
+                                                                   os<<"MOVI "<<RSH_Val<<" "<<dst_regName<<endl;
                                                                    break;
-                               }
 
                                }
 
@@ -308,6 +309,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                     case OpNode::OpCode::GE   : (if_cond_int) ? os<<"GE " : os<<"FGE "; break;
                                     case OpNode::OpCode::LT   : (if_cond_int) ? os<<"GT " : os<<"FGT "; break; 
                                     case OpNode::OpCode::LE   : (if_cond_int) ? os<<"GE " : os<<"FGE "; break;
+                                    default                    :  break ;    
                                 }
                                 if(interCode->getsubCode() == OpNode::OpCode::LT  || interCode->getsubCode() == OpNode::OpCode::LE)
                                 {
