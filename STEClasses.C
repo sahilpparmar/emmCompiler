@@ -38,7 +38,7 @@ InterCodesClass* GlobalEntry::codeGen()
 
     if (symTab()) {
         cls = new InterCodesClass();
-        cls->addCode (LabelClass::assignLabel ("GLOBAL"));
+        cls->addCode(LabelClass::assignLabel ("GLOBAL"));
         
         SymTab::iterator it = symTab()->begin();
         for(; it != symTab()->end(); ++it) {
@@ -170,8 +170,8 @@ InterCodesClass* FunctionEntry:: codeGen() {
     InterCodesClass* cls = NULL;
     if (body_) {
         cls = new InterCodesClass();
-        cls->addCode (LabelClass::assignLabel (name()));
-        cls->addCode (InterCode::OPNTYPE::ENTER, (void *)name().c_str());
+        cls->addCode(LabelClass::assignLabel (name()));
+        cls->addCode(InterCode::OPNTYPE::ENTER, this);
         
         if (symTab()) {
             
@@ -181,9 +181,9 @@ InterCodesClass* FunctionEntry:: codeGen() {
                     cls->addCode((*it)->codeGen());
             }
         }
-        cls->addCode (body_->codeGen());
+        cls->addCode(body_->codeGen());
 
-        cls->addCode (InterCode::OPNTYPE::LEAVE, (void *)name().c_str());
+        cls->addCode(InterCode::OPNTYPE::LEAVE, this);
 
         return cls; 
     }

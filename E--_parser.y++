@@ -1,4 +1,3 @@
-//TODO: mytest/in26
 %{
 
 #include "Ast.h"
@@ -24,6 +23,7 @@ static vector<VariableEntry*> *curVarList     =  NULL;
 static FunctionEntry          *curFuncEnt     =  NULL;
 static EventEntry             *curEventEnt    =  NULL;
 static RuleBlockEntry         *curRBlkNode    =  NULL;
+static ReturnStmtNode         *curReturnNode  =  NULL;
 static int                    curClassSize    =  0;
 
 static EventEntry* getEventEntry(char *eventName) {
@@ -46,6 +46,12 @@ static Type* getUserType(char *typeName) {
         errMsg((string)"Undeclared type \"" + (string)typeName + (string)"\"");
         return new Type(Type::VOID);
     }
+}
+
+void checkReturnStmt(FunctionEntry *func) {
+    if (!curReturnNode && func->type()->retType()->tag() != Type::VOID)
+        errMsg((string)"Return Statement expected for function '" + func->name() + "'");
+    curReturnNode = NULL;
 }
 
 static bool IsFuncSymEntry(SymTabEntry *sym) {
@@ -164,7 +170,6 @@ static FunctionEntry* allocFuncEntry(char* name = NULL, Type* rettype = NULL, ve
         curFuncEnt = NULL;
     } else {
         retFuncEnt = new FunctionEntry(string("dummy_func"), NULL, yylinenum, yycolumnno, string(yyfilename));
-        //cout << "Current Scope : "<<stm.currentScope()->name();
         stm.enterScope(retFuncEnt);
     }
     return retFuncEnt;
@@ -214,8 +219,9 @@ static ExprStmtNode* allocExprStmtNode(ExprNode* e) {
 static ReturnStmtNode* allocReturnNode(ExprNode* e) {
     if (IsCurRuleBlockEntry())
         errMsg((string)"Return statement is valid only within a function");
-    return new ReturnStmtNode(e, (FunctionEntry*)stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND),
-            yylinenum, yycolumnno, string(yyfilename));
+    curReturnNode = new ReturnStmtNode(e, (FunctionEntry*)stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND),
+                                yylinenum, yycolumnno, string(yyfilename));
+    return curReturnNode;
 }
 
 static BreakStmtNode* allocBreakNode(ExprNode* e) {
@@ -610,8 +616,8 @@ class_func_invocation:  TOK_IDENT TOK_LPAREN caller_param_l TOK_RPAREN      {   
                   |     TOK_IDENT TOK_LPAREN TOK_RPAREN                     {   funcParamList = NULL;                            prt("ClassFunctionInvocation"); }
                   ;
 
-function_proto:     function_decl semi_colon                                {   $$ = $1;                    }
-                  | function_decl function_defn                             {   $1->body($2);   $$ = $1;    }
+function_proto:     function_decl semi_colon                                {   $$ = $1;                                        }
+                  | function_decl function_defn                             {   $$ = $1;    $1->body($2); checkReturnStmt($1);  }
                   ;
 
 function_defn:      TOK_LBRACE function_body TOK_RBRACE semi_colon          {   $$ = allocCompStmtNode(curStmtList3);        curStmtList3 = NULL;     prt("FunctionBody");  }

@@ -86,13 +86,13 @@ void InterCode::print(ostream &os) {
 
         case ENTER: {
                         prtSpace(os, TAB_SPACE);
-                        os << "enter " << (char*)op[0];
+                        os << "enter " << ((FunctionEntry*)op[0])->name();
                     }
                     break;
 
         case LEAVE: {
                         prtSpace(os, TAB_SPACE);
-                        os << "leave " << (char*)op[0];
+                        os << "leave " << ((FunctionEntry*)op[0])->name();
                     }
                     break;
 
@@ -101,7 +101,7 @@ void InterCode::print(ostream &os) {
                         if (op[1]) {
                             os << op[1]->getRefName() << " = ";
                         }
-                        os << "call " << (char*)op[0];
+                        os << "call " << ((InvocationNode*)op[0])->symTabEntry()->name();
                     }
                     break;
 
