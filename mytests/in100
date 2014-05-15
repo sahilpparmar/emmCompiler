@@ -1,0 +1,15 @@
+void foo(int b) {
+    int a = 5;
+
+    if (a > 0)
+        b = 3;
+    
+    b = b/a;
+}
+
+int bar() {
+
+    int c = 33;
+    foo(c);
+    return c;
+}

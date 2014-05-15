@@ -265,16 +265,19 @@ main(int argc, char *argv[], char *envp[]) {
         DEBUG("======================3 Addr Generation======================\n");
         InterCodesClass* in = ge->codeGen();
         if (debugLevel > 0) {
-            in->print(cout);
+           // in->print(cout);
         }
-
+        //in->print(cout);
         // TODO: Remove unwanted couts before uncommenting below code
-        //DEBUG("====================Basic Block creation=====================\n");
+        DEBUG("====================Basic Block creation=====================\n");
         //BasicBlocksClass *bb = new BasicBlocksClass();
         //bb->createBlocks(in);
         //bb->constantOptimize();
         //bb->print(cout);
         //bb->check();
+        BasicBlocksContainer *bbC = new BasicBlocksContainer();
+        bbC->createBlockStruct (in);
+        bbC->print(cout);
  
 /*        
         cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";

@@ -1,3 +1,14 @@
+/* Each InterCode class will store single three address Instruction in Quadruple form
+ * opnds_ array is for three operands
+ * OPNTYPE gives which type of instruction is this
+ * subCode_ is to distinguish expr type operand
+ * 
+ * InterCodesClass     - vector to store all InterCodes in a program
+ * BasicBlock          - Divide InterCodesvec into basicblocks 
+ * BasicBlocksClass    - Vector of all basic blocks within one function reachable from one another 
+ * BasicBlocksContainer- GLobal BasicBlocks structure - vector of all basicblocksclass
+ */
+
 #ifndef INTERCODE
 #define INTERCODE
 
@@ -11,10 +22,6 @@
 
 using namespace std;
 
-/* Each InterCode class will store single three address Instruction 
- * opnds_ array is for three operands
- * OPNTYPE gives which type of instruction is this
- */
 class InterCode {
     public:
        enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
@@ -165,6 +172,15 @@ class BasicBlock {
            }
            NextBlockLabels.push_back(nextlabel);
         }
+        
+        void addPrevBlock(string prevlabel) {
+           vector<string>::iterator it = PrevBlockLabels.begin();
+           for(; it != PrevBlockLabels.end(); ++it) {
+               if (prevlabel.compare(*it) == 0)
+                   return;
+           }
+           PrevBlockLabels.push_back(prevlabel);
+        }
 
         void setBlockLabel(string s) {
             blocklabel.assign(s);
@@ -180,7 +196,14 @@ class BasicBlock {
        
 
         void print(ostream &os) {
-            os << "Block Label: " << blocklabel << endl;
+            
+            os << "\n\nPrevBlocks: ";
+            vector<string>::iterator iter = PrevBlockLabels.begin();
+            for ( ; iter != PrevBlockLabels.end(); ++iter) {
+                os << *iter << ",";
+            }
+            os << endl; 
+            os << "Block Start: " << blocklabel << endl;
             vector <InterCode*>::iterator it = InterCodeVector.begin();
 
             for (; it != InterCodeVector.end(); ++it) {
@@ -188,47 +211,37 @@ class BasicBlock {
                 os << endl;
             }
         
-            os << "Nextblocks: ";  
-            vector<string>::iterator iter = NextBlockLabels.begin();
-            
+            os << "Block end: " << blocklabel << endl ;
+            os << "NextBlocks:";  
+            iter = NextBlockLabels.begin();
             for ( ; iter != NextBlockLabels.end(); ++iter) {
-                os << *iter << "\t";
+                os << *iter << ",";
             }
-            os << endl; 
+            
         }
         
-        void check() {
-            vector<InterCode*>::iterator it = InterCodeVector.begin(); 
-            
-            for (; it != InterCodeVector.end(); ++it) {
-
-            if ((*it)->getOPNType() == InterCode::OPNTYPE::EXPR ) { 
-               ExprNode **op =  (ExprNode **)(*it)->get3Operands();
-                for (int i = 0; i < 1; ++i) { 
-                    if (op[i] && op[i]->coercedType())
-                        cout <<"\n---------"<< op[i]->coercedType()->name();
-                    else if (op[i] && op[i]->type())
-                        cout << endl<<op[i]->type()->name();
-                }
-            }
-            }
-        }
         void constantFolding();
         void constantPropogation();
     private : 
         string blocklabel; 
         vector <InterCode*> InterCodeVector;       
         vector <string> NextBlockLabels;
+        vector <string> PrevBlockLabels;
 };
 
 
 class BasicBlocksClass {
     private:
         vector <BasicBlock*> bbVector;
-    
+        map <string, BasicBlock*> label_block_map; 
     public:
+        
+        vector<BasicBlock*>* getVector() {
+            return &bbVector;
+        }
+
         BasicBlock* getBlockWithLabel (string label) {
-           vector <BasicBlock*>::iterator it = bbVector.begin();
+            vector <BasicBlock*>::iterator it = bbVector.begin();
 
             for (; it != bbVector.end(); ++it) {
                 if (label.compare((*it)->getBlockLabel()) == 0)
@@ -237,6 +250,7 @@ class BasicBlocksClass {
             //if block does not exist,then create block with new label
             BasicBlock *newbb = new BasicBlock(label);
             bbVector.push_back(newbb);
+            label_block_map.insert(pair<string, BasicBlock*> (label, newbb));
             return newbb;
         }
         
@@ -258,14 +272,38 @@ class BasicBlocksClass {
                  (*it)->print(os);
              }
         }
-        void check() {
-             cout << "DEBUG ON"; 
-             vector <BasicBlock*>::iterator it = bbVector.begin();
-             for (; it != bbVector.end(); ++it) {
-                 (*it)->check();
-             }
-        }
 
 };
+
+class BasicBlocksContainer {
+    private: 
+        map <string, BasicBlocksClass*> bbContainer; 
+        
+    public:
+       void createBlockStruct (InterCodesClass* ic);
+       
+       BasicBlocksClass* insertInContainer (string name) {
+
+           if (bbContainer.find(name) == bbContainer.end()) {
+               BasicBlocksClass* bbCls = new BasicBlocksClass(); 
+               bbContainer.insert (pair<string, BasicBlocksClass*> (name, bbCls));
+               
+               return bbCls;
+           }
+           else
+               return bbContainer.find(name)->second;
+       }
+       
+       void print(ostream &os) {
+            map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+            
+            for (; it != bbContainer.end(); ++it) {
+                os << "\n====Basic Blocks Container: " << (*it).first << "=====" << endl;
+                (*it).second->print(os);
+                os << endl;
+            }
+       }
+};
+
 
 #endif
