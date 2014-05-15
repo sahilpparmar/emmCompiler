@@ -4,7 +4,7 @@
 
     int logMessage(string x) ;	
     int a = 5, b, c;
-    event open (string a1 , int a2 , unsigned int a3);
+    event open (double a1 , int a2 , unsigned int a3);
 	bool condition;
 
     open(file, flags, mode) -> {

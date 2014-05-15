@@ -54,12 +54,10 @@ void checkEventParamType(Type *ptype) {
         case Type::INT:
         case Type::UINT:
         case Type::DOUBLE:
-        //TODO: Invalid types (Need to remove below from all test cases)
-        case Type::STRING:
-        case Type::CLASS:
             break;
+        // Invalid types
         default:
-            errMsg((string)"Invalid parameter type for event declaration");
+            errMsg((string)"Invalid parameter type '" + ptype->fullName() + (string)"' for event declaration");
             break;
     }
 }
