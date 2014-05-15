@@ -118,9 +118,12 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                 break;
                               }
               case FPARAM  :  {
-                                
+                                ExprNode **opndsList = (ExprNode **)interCode->get3Operands();
+                                    cout<<"\n fparam: "<<opndsList[0]->getRefName();
+                                    
                               } 
               case APARAM  :   {
+                  cout<<"\n in aparam";
                                 ExprNode **opndsList = (ExprNode **)interCode->get3Operands();
                                 ExprNode *param       = opndsList[0];
                                     string    str;
@@ -260,7 +263,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                }
                                }
              case LABEL  :     {
-                                //cout<<"\n in label "<<interCode->getLabel();
+//                                cout<<"\n in label "<<interCode->getLabel();
                                 os<<interCode->getLabel()<<endl;
                                 break; }
              case GOTO   :     { 
@@ -335,7 +338,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                }
                                break;
                              }
-             case ENTER  :   { //cout<<"\n in enter"; 
+             case ENTER  :   { cout<<"\n in enter"; 
                                ExprNode **opndsList = (ExprNode **)interCode->get3Operands();
                              //  os<<(char*)opndsList[0]<<":";
                                break;}
