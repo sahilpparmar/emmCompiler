@@ -27,6 +27,7 @@
         };
       };
     };
+    return a;
   };
  
 
@@ -74,25 +75,29 @@ L6:
 L5:
         aparam 1
         aparam "Assignment in condition"
-        call logMessage
-        goto L4:
+        __vreg0 = call logMessage
 L7:
-        if a > 10 goto L8:
-        goto L9:
-L8:
-        __vreg0 = b + c
-        a = __vreg0
-        if a > 20 goto L11:
-        goto L12:
-L11:
-        goto L2:
-        goto L10:
-L12:
         goto L4:
-L10:
-        goto L7:
+L8:
+        if a > 10 goto L9:
+        goto L10:
 L9:
+        __vreg1 = b + c
+        a = __vreg1
+        if a > 20 goto L12:
+        goto L13:
+L12:
+        goto L2:
+        goto L11:
+L13:
+        goto L4:
+L11:
+        goto L8:
+L10:
         goto L2:
 L4:
+        return a
         leave open
+
+====================Basic Block creation=====================
 Compilation Successful

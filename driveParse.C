@@ -269,25 +269,27 @@ main(int argc, char *argv[], char *envp[]) {
             in->print(cout);
         }
 
-        cout<<"======================Basic Block creation======================\n";
-         //TODO: Remove unwanted couts before uncommenting below code
         DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksClass *bb = new BasicBlocksClass();
         bb->createBlocks(in);
-        bb->constantOptimize();
-        bb->print(cout);
-        bb->check();
 
-        cout<<"=====================Abstract Code============================\n";
-        AbstractMachineCode::genAMC(bb, cout);
+        //TODO: Segfault in mytests/in29
+        //bb->constantOptimize();
+         
+        //TODO: Remove unwanted couts before uncommenting below code
+        //bb->print(cout);
 
-        /*        
-                  cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
-                  CodeOpt* codeOpt = new CodeOpt();
-                  InterCodesClass* out = codeOpt->codeOptimization(in);
-                  if (out)
-                  out->print(cout);
-                  */
+        //TODO: Enable below once all correctly printed
+        //cout<<"=====================Abstract Code============================\n";
+        //AbstractMachineCode::genAMC(bb, cout);
+
+        //cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
+        //CodeOpt* codeOpt = new CodeOpt();
+        //InterCodesClass* out = codeOpt->codeOptimization(in);
+        //if (out)
+        //out->print(cout);
+        //cout << endl;
+
         cout << "Compilation Successful" << endl;
     }
 #endif

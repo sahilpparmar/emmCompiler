@@ -28,6 +28,6 @@ int open(string file, int a, unsigned int mode)
         }
 
     }
-
+    return a;
 };
 

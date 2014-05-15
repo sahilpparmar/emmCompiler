@@ -45,4 +45,6 @@ Variable: x, Offset: 8
 ======================3 Addr Generation======================
 GLOBAL:
         b = 2
+
+====================Basic Block creation=====================
 Compilation Successful

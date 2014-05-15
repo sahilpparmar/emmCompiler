@@ -17,11 +17,16 @@
   int k = 1^1;
   int l = (1<<2);
   int m = (100>>2);
-  void foo(int a) {
+  int bar(int aa) {
+    
+    return (aa+1);
+  };
+  int foo(int a) {
     
     a=10;
     if (a==1)     a=2;
-    else     a=3;
+    else     a=((3+bar(a))+bar(a)*2);
+    return a;
   };
  
 
@@ -45,6 +50,12 @@ Variable: j, Offset: 40
 Variable: k, Offset: 44
 Variable: l, Offset: 48
 Variable: m, Offset: 52
+
+====Function 'bar'
+==Formal Parameters
+Variable: aa, Offset: 8
+==Local Variables
+
 
 ====Function 'foo'
 ==Formal Parameters
@@ -81,17 +92,35 @@ GLOBAL:
         l = __vreg13
         __vreg14 = 100 >> 2
         m = __vreg14
+bar:
+        enter bar
+        fparam aa
+        __vreg15 = aa + 1
+        return __vreg15
+        leave bar
 foo:
         enter foo
         fparam a
         a = 10
-        if a == 1 goto L3:
-        goto L4:
-L3:
-        a = 2
-        goto L2:
+        if a == 1 goto L4:
+        goto L5:
 L4:
-        a = 3
-L2:
+        a = 2
+        goto L3:
+L5:
+        aparam a
+        __vreg16 = call bar
+L6:
+        __vreg17 = 3 + __vreg16
+        aparam a
+        __vreg18 = call bar
+L7:
+        __vreg19 = __vreg18 * 2
+        __vreg20 = __vreg17 + __vreg19
+        a = __vreg20
+L3:
+        return a
         leave foo
+
+====================Basic Block creation=====================
 Compilation Successful

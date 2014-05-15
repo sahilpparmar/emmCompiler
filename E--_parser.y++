@@ -48,6 +48,22 @@ static Type* getUserType(char *typeName) {
     }
 }
 
+void checkEventParamType(Type *ptype) {
+    switch(ptype->tag()) {
+        // Valid types
+        case Type::INT:
+        case Type::UINT:
+        case Type::DOUBLE:
+        //TODO: Invalid types (Need to remove below from all test cases)
+        case Type::STRING:
+        case Type::CLASS:
+            break;
+        default:
+            errMsg((string)"Invalid parameter type for event declaration");
+            break;
+    }
+}
+
 void checkReturnStmt(FunctionEntry *func) {
     if (!curReturnNode && func->type()->retType()->tag() != Type::VOID)
         errMsg((string)"Return Statement expected for function '" + func->name() + "'");
@@ -189,6 +205,11 @@ static RefExprNode* allocRefExprNode(char* str) {
 static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
     assert(str != NULL);
     SymTabEntry *sym = stm.lookUp(string(str));
+
+    if (!sym) {
+        sym = stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND);
+        if (sym->name().compare(str)) sym = NULL;
+    }
 
     if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
         errMsg((string)"\"" + (string)str + (string)"\" is not a function or module name");
@@ -661,8 +682,9 @@ event_param_l:      TOK_LPAREN event_param_l TOK_RPAREN                     {   
                   | TOK_LPAREN TOK_RPAREN                                   {   curEventEnt = allocEventEntry();}
                   ;
 
-event_param:        type TOK_IDENT                                          {   if (!curEventEnt) curEventEnt = allocEventEntry();  
-                                                                                $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, NULL); prt("FormalParam");}
+event_param:        type TOK_IDENT                                          {   if (!curEventEnt) curEventEnt = allocEventEntry(); checkEventParamType($1); 
+                                                                                $$ = $1; allocVarEntry($2, VariableEntry::PARAM_VAR, $1, NULL); prt("FormalParam");
+                                                                            }
                   ;
 
 semi_colon:         semi_colon TOK_SEMICOLON

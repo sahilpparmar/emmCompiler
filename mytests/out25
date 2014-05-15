@@ -59,4 +59,6 @@ GLOBAL:
         b = 12345678
         c = 1
         d = 1
+
+====================Basic Block creation=====================
 Compilation Successful
