@@ -19,7 +19,7 @@ using namespace std;
  */
 class InterCode {
     public:
-       enum OPNTYPE {CALL, PARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
+       enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
        
        InterCode (OPNTYPE op, OpNode::OpCode subopc = OpNode::OpCode::INVALID, 
                    void *a = NULL, void *b  = NULL, void *c = NULL) {
@@ -103,6 +103,14 @@ class InterCodesClass {
 
         void setICodeVector(vector <InterCode*> *tempVector) {
                 InterCodeVector = *tempVector;
+        }
+        
+        void ifThenElseOpt();
+        void removeContLabelGoto();
+
+        void optimize () {
+                ifThenElseOpt();
+                removeContLabelGoto();
         }
         
     protected:
@@ -222,6 +230,7 @@ class BasicBlock {
         void constantPropogation();
         void redundantGotoRemoval();
         void zeroRemoval();
+
     private : 
         string blocklabel; 
         vector <InterCode*> InterCodeVector;       
@@ -249,7 +258,7 @@ class BasicBlocksClass {
         
         void createBlocks (InterCodesClass* ic);
         
-        void constantOptimize () {
+        void blockOptimize () {
            vector <BasicBlock*>::iterator it; 
             
             //TODO : Need to convert this to iterative 

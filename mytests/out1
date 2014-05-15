@@ -5,21 +5,19 @@
  
   int a = 5;
   int f(int i, int j) {
-    
-    a=((i+j)/2);
-    return a*2;
+    int c = 2;
+    int b = ((2+3)+c);
+    double e = (8.5+1.1);
+  
+    if ((e<b&&e>c))     b=(9/2);
+    else     b=9*2;
+    e=(c+b);
+    return c;
   };
-  void foo(int b) {
-    
-    if (((a&&a==b)&&b))     b=2;
-    else     b=3;
-    f(b, (b*b-1));
-  };
+  int b = 10;
  
 
 ========================Type Checking========================
-mytests/in1:9:Warning: Incompatible type for agrument 1 for operator `&&'
-mytests/in1:9:Warning: Incompatible type for agrument 2 for operator `&&'
 
 ======================Memory Allocation======================
 
@@ -32,43 +30,40 @@ Variable: a, Offset: 0
 Variable: i, Offset: 8
 Variable: j, Offset: 12
 ==Local Variables
+Variable: c, Offset: -4
+Variable: b, Offset: -8
+Variable: e, Offset: -12
 
-
-====Function 'foo'
-==Formal Parameters
-Variable: b, Offset: 8
-==Local Variables
+Variable: b, Offset: 4
 ======================3 Addr Generation======================
-L0:
+GLOBAL:
         a = 5
 f:
         enter f
-        __vreg0 = i + j
-        __vreg1 = __vreg0 / 2
-        a = __vreg1
-        __vreg2 = a * 2
-        return __vreg2
-        leave f
-foo:
-        enter foo
-        if a goto L7:
-        goto L5:
-L7:
-        if a == b goto L6:
-        goto L5:
-L6:
-        if b goto L4:
-        goto L5:
-L4:
-        b = 2
-        goto L3:
+        fparam i
+        fparam j
+        c = 2
+        __vreg0 = 2 + 3
+        __vreg1 = __vreg0 + c
+        b = __vreg1
+        __vreg2 = 8.5 + 1.1
+        e = __vreg2
+        if e < b goto L5:
+        goto L4:
 L5:
-        b = 3
+        if e > c goto L3:
+        goto L4:
 L3:
-        param b
-        __vreg3 = b * b
-        __vreg4 = __vreg3 - 1
-        param __vreg4
-        call f
-        leave foo
-
+        __vreg3 = 9 / 2
+        b = __vreg3
+        goto L2:
+L4:
+        __vreg4 = 9 * 2
+        b = __vreg4
+L2:
+        __vreg5 = c + b
+        e = __vreg5
+        return c
+        leave f
+        b = 10
+Compilation Successful

@@ -262,24 +262,23 @@ main(int argc, char *argv[], char *envp[]) {
             in->print(cout);
         cout << endl;
 
+        cout<<"====================== Basic Code Optimization ======================\n";
+        if (in) {
+            in->optimize();
+            in->print(cout);
+        }
+        cout << endl;
+        
         cout<<"======================Basic Block creation======================\n";
         BasicBlocksClass *bb = new BasicBlocksClass();
         bb->createBlocks(in);
-        bb->constantOptimize();
         bb->print(cout);
-/*
-        cout<<"====================== Code Optimization ======================\n";
-        bb->constantOptimize();
+
+        cout<<"====================== Block Code Optimization ======================\n";
+        bb->blockOptimize();
         bb->print(cout);
         //bb->check();
-
-        cout<<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
-        CodeOpt* codeOpt = new CodeOpt();
-        InterCodesClass* out = codeOpt->codeOptimization(in);
-        if (out)
-            out->print(cout);
-        cout << endl;
-*/
     }
 #endif
 }
+

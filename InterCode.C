@@ -8,7 +8,6 @@ std::map <string, InterCode*> LabelClass::label_interCode_map;
 void InterCode::print(ostream &os) {
     ExprNode** op = (ExprNode**)opnds_;
 
-    //os << "NEXT\n";
     switch (optype_) {
         case EXPR:  {
                         switch (subCode_) {
@@ -44,7 +43,7 @@ void InterCode::print(ostream &os) {
                         prtSpace(os, TAB_SPACE);
                         os << "goto "; 
                         goto_lab->print(os);
-                    }
+                        }
                     break; 
 
         case LABEL: {
@@ -78,28 +77,33 @@ void InterCode::print(ostream &os) {
 
                         os << " goto ";
                         true_lab->print(os);
-                        os << endl;
-                        prtSpace(os, TAB_SPACE);
-                        os << "goto ";
-                        false_lab->print(os);
+                        if (false_lab)  {
+                            os << endl;
+                            prtSpace(os, TAB_SPACE);
+                            os << "goto ";
+                            false_lab->print(os);
+                        }
                     }
                     break; 
 
         case ENTER: {
                         prtSpace(os, TAB_SPACE);
-                        os << "enter " << (char*)op[0];
+                        os << "enter " << ((FunctionEntry*)op[0])->name();
                     }
                     break;
 
         case LEAVE: {
                         prtSpace(os, TAB_SPACE);
-                        os << "leave " << (char*)op[0];
+                        os << "leave " << ((FunctionEntry*)op[0])->name();
                     }
                     break;
 
         case CALL:  {
                         prtSpace(os, TAB_SPACE);
-                        os << "call " << (char*)op[0];
+                        if (op[1]) {
+                            os << op[1]->getRefName() << " = ";
+                        }
+                        os << "call " << ((InvocationNode*)op[0])->symTabEntry()->name();
                     }
                     break;
 
@@ -112,11 +116,18 @@ void InterCode::print(ostream &os) {
                     }
                     break;
 
-        case PARAM: {
+        case APARAM:{
                         prtSpace(os, TAB_SPACE);
-                        os << "param " << op[0]->getRefName();
+                        os << "aparam " << op[0]->getRefName();
                     }
                     break;
+
+        case FPARAM:{
+                        prtSpace(os, TAB_SPACE);
+                        os << "fparam " << op[0]->getRefName();
+                    }
+                    break;
+
         case PRINT: {
                         prtSpace(os, TAB_SPACE);
                         os << "print " << op[0]->getRefName();
@@ -128,6 +139,95 @@ void InterCode::print(ostream &os) {
     }
 }
 
+/****************************************************************************************************************************  
+ *  Input :
+ *
+ *  if a then goto L1 
+ *      else goto L2
+ *  L1: 
+ *      .... L1 body ........
+ *  L2:
+ *      .... L2 body ........
+ *
+ *  Output :
+ *
+ *  if !a then goto L2
+ *      else goto L1
+ *  L1:
+ *      .... L1.body ........
+ *  L2:
+ *      .... L2 body ........
+ *
+ *****************************************************************************************************************************/
+
+void InterCodesClass::ifThenElseOpt() {
+    
+    int i;
+    vector<InterCode*>* dupICodeVector = getICodeVector();
+    ExprNode* cond; 
+    InterCode* true_lab, *false_lab;
+
+    for ( i = 0; i < (int )dupICodeVector->size(); i++) {
+
+	if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
+            
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
+            cond = operands[0];  
+            
+            true_lab = cond->OnTrue();
+            false_lab = cond->OnFalse();
+            
+            cond->OnTrue(false_lab);
+            cond->OnFalse(true_lab);
+            
+            dupICodeVector->at(i)->xchgSubcode();
+            
+        }
+    }        
+}
+
+void InterCodesClass::removeContLabelGoto() {
+    
+    int i;
+    vector<InterCode*>* dupICodeVector = getICodeVector();
+    ExprNode* cond; 
+    InterCode* goto_lab, *false_lab, *start_lab;
+    
+    for ( i = 0; i < (int )dupICodeVector->size(); i++) {
+
+	if (dupICodeVector->at(i)->getOPNType() == InterCode::GOTO)  {
+
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
+            goto_lab = (InterCode *)operands[0];
+            
+//            cout << "\nLabel Name = " << goto_lab->getLabel();
+            if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
+                        start_lab = dupICodeVector->at(i+1);
+                        if (goto_lab->getLabel() == start_lab->getLabel())
+                                dupICodeVector->erase(dupICodeVector->begin() + i);
+            }    
+        }
+	else if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
+            
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+            
+            cond = operands[0];  
+            false_lab = cond->OnFalse();
+            
+//            cout << "\nLabel Name = " << false_lab->getLabel();
+            if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
+                        start_lab = dupICodeVector->at(i+1);
+                        if (false_lab->getLabel() == start_lab->getLabel())
+                                cond->OnFalse(NULL);
+            }    
+            
+        }
+
+
+    }        
+}
 
 void BasicBlock::constantFolding() {
 
@@ -289,6 +389,19 @@ void BasicBlock::constantFolding() {
     //cout << "\nReturned \n";
 }
 
+
+/***************************************************************************************************************
+ * 3 Address Code :
+ *      
+ *      a := 6
+ *      __vreg0 := c + a
+ *
+ * Code Optimized : Constant Propagation
+ *
+ *      a := 6
+ *      __vreg0 := c + 6
+ *
+ * **************************************************************************************************************/
 void BasicBlock::constantPropogation() {
    
     //cout <<"\n ENTER " << this->getBlockLabel() << " Size = " << dupICodeVector->size() << "\n";
@@ -412,10 +525,8 @@ void BasicBlock::redundantGotoRemoval() {
 void BasicBlock::zeroRemoval() {
 
     int i;
-
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
-    ExprNode* temp; 
 
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
 
@@ -437,7 +548,6 @@ void BasicBlock::zeroRemoval() {
                         new2->value()->type()->tag() == Type::TypeTag::UINT) && (new2->value()->ival() == 0)) 
                             ||  ((new2->value()->type()->tag() == Type::TypeTag::DOUBLE) && (new2->value()->dval() == 0.0))) {
 
-                        temp = new1;
 
                         switch(dupICodeVector->at(i)->getsubCode()) {
                             case OpNode::OpCode::PLUS  :
@@ -487,8 +597,18 @@ void BasicBlock::zeroRemoval() {
             else
                 tempICodeVector->push_back(dupICodeVector->at(i));
         }
-        else if ((operands[0] == operands[1]) && (operands[2]))   {
-                /* TODO : Remove self (dead) assignment by not pushing */
+        else if ((operands[0]) && (operands[1])) { 
+                    /* TODO : Remove self (dead) assignment by not pushing */
+                    if ((dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR) && 
+                            (operands[0]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) && 
+                                (operands[1]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)) {
+
+                        if (operands[0]->getRefName() == operands[1]->getRefName()) {}
+                            else
+                                tempICodeVector->push_back(dupICodeVector->at(i));
+                    }
+                    else
+                        tempICodeVector->push_back(dupICodeVector->at(i));
         }
         else
             tempICodeVector->push_back(dupICodeVector->at(i));
@@ -497,6 +617,9 @@ void BasicBlock::zeroRemoval() {
         setICodeVector(tempICodeVector);
         //cout << "\nReturned \n";
 }
+
+
+
 
 void InterCodesClass::addCode (InterCode *code) {
     if (code != NULL) 

@@ -47,38 +47,5 @@ mytests/in10:48:Error: Assigned expression must be a subtype of target
 mytests/in10:50:Error: Assigned expression must be a subtype of target
 mytests/in10:52:Error: Assigned expression must be a subtype of target
 mytests/in10:54:Error: 0 arguments expected for logMessage
-
-======================Memory Allocation======================
-
-
-====Global Declarations
-
-====Event 'open'
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
-Variable: a3, Offset: 8
-
-Variable: b3, Offset: 0
-Variable: s, Offset: 4
-Variable: l, Offset: 8
-Variable: i, Offset: 12
-Variable: j, Offset: 16
-Variable: us1, Offset: 20
-Variable: ui, Offset: 24
-Variable: ul, Offset: 28
-Variable: ci, Offset: 32
-Variable: d, Offset: 36
-
-====Function 'logMessage'
-
-Variable: b5, Offset: 40
-Variable: str, Offset: 44
-Variable: str1, Offset: 48
-
-====Function 'get'
-==Formal Parameters
-Variable: a, Offset: 8
-======================3 Addr Generation======================
-L0:
-        i = 65536
-Segmentation fault (core dumped)
+mytests/in10:56:Error: 5 error(s) reported.
+Compilation terminated.

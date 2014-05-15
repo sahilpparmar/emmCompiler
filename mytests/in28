@@ -1,8 +1,8 @@
-int logMessage(string x) ;	
+int logMessage(string x, int aa) ;	
 int a = 5, b, c;
 bool condition;
 
-int open(string file, int flags, unsigned int mode)
+int open(string file, int a, unsigned int mode)
 {
     while (a < 3) 
     {
@@ -12,7 +12,7 @@ int open(string file, int flags, unsigned int mode)
         {
             continue;
         }
-        logMessage("Assignment in condition") ; 
+        logMessage("Assignment in condition", 1) ; 
         break;
         while (a > 10)
         {

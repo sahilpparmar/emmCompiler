@@ -1,6 +1,14 @@
-int foo (int b)  {
+void foo (int b)  {
 
     int a = 10;
+
+    if (a == b) {
+        a = a + b;
+    }
+    else {
+        a = a - b;
+    }
+
     while ( a <= b ) {
         continue 1; 
         break 1;
@@ -8,6 +16,7 @@ int foo (int b)  {
 
     int c = 1, d = 5, e = 9;
     d = 0 * d;
-    e = e;
-    e = 0 + e;
+
+    b = b + 0;
+//    e = 0 + e;
 }

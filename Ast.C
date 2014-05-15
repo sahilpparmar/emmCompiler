@@ -223,13 +223,10 @@ void ReturnStmtNode::print(ostream& os, int indent) const
 const Type* ReturnStmtNode::typeCheck() 
 {   
     const Type* return_type = NULL;
-    const Type* func_type   = NULL;
+    const Type* func_type = fun_->type()->retType();        
 
     if (expr_) {
         return_type = expr_->typeCheck(); 
-
-        if (fun_)
-            func_type = fun_->type()->retType();        
 
         if (return_type && func_type) {
 
@@ -243,6 +240,8 @@ const Type* ReturnStmtNode::typeCheck()
                 errMsg("Return value incompatible with current function type", expr_);
             }
         }
+    } else if (func_type->tag() != Type::TypeTag::VOID) {
+        errMsg("Return value expected", this);
     }
     return return_type;
 }
@@ -493,27 +492,32 @@ const Type* InvocationNode::typeCheck()
         }
     }
 
-    if (func_entry)
-        return func_entry->type()->retType();
-    
-    return NULL;
+    return func_entry->type()->retType();
 }
 
 InterCodesClass* InvocationNode::codeGen()
 {
     InterCodesClass *cls = new InterCodesClass();
     FunctionEntry* func_entry  = (FunctionEntry *) symTabEntry();  
+    InterCode* nxt = LabelClass::assignLabel();
 
     if (params_) {
-        vector<ExprNode*>::iterator p_iter = params_->begin();
-
-        for (; p_iter != params_->end(); ++p_iter) {
-            ExprNode* expr_node = *p_iter; 
+        for (int ii = params_->size() - 1; ii >= 0; ii--) {
+            ExprNode* expr_node = (*params_)[ii];
             cls->addCode(expr_node->codeGen());
-            cls->addCode(InterCode::OPNTYPE::PARAM, expr_node->getRefNode());
+            cls->addCode(InterCode::OPNTYPE::APARAM, expr_node->getRefNode());
         }
     }
-    cls->addCode(InterCode::OPNTYPE::CALL, (void *)func_entry->name().c_str());
+
+    if (func_entry->type()->retType()->tag() == Type::VOID) {
+        cls->addCode(InterCode::OPNTYPE::CALL, this);
+    } else {
+        cls->addCode(InterCode::OPNTYPE::CALL, this, this->getRefNode());
+    }
+
+    // Add next label for return address of call
+    this->next(nxt);
+    cls->addCode(nxt);
 
     return cls;
 }

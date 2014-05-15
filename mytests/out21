@@ -39,26 +39,5 @@ mytests/in21:20:Error: Incompatible type for argument 2 for operator `%'
 mytests/in21:20:Error: Assigned expression must be a subtype of target
 mytests/in21:21:Error: Incompatible type for agrument 2 for operator `+'
 mytests/in21:21:Error: Assigned expression must be a subtype of target
-
-======================Memory Allocation======================
-
-
-====Global Declarations
-
-====Event 'open'
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
-Variable: a3, Offset: 8
-
-Variable: i, Offset: 0
-Variable: j, Offset: 4
-Variable: k, Offset: 8
-Variable: f, Offset: 12
-Variable: b, Offset: 16
-Variable: s, Offset: 20======================3 Addr Generation======================
-L0:
-        i = 2
-        j = 3
-        k = 4.0
-        f = 3.3
-
+mytests/in21:43:Error: 8 error(s) reported.
+Compilation terminated.
