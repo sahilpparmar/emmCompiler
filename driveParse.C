@@ -264,9 +264,11 @@ main(int argc, char *argv[], char *envp[]) {
         }
 
         DEBUG("====================== Basic Code Optimization ======================\n");
-        if (in) {
-            in->optimize();
-            in->print(cout);
+        if (debugLevel > 0) {
+            if (in) {
+                in->optimize();
+                in->print(cout);
+            }
         }
         
         cout << endl;
