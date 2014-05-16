@@ -1,0 +1,10 @@
+event a(int aa, int bb);
+int sum;
+bool ii;
+a(i,j)-> {
+    ii = i<j;
+    if((ii || !(i<6)) && (i<=j || j >=i))
+        sum = i+j;
+    else
+        sum = i-j;
+}

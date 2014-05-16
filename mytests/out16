@@ -54,6 +54,18 @@ Variable: j, Offset: 16
 Variable: y, Offset: 20
 ======================3 Addr Generation======================
 GLOBAL:
+_event_a:
+        enter _event_a
+        fparam e
+        __vreg9 = z + 1
+        z = __vreg9
+        leave _event_a
+_event_a:
+        enter _event_a
+        fparam k
+        __vreg10 = k + y
+        z = __vreg10
+        leave _event_a
 
 ====================Basic Block creation=====================
 Compilation Successful

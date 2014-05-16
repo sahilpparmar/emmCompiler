@@ -48,7 +48,7 @@ static Type* getUserType(char *typeName) {
     }
 }
 
-void checkEventParamType(Type *ptype) {
+static void checkEventParamType(Type *ptype) {
     switch(ptype->tag()) {
         // Valid types
         case Type::INT:
@@ -62,7 +62,7 @@ void checkEventParamType(Type *ptype) {
     }
 }
 
-void checkReturnStmt(FunctionEntry *func) {
+static void checkReturnStmt(FunctionEntry *func) {
     if (!curReturnNode && func->type()->retType()->tag() != Type::VOID)
         errMsg((string)"Return Statement expected for function '" + func->name() + "'");
     curReturnNode = NULL;
@@ -204,6 +204,7 @@ static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
     assert(str != NULL);
     SymTabEntry *sym = stm.lookUp(string(str));
 
+    // Look for recursive function call to current function scope
     if (!sym) {
         sym = stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND);
         if (sym->name().compare(str)) sym = NULL;
@@ -482,9 +483,9 @@ normal_event:       TOK_IDENT TOK_LPAREN event_aparam_l TOK_RPAREN          {   
                   ;
 
 event_aparam_l:   
-                    event_aparam_l TOK_COMMA TOK_IDENT                      {   curVarList->push_back(allocVarEntry($3, VariableEntry::UNDEFINED, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
+                    event_aparam_l TOK_COMMA TOK_IDENT                      {   curVarList->push_back(allocVarEntry($3, VariableEntry::PARAM_VAR, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
                   | TOK_IDENT                                               {   allocRuleBlockNode(); curVarList = new vector<VariableEntry*>(); 
-                                                                                curVarList->push_back(allocVarEntry($1, VariableEntry::UNDEFINED, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
+                                                                                curVarList->push_back(allocVarEntry($1, VariableEntry::PARAM_VAR, new Type(Type::UNKNOWN), NULL)); prt("EventFormalParam");}
                   |
                   ;
 

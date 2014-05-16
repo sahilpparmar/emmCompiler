@@ -1,0 +1,60 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  event a(int aa, int bb);
+  int sum;
+  bool ii;
+ 
+  (a(int i, int j))-->   {
+    ii=i<j;
+    if (((ii||!i<6)&&(i<=j||j>=i)))     sum=(i+j);
+    else     sum=(i-j);
+  };
+  ;;
+
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event 'a'
+Variable: aa, Offset: 0
+Variable: bb, Offset: 4
+
+Variable: sum, Offset: 0
+Variable: ii, Offset: 4
+======================3 Addr Generation======================
+GLOBAL:
+_event_a:
+        enter _event_a
+        fparam i
+        fparam j
+        __vreg1 = i < j
+        ii = __vreg1
+        if ii goto L5:
+        goto L6:
+L6:
+        if i < 6 goto L4:
+        goto L5:
+L5:
+        if i <= j goto L3:
+        goto L7:
+L7:
+        if j >= i goto L3:
+        goto L4:
+L3:
+        __vreg2 = i + j
+        sum = __vreg2
+        goto L2:
+L4:
+        __vreg3 = i - j
+        sum = __vreg3
+L2:
+        leave _event_a
+
+====================Basic Block creation=====================
+Compilation Successful

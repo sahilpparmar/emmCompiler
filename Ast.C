@@ -32,7 +32,7 @@ string VregNode::getRegisterName()
     return registerName_;
 }
 
-void   VregNode::setRegisterName(string reg_name)
+void VregNode::setRegisterName(string reg_name)
 {
     registerName_ = reg_name;
 }
@@ -40,23 +40,22 @@ void   VregNode::setRegisterName(string reg_name)
 const Type* VregNode::typeCheck()
 {
     return type();
-    }
+}
 
 /****************************************************************/
+
 ExprNode* ExprNode:: getRefNode () 
 {
     if (refnode_ == NULL) {
         refnode_ = new VregNode();
-          
+
         Type* t = const_cast<Type*>(typeCheck());
         refnode_->type(t);
         if (refnode_->type() == NULL)
-       {
-         //refnode_->type(type()); }
-        Type *t = const_cast<Type*>(typeCheck());
-        refnode_->type(t);
+        {
+            Type *t = const_cast<Type*>(typeCheck());
+            refnode_->type(t);
         }
-
     }
     return (ExprNode *)refnode_;
 }
@@ -205,6 +204,8 @@ const Type* IfNode::typeCheck()
     return NULL;
 }
 
+static bool IsIfRelNeeded = false;
+
 InterCodesClass* IfNode::codeGen()
 {
     assert(cond_ && "If Condition Expected");
@@ -221,13 +222,14 @@ InterCodesClass* IfNode::codeGen()
             cond_->OnFalse(LabelClass::assignLabel());   
             else_->next (nxt);
         }
-
+        IsIfRelNeeded = true;
         InterCodesClass* ic_cond;
         if ((ic_cond = cond_->codeGen()) != NULL) {
             cls->addCode(ic_cond);
         } else {
             cls->addCode(InterCode::OPNTYPE::IFREL, cond_);
         }
+        IsIfRelNeeded = false;
 
         cls->addCode(cond_->onTrue_);
         cls->addCode(then_->codeGen());
@@ -345,11 +347,13 @@ InterCodesClass* WhileNode::codeGen()
 
     cond_->OnTrue(body_l); 
     cond_->OnFalse(end_l);
+    IsIfRelNeeded = true;
     if ((ic_cond = cond_->codeGen()) != NULL) {
         cls->addCode(ic_cond);
     } else {
         cls->addCode(InterCode::OPNTYPE::IFREL, cond_);
     }
+    IsIfRelNeeded = false;
 
     cls->addCode(body_l);
     cls->addCode(body_->codeGen());
@@ -754,7 +758,6 @@ void RuleNode::print(ostream& out, int indent) const
     out << ";;";
 }
 
-
 const Type* RuleNode::typeCheck() 
 {
     if (pat_)
@@ -763,6 +766,24 @@ const Type* RuleNode::typeCheck()
     if (reaction_)
         reaction_->typeCheck();
     
+    return NULL;
+}
+
+static FunctionEntry *gRuleFuncSym = NULL;
+InterCodesClass* RuleNode::codeGen()
+{
+    // TODO: Currently only Primitive PatNodes are supported
+    if (pat_->kind() == BasePatNode::PatNodeKind::PRIMITIVE) {
+        InterCodesClass *cls = new InterCodesClass();
+
+        cls->addCode(pat_->codeGen());
+        if (reaction_)
+            cls->addCode(reaction_->codeGen());
+        cls->addCode(InterCode::OPNTYPE::LEAVE, gRuleFuncSym);
+
+        gRuleFuncSym = NULL;
+        return cls;
+    }
     return NULL;
 }
 
@@ -851,6 +872,27 @@ const Type* PrimitivePatNode::typeCheck()
     }
     return NULL;
 }
+
+InterCodesClass* PrimitivePatNode::codeGen()
+{
+    InterCodesClass *cls = new InterCodesClass();
+    string funcName = (string)"_event_" + ee_->name();
+
+    Type *ltype = new Type(ee_->type()->argTypes(), new Type(Type::VOID));
+    gRuleFuncSym = new FunctionEntry(funcName, ltype);
+
+    cls->addCode(LabelClass::assignLabel(funcName));
+    cls->addCode(InterCode::OPNTYPE::ENTER, gRuleFuncSym);
+
+    std::vector<VariableEntry*>::iterator var_it = params_->begin();
+    for (; var_it != params_->end(); ++var_it) {
+        VariableEntry* var_entry = *var_it; 
+        cls->addCode(var_entry->codeGen());
+    }
+
+    return cls;
+}
+
 /****************************************************************/
 
 void PatNode::print(ostream& out, int indent) const 
@@ -884,21 +926,27 @@ void PatNode::print(ostream& out, int indent) const
 
 const Type* PatNode::typeCheck() 
 {
-  switch(kind()) {
-    case PatNodeKind::PRIMITIVE:    break;
-    case PatNodeKind::UNDEFINED:    break;
-    case PatNodeKind::EMPTY:        break;
-    case PatNodeKind::STAR:         pat1_->typeCheck(); break;
-    case PatNodeKind::SEQ:          pat1_->typeCheck(); pat2_->typeCheck(); break;
-    case PatNodeKind::OR:           pat1_->typeCheck(); pat2_->typeCheck(); break;
-    case PatNodeKind::NEG:
-        if (hasSeqOps()) {
-            errMsg("Only simple patterns without `.', `*', and `!' operatorscan be negated", this);
-        }
-        pat1_->typeCheck();
-        break;
-  }
-  return NULL;
+    switch(kind()) {
+        case PatNodeKind::PRIMITIVE:
+        case PatNodeKind::UNDEFINED:    
+        case PatNodeKind::EMPTY:
+            break;
+        case PatNodeKind::STAR: 
+            pat1_->typeCheck();
+            break;
+        case PatNodeKind::SEQ:
+        case PatNodeKind::OR:
+            pat1_->typeCheck(); 
+            pat2_->typeCheck(); 
+            break;
+        case PatNodeKind::NEG:
+            if (hasSeqOps()) {
+                errMsg("Only simple patterns without `.', `*', and `!' operatorscan be negated", this);
+            }
+            pat1_->typeCheck();
+            break;
+    }
+    return NULL;
 }
 
 bool PatNode::hasSeqOps() const 
@@ -1252,61 +1300,79 @@ InterCodesClass* OpNode::codeGen()
         case OpCode::LE:
             cls->addCode (arg_[0]->codeGen());
             cls->addCode (arg_[1]->codeGen());
-            cls->addCode (InterCode::OPNTYPE::IFREL, this,
-                    arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
+            if (IsIfRelNeeded) {
+                cls->addCode (InterCode::OPNTYPE::IFREL, this,
+                        arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
+            } else {
+                cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(),
+                        arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
+            }
             break;
 
         // Short Circuit '&&' Operator
         case OpCode::AND:
         {
-            InterCode* arg0_true_l = LabelClass::assignLabel();
+            if (IsIfRelNeeded) {
+                InterCode* arg0_true_l = LabelClass::assignLabel();
 
-            arg_[0]->OnTrue(arg0_true_l);
-            arg_[0]->OnFalse(this->OnFalse());
+                arg_[0]->OnTrue(arg0_true_l);
+                arg_[0]->OnFalse(this->OnFalse());
 
-            if ((ic_cond = arg_[0]->codeGen()) != NULL) {
-                cls->addCode(ic_cond);
+                if ((ic_cond = arg_[0]->codeGen()) != NULL) {
+                    cls->addCode(ic_cond);
+                } else {
+                    cls->addCode(InterCode::OPNTYPE::IFREL, arg_[0]);
+                }
+
+                cls->addCode(arg0_true_l);
+                 
+                arg_[1]->OnTrue(this->OnTrue());
+                arg_[1]->OnFalse(this->OnFalse());
+
+                if ((ic_cond = arg_[1]->codeGen()) != NULL) {
+                    cls->addCode(ic_cond);
+                } else {
+                    cls->addCode(InterCode::OPNTYPE::IFREL, arg_[1]);
+                }
             } else {
-                cls->addCode(InterCode::OPNTYPE::IFREL, arg_[0]);
+                cls->addCode (arg_[0]->codeGen());
+                cls->addCode (arg_[1]->codeGen());
+                cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(),
+                        arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
             }
-
-            cls->addCode(arg0_true_l);
-             
-            arg_[1]->OnTrue(this->OnTrue());
-            arg_[1]->OnFalse(this->OnFalse());
-
-            if ((ic_cond = arg_[1]->codeGen()) != NULL) {
-                cls->addCode(ic_cond);
-            } else {
-                cls->addCode(InterCode::OPNTYPE::IFREL, arg_[1]);
-            }
-
             break;
         }
 
         // Short Circuit '||' Operator
         case OpCode::OR:
         {
-            InterCode* arg0_false_l = LabelClass::assignLabel();
+            if (IsIfRelNeeded) {
+                InterCode* arg0_false_l = LabelClass::assignLabel();
 
-            arg_[0]->OnTrue(this->OnTrue());
-            arg_[0]->OnFalse(arg0_false_l);
+                arg_[0]->OnTrue(this->OnTrue());
+                arg_[0]->OnFalse(arg0_false_l);
 
-            if ((ic_cond = arg_[0]->codeGen()) != NULL) {
-                cls->addCode(ic_cond);
+                if ((ic_cond = arg_[0]->codeGen()) != NULL) {
+                    cls->addCode(ic_cond);
+                } else {
+                    cls->addCode(InterCode::OPNTYPE::IFREL, arg_[0]);
+                }
+
+                cls->addCode(arg0_false_l);
+                 
+                arg_[1]->OnTrue(this->OnTrue());
+                arg_[1]->OnFalse(this->OnFalse());
+
+                if ((ic_cond = arg_[1]->codeGen()) != NULL) {
+                    cls->addCode(ic_cond);
+                } else {
+                    cls->addCode(InterCode::OPNTYPE::IFREL, arg_[1]);
+                }
             } else {
-                cls->addCode(InterCode::OPNTYPE::IFREL, arg_[0]);
-            }
-
-            cls->addCode(arg0_false_l);
-             
-            arg_[1]->OnTrue(this->OnTrue());
-            arg_[1]->OnFalse(this->OnFalse());
-
-            if ((ic_cond = arg_[1]->codeGen()) != NULL) {
-                cls->addCode(ic_cond);
-            } else {
-                cls->addCode(InterCode::OPNTYPE::IFREL, arg_[1]);
+                cls->addCode (arg_[0]->codeGen());
+                cls->addCode (arg_[1]->codeGen());
+                cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(),
+                        arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
             }
 
             break;
@@ -1314,9 +1380,20 @@ InterCodesClass* OpNode::codeGen()
 
         // UNARY Conditional Operators
         case OpCode::NOT: 
-            cls->addCode (arg_[0]->codeGen());
-            cls->addCode (InterCode::OPNTYPE::IFREL, this,
-                    arg_[0]->getRefNode(), NULL, opCode_);
+            if (IsIfRelNeeded) {
+                arg_[0]->OnFalse(this->OnTrue());
+                arg_[0]->OnTrue(this->OnFalse());
+
+                if ((ic_cond = arg_[0]->codeGen()) != NULL) {
+                    cls->addCode(ic_cond);
+                } else {
+                    cls->addCode(InterCode::OPNTYPE::IFREL, arg_[0]);
+                }
+            } else {
+                cls->addCode (arg_[0]->codeGen());
+                cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(), 
+                        arg_[0]->getRefNode(), NULL, opCode_);
+            }
             break;
 
         // BINARY Arithmetic Operators

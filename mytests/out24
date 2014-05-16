@@ -63,6 +63,60 @@ Variable: condition, Offset: 12
 ======================3 Addr Generation======================
 GLOBAL:
         a = 5
+_event_open:
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if a == 0 goto L3:
+        goto L4:
+L3:
+        aparam "Assignment in condition"
+        __vreg1 = call logMessage
+L5:
+        if a < 5 goto L7:
+        goto L8:
+L7:
+        b = 3
+        goto L6:
+L8:
+L6:
+        goto L2:
+L4:
+L2:
+L9:
+        if a < 3 goto L10:
+        goto L11:
+L10:
+        a = 10
+        if a == 10 goto L13:
+        goto L12:
+L13:
+        goto L9:
+L12:
+        aparam "Assignment in condition"
+        __vreg2 = call logMessage
+L14:
+        goto L11:
+L15:
+        if a > 10 goto L16:
+        goto L17:
+L16:
+        __vreg3 = b + c
+        a = __vreg3
+        if a > 20 goto L19:
+        goto L20:
+L19:
+        goto L9:
+        goto L18:
+L20:
+        goto L11:
+L18:
+        goto L15:
+L17:
+        goto L9:
+L11:
+        leave _event_open
 
 ====================Basic Block creation=====================
 Compilation Successful

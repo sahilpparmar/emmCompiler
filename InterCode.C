@@ -26,7 +26,7 @@ void InterCode::print(ostream &os) {
                                     prtSpace(os, TAB_SPACE);
                                     os << op[0]->getRefName() << " = ";
                                     os << OpNode::opInfo[(int )subCode_].name_;
-                                    os << op[2]->getRefName();
+                                    os << op[1]->getRefName();
                                 }
                                 break;
 
@@ -77,10 +77,13 @@ void InterCode::print(ostream &os) {
 
                         os << " goto ";
                         true_lab->print(os);
-                        os << endl;
-                        prtSpace(os, TAB_SPACE);
-                        os << "goto ";
-                        false_lab->print(os);
+
+                        if (false_lab) {
+                            os << endl;
+                            prtSpace(os, TAB_SPACE);
+                            os << "goto ";
+                            false_lab->print(os);
+                        }
                     }
                     break; 
 

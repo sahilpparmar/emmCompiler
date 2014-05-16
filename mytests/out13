@@ -33,6 +33,46 @@ Variable: a3, Offset: 8
 Variable: condition, Offset: 0
 ======================3 Addr Generation======================
 GLOBAL:
+_event_open:
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if condition goto L3:
+        goto L4:
+L3:
+        goto L2:
+L4:
+L2:
+        if condition goto L6:
+        goto L5:
+L6:
+        if condition goto L8:
+        goto L9:
+L8:
+        goto L7:
+L9:
+L7:
+L5:
+        if condition goto L11:
+        goto L12:
+L11:
+        if condition goto L14:
+        goto L15:
+L14:
+        goto L13:
+L15:
+L13:
+        goto L10:
+L12:
+        if condition goto L17:
+        goto L18:
+L17:
+        goto L16:
+L18:
+L16:
+L10:
+        leave _event_open
 
 ====================Basic Block creation=====================
 Compilation Successful

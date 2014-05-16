@@ -45,6 +45,15 @@ Variable: x, Offset: 8
 ======================3 Addr Generation======================
 GLOBAL:
         b = 2
+_event_open:
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        aparam "open: testing almost nothing"
+        __vreg1 = call logMessage
+L2:
+        leave _event_open
 
 ====================Basic Block creation=====================
 Compilation Successful

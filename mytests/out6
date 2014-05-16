@@ -90,6 +90,23 @@ g:
         enter g
         a1 = 1
         leave g
+_event_open:
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        aparam "open: testing almost nothing"
+        __vreg2 = call logMessage
+L3:
+        leave _event_open
+_event_open:
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        call g
+L5:
+        leave _event_open
 
 ====================Basic Block creation=====================
 Compilation Successful

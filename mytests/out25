@@ -59,6 +59,42 @@ GLOBAL:
         b = 12345678
         c = 1
         d = 1
+_event_open:
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if a == 0 goto L3:
+        goto L4:
+L3:
+        aparam "Assignment in condition"
+        __vreg1 = call logMessage
+L5:
+        c = 0
+        goto L2:
+L4:
+L2:
+L6:
+        if a < 3 goto L7:
+        goto L8:
+L7:
+        a = 10
+        aparam "Assignment in condition"
+        __vreg2 = call logMessage
+L9:
+        b = 987654321
+        goto L8:
+L10:
+        if a > 10 goto L11:
+        goto L12:
+L11:
+        c = 1
+        goto L8:
+        goto L10:
+L12:
+        goto L6:
+L8:
+        leave _event_open
 
 ====================Basic Block creation=====================
 Compilation Successful
