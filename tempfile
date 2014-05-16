@@ -230,7 +230,11 @@ NextBlocks:global,
 
 PrevBlocks: 
 Block Start: bar
+        enter bar
+        fparam aa
         __vreg15 = aa + 1
+        return __vreg15
+        leave bar
 Block end: bar
 NextBlocks:
 
@@ -239,6 +243,8 @@ NextBlocks:
 
 PrevBlocks: 
 Block Start: foo
+        enter foo
+        fparam a
         a = 10
         if a == 1 goto L4:
         goto L5:
@@ -248,23 +254,28 @@ NextBlocks:L4,L5,
 PrevBlocks: foo,
 Block Start: L4
         a = 2
+        goto L3:
 Block end: L4
 NextBlocks:L3,
 
 PrevBlocks: foo,
 Block Start: L5
+        aparam a
         __vreg16 = call bar
 Block end: L5
 NextBlocks:L6,
 
 PrevBlocks: L4,L7,
 Block Start: L3
+        return a
+        leave foo
 Block end: L3
 NextBlocks:
 
 PrevBlocks: L5,
 Block Start: L6
         __vreg17 = 3 + __vreg16
+        aparam a
         __vreg18 = call bar
 Block end: L6
 NextBlocks:L7,
@@ -287,21 +298,21 @@ Block Start: global
         __vreg1 = 3
         b = 3
         __vreg2 = 1000
-        __vreg3 = 1 + 1000
-        c = __vreg3
-        __vreg4 = 30 * 3
-        d = __vreg4
-        __vreg5 = 1 - __vreg3
-        e = __vreg5
-        __vreg6 = 3 / 4
-        f = __vreg6
+        __vreg3 = 1001
+        c = 1001
+        __vreg4 = 90
+        d = 90
+        __vreg5 = -1000
+        e = -1000
+        __vreg6 = 0
+        f = 0
         __vreg7 = 5
         g = 5
         __vreg8 = 0
         h = 0
         __vreg9 = 0
-        __vreg10 = 1 | 0
-        i = __vreg10
+        __vreg10 = 1
+        i = 1
         __vreg11 = 0
         j = 0
         __vreg12 = 0
@@ -317,53 +328,72 @@ NextBlocks:global,
 JMP begin: 
 begin: 
 MOVI  R000 10000
-ADD R021 1 R020
-JMP begin: 
+
+ in enter
+ fparam: aa
+ in aparamSTI R020  R000
+SUB  R000 4  R000
+ADD R020 1 R021
+MOVI R022  R001
+ in leavePþBJMP begin: 
 begin: 
 MOVI  R000 10000
-MOVI 10  R022
-JMPC EQ R022 1 L4
+
+ in enter
+ fparam: a
+ in aparamSTI R023  R000
+SUB  R000 4  R000
+MOVI 10  R023
+JMPC EQ R023 1 L4
 JMP L5
-MOVI 2  R022
-MOVL L11 R023
-STI R023  R000
+MOVI 2  R023
+JMP 
+
+ in aparamSTI R023  R000
 SUB  R000 4  R000
-JMP õBADD 3 R025 R024
-MOVL L12 R026
-STI R026  R000
+MOVL L11 R024
+STI R024  R000
 SUB  R000 4  R000
-JMP õBMUL R028 2 R027
-ADD R024 R027 R029
-MOVI R029  R022
+JMP 0öBMOVI R025  R001
+ in leavePþBADD 3 R027 R026
+
+ in aparamSTI R023  R000
+SUB  R000 4  R000
+MOVL L12 R028
+STI R028  R000
+SUB  R000 4  R000
+JMP 0öBMUL R030 2 R029
+ADD R026 R029 R031
+MOVI R031  R023
 JMP begin: 
 begin: 
 MOVI  R000 10000
-MOVI 30  R030
-MOVI 30  R031
-MOVI 3  R032
-MOVI 3  R033
-MOVI 1000  R034
-ADD 1 1000 R035
-MOVI R035  R036
-MUL 30 3 R037
-MOVI R037  R038
-SUB 1 R035 R039
-MOVI R039  R040
-DIV 3 4 R041
-MOVI R041  R042
-MOVI 5  R043
-MOVI 5  R044
-MOVI 0  R045
-MOVI 0  R046
+MOVI 30  R032
+MOVI 30  R033
+MOVI 3  R034
+MOVI 3  R035
+MOVI 1000  R036
+MOVI 1001  R037
+MOVI 1001  R038
+MOVI 90  R039
+MOVI 90  R040
+MOVI -1000  R041
+MOVI -1000  R042
+MOVI 0  R043
+MOVI 0  R044
+MOVI 5  R045
+MOVI 5  R046
 MOVI 0  R047
-1 0 R048
-MOVI R048  R049
-MOVI 0  R050
-MOVI 0  R051
+MOVI 0  R048
+MOVI 0  R049
+MOVI 1  R050
+MOVI 1  R051
 MOVI 0  R052
 MOVI 0  R053
-MOVI 4  R054
-MOVI 4  R055
-MOVI 25  R056
-MOVI 25  R057
+MOVI 0  R054
+MOVI 0  R055
+MOVI 4  R056
+MOVI 4  R057
+MOVI 25  R058
+MOVI 25  R059
 Compilation Successful

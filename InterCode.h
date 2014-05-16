@@ -219,8 +219,8 @@ class BasicBlock {
             }
         }
         
-        void constantFolding();
-        void constantPropogation();
+        void constantFolding(int *isOptimized);
+        void constantPropogation(int *isOptimized);
     private : 
         string blocklabel; 
         vector <InterCode*> InterCodeVector;       
@@ -261,12 +261,15 @@ class BasicBlocksClass {
         
         void constantOptimize () {
            vector <BasicBlock*>::iterator it; 
-            
-            //TODO : Need to convert this to iterative 
-            for (it = bbVector.begin(); it != bbVector.end(); ++it) {
-                (*it)->constantFolding();
-                (*it)->constantPropogation();
-            }
+            int isOptimized = 0; 
+            do {
+                 isOptimized = 0;
+                 //TODO : Need to convert this to iterative 
+                 for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+                     (*it)->constantFolding (&isOptimized);
+                     (*it)->constantPropogation (&isOptimized);
+                 }
+            } while (isOptimized);
         }
         
         void print(ostream &os) {

@@ -137,12 +137,13 @@ void InterCode::print(ostream &os) {
 }
 
 
-void BasicBlock::constantFolding() {
+void BasicBlock::constantFolding (int *isOptimized) {
     int result = 0, val_1 = 0, val_2 = 0, i;
     double resultf = 0.0, valf_1 = 0.0, valf_2 = 0.0;
     
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
+    bool flag                           = false;
     bool isfloat;
 
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
@@ -179,36 +180,40 @@ void BasicBlock::constantFolding() {
                                       case OpNode::OpCode::PLUS :
                                                           if(isfloat) resultf = valf_1 + valf_2;
                                                           else result = val_1 + val_2;
+                                                          flag = true;
                                                           break; 
                                       case OpNode::OpCode::MINUS :
                                                           if(isfloat) resultf = valf_1 - valf_2;
                                                           else result = val_1 - val_2;
+                                                          flag = true;
                                                           break; 
                                       case OpNode::OpCode::MULT :
                                                           if(isfloat) resultf = valf_1 * valf_2;
                                                           else result = val_1 * val_2;
+                                                          flag = true;
                                                           break; 
                                       case OpNode::OpCode::DIV :
                                                           if(isfloat) resultf = valf_1 / valf_2;
                                                           else result = val_1 / val_2;
+                                                          flag = true;
                                                           break; 
                                       case OpNode::OpCode::MOD :
-                                                          if(!isfloat) result = val_1 % val_2;
+                                                          if(!isfloat) { result = val_1 % val_2; flag = true; }
                                                           break; 
                                       case OpNode::OpCode::BITOR :
-                                                          if(!isfloat) result = val_1 | val_2;
+                                                          if(!isfloat) { result = val_1 | val_2; flag = true; }
                                                           break;
                                       case OpNode::OpCode::BITAND :
-                                                          if(!isfloat) result = val_1 & val_2;
+                                                          if(!isfloat) { result = val_1 & val_2; flag = true; }
                                                           break;
                                       case OpNode::OpCode::BITXOR :
-                                                          if(!isfloat) result = val_1 ^ val_2;
+                                                          if(!isfloat) { result = val_1 ^ val_2; flag = true; }
                                                           break;
                                       case OpNode::OpCode::SHL :
-                                                          if(!isfloat) result = val_1 << val_2;
+                                                          if(!isfloat) { result = val_1 << val_2; flag = true; }
                                                           break;
                                       case OpNode::OpCode::SHR :
-                                                          if(!isfloat) result = val_1 >> val_2;
+                                                          if(!isfloat) { result = val_1 >> val_2; flag = true; }
                                                           break;
                                       default : 
                                               cout << "\nUnhandled OpCode \n";
@@ -237,22 +242,27 @@ void BasicBlock::constantFolding() {
                                        case OpNode::OpCode::NE:
                                                            if(!isfloat) cond = (val_1 != val_2);
                                                            else cond = (valf_1 != valf_2);
+                                                           flag = true; 
                                                            break;
                                        case OpNode::OpCode::GE:
                                                            if(!isfloat) cond = (val_1 >= val_2);
                                                            else cond = (valf_1 >= valf_2);
+                                                           flag = true; 
                                                            break;
                                        case OpNode::OpCode::LE:
                                                            if(!isfloat) cond = (val_1 <= val_2);
                                                            else cond = (valf_1 <= valf_2);
+                                                           flag = true; 
                                                            break;
                                        case OpNode::OpCode::GT:
                                                            if(!isfloat) cond = (val_1 > val_2);
                                                            else cond = (valf_1 > valf_2);
+                                                           flag = true; 
                                                            break;
                                        case OpNode::OpCode::LT:
                                                            if(!isfloat) cond = (val_1 < val_2);
                                                            else cond = (valf_1 < valf_2);
+                                                           flag = true; 
                                                            break;
                                        default : cout << "unknown opcode"; 
                                                  break;
@@ -279,6 +289,7 @@ void BasicBlock::constantFolding() {
                 
                 if ((new1->value()->type()->tag() == Type::TypeTag::INT || new1->value()->type()->tag() == Type::TypeTag::UINT)) {
                     
+                    flag            = true;
                     int val         = stoi(new1->getRefName());
                     ValueNode *temp =  new ValueNode(new Value(~val, Type::INT));
                     tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, OpNode::OpCode::ASSIGN, operands[0], temp));
@@ -293,22 +304,27 @@ void BasicBlock::constantFolding() {
     }
 
     setICodeVector(tempICodeVector);
-    //cout << "\nReturned \n";
+
+    if(flag)
+        *isOptimized = 1;
 }
 
-void BasicBlock::constantPropogation() {
+void BasicBlock::constantPropogation (int *isOptimized) {
    
     //cout <<"\n ENTER\n";
     map <string, ExprNode*> cvar_map;
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     vector<InterCode*>::iterator it     = dupICodeVector->begin();
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
+    bool flag                           = false;
     
     for (; it != dupICodeVector->end(); it++) {
         
         ExprNode** op = (ExprNode**)(*it)->get3Operands();
-        if (op[0] == NULL || op[1] == NULL)
+        if (op[1] == NULL) {
+            tempICodeVector->push_back(*it);
             continue;
+        }
 
         //Node of type EXPR and op[0] = op[1] , op[2] is NULL 
         if ((*it)->getOPNType() == InterCode::OPNTYPE::EXPR && 
@@ -352,10 +368,12 @@ void BasicBlock::constantPropogation() {
                                                 //iterate over map. check and replace op[0] and op[1] value
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                    flag     = true;
                                                 } 
                                                 
                                                 if (cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
                                                     oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
+                                                    flag     = true;
                                                 } 
                                             }
                                             break;
@@ -366,6 +384,7 @@ void BasicBlock::constantPropogation() {
                                             {
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                    flag     =  true;
                                                 }
                                                 cvar_map.insert(pair<string, ExprNode*>(oprnd[0]->getRefName(), (ValueNode *)op[1]));
                                             }
@@ -384,6 +403,8 @@ void BasicBlock::constantPropogation() {
    }/*end for*/ 
 
    setICodeVector(tempICodeVector);
+   if (flag)
+       *isOptimized = 1;
 
 }
 
