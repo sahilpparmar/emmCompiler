@@ -6,8 +6,12 @@
 #define     IS_INT(type)     Type::isInt  (type->tag())
 #define     IS_STRING(type)  Type::isString  (type->tag())
 
-static int float_reg_count = 10;
-static int int_reg_count   = 20;
+static int float_reg_count  = 10;
+static int int_reg_count    = 20;
+vector     <string>  reg_list;
+ int fl_reg_used_cnt  = 0 ;
+ int int_reg_used_cnt = 0 ;
+
 stack<ExprNode*>formal_param_list;
 
 string allocateNewRegName(bool floatStatus)
@@ -38,6 +42,80 @@ string convertToFloat(ExprNode *expr, ostream &os)
     string new_reg = allocateNewRegName(true);
     os<<new_reg<<endl;
     return new_reg;
+}
+
+void push_registers(string retAdd, ostream &os)
+{
+    char newRegName[5];
+//    cout<<"\n registers to be pushed"<<(int_reg_used_cnt + fl_reg_used_cnt);
+    int in = int_reg_count-1;
+    int fl = float_reg_count-1;
+//    os<<"STI "<<RRET_ADD<<" "<<RSP<<endl;
+//    os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
+    
+    for(int i=0; i<int_reg_used_cnt; i++)
+    {
+        sprintf(newRegName, "R%.3d", in);
+        string temp(newRegName);
+        os<<"STI  "<< temp<<" "<<RSP<<endl;
+        os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
+        in--;
+    }
+    
+    for(int i=0; i<fl_reg_used_cnt; i++)
+    {
+        sprintf(newRegName, "F%.3d", fl);
+        string temp(newRegName);
+        os<<"STF  "<< temp<<" "<<RSP<<endl;
+        os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
+        fl--;
+    }
+    
+    string dst_regName     = allocateNewRegName(false);
+    os<<"MOVL "<<retAdd<<" "<<dst_regName<<endl;
+    os<<"STI  "<<dst_regName<<" "<<RSP <<endl;
+    os<<"SUB "<<RSP<<" 4 "<<RSP << endl;
+
+    vector <string> ::iterator iter1  = reg_list.begin();
+    for(; iter1 != reg_list.end(); iter1++)
+    {
+        if((*iter1).at(0) == 'F')
+            os<<"STF  ";
+        else
+            os<<"STI  ";
+        os<<(*iter1)<<" "<<RSP<<endl;
+        os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
+    }
+
+
+
+}
+
+void pop_registers(ostream &os)
+{
+
+    char newRegName[5];
+    int in = int_reg_count-int_reg_used_cnt;
+    int fl = float_reg_count-fl_reg_used_cnt;
+    
+    for(int i=0; i<fl_reg_used_cnt; i++)
+    {
+        sprintf(newRegName, "F%.3d", fl);
+        string temp(newRegName);
+        os<<"ADD "<<RSP<<" 4 "<<RSP<<endl;
+        os<<"LDF "<<RSP<<" "<< temp<<endl;
+        fl++;
+    }
+    
+    for(int i=0; i<int_reg_used_cnt; i++)
+    {
+        sprintf(newRegName, "R%.3d", in);
+        string temp(newRegName);
+        os<<"ADD "<<RSP<<" 4 "<<RSP<<endl;
+        os<<"LDI "<<RSP<<" "<< temp<<endl;
+        in++;
+    }
+
 }
 
 void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
@@ -81,33 +159,47 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
         switch(interCode->getOPNType())
         {
               case CALL   :   {
-                                   string retAddrReg =   allocateNewRegName(false); 
-                                   os<<"STI "<<retAddrReg<<" "<<RSP <<endl;
-                                   os<<"SUB "<<RSP<<" 4 "<<RSP << endl;
-                                   os<<"JMP "<<((InvocationNode*)opndsList[0])->symTabEntry()->name()<<endl;
-                                   
+                                   LabelClass *ret_addr_label  = new LabelClass();
+                                   string func_name = ((InvocationNode*)opndsList[0])->symTabEntry()->name();
+                                   InterCode  *ic1 = ret_addr_label->assignLabel();
+                                   string retAddrReg = ic1->getLabel();
+                                   push_registers(retAddrReg, os); 
+                                   os<<"JMP  "<<func_name<<endl;
+                                   os<<retAddrReg<<":  ";
+                                   int_reg_count--; 
                                    if(opndsList[1])
                                    {
                                         ExprNode *src1    = opndsList[1];
                                         string retValueReg = src1->getRegisterName();
                                         if(IS_FLOAT(src1->type()))
-                                            os<<"MOVF RRV_F ";
+                                            os<<"MOVF "<<RRV_F;
                                         else
-                                            os<<"MOVI RRV_I ";
+                                            os<<"MOVI "RRV_I;
                                         os<<retValueReg<<endl;
 
                                    }
+                                   pop_registers(os);
+                                   reg_list.resize(0);
+
                                 break;
                               }
               case FPARAM  :  {
                                    ExprNode *src1       = opndsList[0];
-                                   string fparamReg;
                                    if(src1)
                                    {
-                                     fparamReg = src1->getRegisterName();
+                                     dst_regName = src1->getRegisterName();
                                    }
                                    os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
-                                   os<<"LDI "<<RSP<<" "<<fparamReg;
+                                   if(IS_FLOAT(src1->type()))
+                                   {
+                                       os<<"LDF "<<RSP<<" "<<dst_regName;
+                                       fl_reg_used_cnt++;
+                                   } 
+                                   else if(IS_INT(src1->type()))
+                                   {
+                                       os<<"LDI "<<RSP<<" "<<dst_regName;
+                                       int_reg_used_cnt++;
+                                   } 
                                    break; 
                               } 
               case APARAM  :  {
@@ -116,13 +208,14 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                 if(param)
                                     {
                                     str  = param->getRegisterName();
-                                    if(IS_FLOAT(param->type()))
-                                            os<<"STF "<<str<<" "<<RSP;
-                                    else if(IS_INT(param->type()))
-                                            os<<"STI "<<str<<" "<<RSP;
-                                    os<<endl;
-                                    os<<"SUB "<<RSP<<" 4 "<<RSP;
-                                    os<<endl;
+                                    reg_list.push_back(str);
+                                   // if(IS_FLOAT(param->type()))
+                                   //         os<<"STF "<<str<<" "<<RSP;
+                                   // else if(IS_INT(param->type()))
+                                   //         os<<"STI "<<str<<" "<<RSP;
+                                   // os<<endl;
+                                   // os<<"SUB "<<RSP<<" 4 "<<RSP;
+                                   // os<<endl;
                                     }
                                 break;
                               }
@@ -181,10 +274,18 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                    case OpNode::OpCode::MINUS:     os<<"FSUB "; break;
                                    case OpNode::OpCode::MULT :     os<<"FMUL "; break;     
                                    case OpNode::OpCode::DIV  :     os<<"FDIV "; break;
-                                   case OpNode::OpCode::ASSIGN:    os<<"MOVF "; break; 
+//                                   case OpNode::OpCode::ASSIGN:    os<<"MOVF "; break; 
                                    default                    :  break ;    
                                }
-                               os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
+                               if(interCode->getsubCode() == OpNode::OpCode::ASSIGN)
+                               {
+                                   if(IS_FLOAT(type_src1) )
+                                       os<<"MOVF "<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
+                               }
+                               else
+                                    os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
+
+                               fl_reg_used_cnt++;
                                }
                                else
                                {
@@ -205,17 +306,40 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                {
                                switch(interCode->getsubCode())
                                {
-                                   case OpNode::OpCode::PLUS :     os<<"ADD "; break; 
-                                   case OpNode::OpCode::MINUS:     os<<"SUB "; break;
-                                   case OpNode::OpCode::MULT :     os<<"MUL "; break;     
-                                   case OpNode::OpCode::DIV  :     os<<"DIV "; break;
-                                   case OpNode::OpCode::ASSIGN:    os<<"MOVI "; break; 
-                    //TODO:        case OpNode::OpCode::NOT  :     cout<<"\n hi";  
-                                  //                                 break;  
+                                   case OpNode::OpCode::PLUS :     os<<"ADD  "; break; 
+                                   case OpNode::OpCode::MINUS:     os<<"SUB  "; break;
+                                   case OpNode::OpCode::MULT :     os<<"MUL  "; break;     
+                                   case OpNode::OpCode::DIV  :     os<<"DIV  "; break;
+                                   case OpNode::OpCode::MOD  :     os<<"MOD  "; break;
+//                                   case OpNode::OpCode::ASSIGN:    os<<"MOVI "; break; 
+                                   case OpNode::OpCode::BITAND:    os<<"AND "; break; 
+                                   case OpNode::OpCode::BITOR:     os<<"OR  "; break; 
+                                   case OpNode::OpCode::NOT  :     { 
+                                                                   LabelClass *true_lab  = new LabelClass(); 
+                                                                   InterCode  *ic1 = true_lab->assignLabel();
+                                                                   LabelClass *false_lab = new LabelClass(); 
+                                                                   InterCode  *ic2 = false_lab->assignLabel();
+                                                                   os<<"JMPC NE ";
+                                                                   os<<src1_regName<<" 0 "<<(ic2->getLabel())<<endl;
+                                                                   os<<"MOVI 1 "<<dst_regName;
+                                                                   os<<"JMP "<<(ic1->getLabel())<<endl;
+                                                                   os<<(ic2->getLabel())<<":";
+                                                                   os<<"MOVI 0 "<<dst_regName;
+                                                                   os<<(ic1->getLabel())<<endl;
+                                                                   break;
+                                                                   }
                                    default                    :  break ;    
 
                                }
-                               os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
+
+                               if(interCode->getsubCode() == OpNode::OpCode::ASSIGN)
+                               {
+                                   if(!IS_FLOAT(type_src1) )
+                                       os<<"MOVI "<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
+                               }
+                               else
+                                    os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
+                               ++int_reg_used_cnt;
                                }
                                else if(interCode->getsubCode() == OpNode::OpCode::SHL || interCode->getsubCode() == OpNode::OpCode::SHR)
                                {
@@ -240,19 +364,21 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                                                    os<<ic1->getLabel()<<":"<<endl;
                                                                    os<<"MOVI "<<RSH_Val<<" "<<dst_regName<<endl;
                                                                    break;
-
+                               cout<<"\n expr: "<<++int_reg_used_cnt;
                                }
 
                                }
                                break;
                                }
              case LABEL  :     {
-                                cout<<"\n in label "<<interCode->getLabel();
+                                //cout<<"\n in label "<<interCode->getLabel();
                                 os<<interCode->getLabel()<<endl;
                                 break; }
              case GOTO   :     { 
-                                // cout<<"\n in goto"; 
-                                os<<"JMP "<<interCode->getLabel() <<endl;
+                                // cout<<"\n in goto";
+                                InterCode* goto_lab = (InterCode*) opndsList[0];
+
+                                os<<"JMP "<<goto_lab->getLabel() <<endl;
                                 break; }
              case IFREL  :   { 
                                ExprNode* cond        = (ExprNode*) opndsList[0];
@@ -325,13 +451,14 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                break;
                              }
              case ENTER  :   { 
-//                               string retAddrReg =   allocateNewRegName(false); 
-                               os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
-                               os<<"LDI "<<RSP <<" "<<RRET_ADD;
+                               fl_reg_used_cnt  = 0 ;
+                               int_reg_used_cnt = 0 ;
                                break;
                              }
              case LEAVE  :   { 
                                //os << "leave " << ((FunctionEntry*)opndsList[0])->name();
+                               os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
+                               os<<"LDI "<<RSP <<" "<<RRET_ADD<<endl;
                                os << "JMP " <<RRET_ADD;
                               // os<<(char*)opndsList[0];
                              break;
