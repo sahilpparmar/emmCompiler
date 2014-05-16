@@ -23,7 +23,7 @@ void GlobalEntry::eventHandler(ostream& os) {
     // Generate code to input event parameter
     for (unsigned int ii = 0; ii < event_l.size(); ii++) {
         event = event_l[ii];
-        os << S_PREFIX << event->name() << ":" << endl;  
+        os << S_PREFIX << event->name() << ": ";
         
         argtype_l = event->type()->argTypes();
 
@@ -48,7 +48,7 @@ void GlobalEntry::eventHandler(ostream& os) {
         os << endl;
     }
 
-    os << S_START << ":" << endl;
+    os << S_START << ": ";
     os << "PRTS " << "\"Enter event name:\"" << endl;
     os << "IN" << R_PARAM << endl;
 

@@ -116,8 +116,8 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
     if (!bbCls)
         return;
 
-    os << "begin:" << endl;
-    os << "MOVI " << RSP << " " << 10000 << "    // RSP Initialized" << endl;
+    os << "begin: ";
+    os << "MOVI " << " " << 10000 << RSP << endl;
     os << "JMP global" << endl << endl;
 
     map <string, BasicBlocksClass*>::iterator it = bbCls->getContainer()->begin();
@@ -128,7 +128,7 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
 
         for (; iter1 != basicBlock->end(); iter1++) {
             vector <InterCode*> ::iterator iter2  = (*iter1)->getICodeVector()->begin();
-            os << (*iter1)->getBlockLabel() << ":" << endl;
+            os << (*iter1)->getBlockLabel() << ": ";
             for(; iter2 != (*iter1)->getICodeVector()->end(); iter2++) {
                 convert_IC_AMC(*iter2, os);
                 os<<endl;
@@ -139,7 +139,7 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
             os << endl;
         }
     }
-    os << endl << S_END << ":" << endl;
+    os << endl << S_END << ": ";
     os << "PRTS " << "\"DONE\"" << endl << endl;
 }
 
@@ -158,7 +158,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                             string retAddrReg = ic1->getLabel();
                             push_registers(retAddrReg, os); 
                             os<<"JMP  "<<func_name<<endl;
-                            os<<retAddrReg<<":  ";
+                            os<<retAddrReg<<": ";
                             int_reg_count--; 
                             if(opndsList[1])
                             {
@@ -316,7 +316,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                                                             os<<src1_regName<<" 0 "<<(ic2->getLabel())<<endl;
                                                                             os<<"MOVI 1 "<<dst_regName;
                                                                             os<<"JMP "<<(ic1->getLabel())<<endl;
-                                                                            os<<(ic2->getLabel())<<":";
+                                                                            os<<(ic2->getLabel())<<": ";
                                                                             os<<"MOVI 0 "<<dst_regName;
                                                                             os<<(ic1->getLabel())<<endl;
                                                                             break;
@@ -354,7 +354,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                         os<<"DIV "<<RSH_Val<<" 2 "<<RSH_Val<<endl;
                                     os<<"SUB "<<RSH_Cnt<<" 1 "<<RSH_Cnt<<endl;
                                     os<<"JMP "<<ic2->getLabel()<<endl;
-                                    os<<ic1->getLabel()<<":"<<endl;
+                                    os<<ic1->getLabel()<<": ";
                                     os<<"MOVI "<<RSH_Val<<" "<<dst_regName<<endl;
                                     break;
                                     cout<<"\n expr: "<<++int_reg_used_cnt;
@@ -453,7 +453,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
          case LEAVE  :  { 
                             os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
                             os<<"LDI "<<RSP <<" "<<RRET_ADD<<endl;
-                            os << "JMP " <<RRET_ADD;
+                            os << "JMPI " <<RRET_ADD;
                             // os<<(char*)opndsList[0];
                             break;
                         }
