@@ -206,32 +206,36 @@ class BasicBlock {
        
 
         void print(ostream &os) {
+            /*
             os << "\n\nPrevBlocks: ";
-            vector<string>::iterator iter = PrevBlockLabels.begin();
             for ( ; iter != PrevBlockLabels.end(); ++iter) {
                 os << *iter << ",";
             }
-            os << endl; 
-            os << "Block Start: " << blocklabel << endl;
+            os << endl; */
+            os << blocklabel << ":" << endl;
             vector <InterCode*>::iterator it = InterCodeVector.begin();
+            vector<string>::iterator iter = PrevBlockLabels.begin();
+            
 
             for (; it != InterCodeVector.end(); ++it) {
                 (*it)->print(os);
                 os << endl;
             }
         
-            os << "Block end: " << blocklabel << endl ;
-            os << "NextBlocks:";  
+            //os << "Block end: " << blocklabel << endl ;
+            prtSpace(os, TAB_SPACE);
+            os << "next: (";  
             iter = NextBlockLabels.begin();
             for ( ; iter != NextBlockLabels.end(); ++iter) {
-                os << *iter << ",";
+                os << " " << *iter;
             }
+            os << " )\n";
         }
         
-        void constantFolding();
-        void constantPropogation();
-        void redundantGotoRemoval();
-        void zeroRemoval();
+        void constantFolding(int *isOptimized);
+        void constantPropogation(int *isOptimized);
+        void redundantGotoRemoval(int *isOptimized);
+        void zeroRemoval(int *isOptimized);
 
     private : 
         string blocklabel; 
@@ -273,20 +277,23 @@ class BasicBlocksClass {
         
         void blockOptimize () {
            vector <BasicBlock*>::iterator it; 
-            
-            //TODO : Need to convert this to iterative 
-            for (it = bbVector.begin(); it != bbVector.end(); ++it) {
-                (*it)->constantFolding();
-                (*it)->constantPropogation();
-                (*it)->redundantGotoRemoval();
-                (*it)->zeroRemoval();
-            }
+            int isOptimized = 0; 
+            do {
+                 isOptimized = 0;
+                 //TODO : Need to convert this to iterative 
+                 for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+                     (*it)->constantFolding (&isOptimized);
+                     (*it)->constantPropogation (&isOptimized);
+                     (*it)->redundantGotoRemoval(&isOptimized);
+                     (*it)->zeroRemoval(&isOptimized);
+                 }
+            } while (isOptimized);
         }
         
         void print(ostream &os) {
              vector <BasicBlock*>::iterator it = bbVector.begin();
              for (; it != bbVector.end(); ++it) {
-                 (*it)->print(os);
+                    (*it)->print(os);
              }
         }
 
@@ -317,14 +324,14 @@ class BasicBlocksContainer {
        void optimize() {
              map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
              for (; it != bbContainer.end(); ++it) {
-                 (*it).second->constantOptimize();
+                 (*it).second->blockOptimize();
              }
        }
         
        void print(ostream &os) {
             map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
-            for (; it != bbContainer.end(); ++it) {
-                os << "\n====Basic Blocks Container: " << (*it).first << "=====" << endl;
+            for (; it != bbContainer.end(); it++) {
+                os << "\n#####" << (*it).first << "#####" << endl;
                 (*it).second->print(os);
                 os << endl;
             }

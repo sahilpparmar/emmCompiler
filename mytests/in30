@@ -28,7 +28,7 @@ void main()
 //  kk =  foo1(k) + k;
 }
 
-void foo (int b)  {
+void fooo (int b)  {
 
     int a = 10;
 
