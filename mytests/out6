@@ -79,7 +79,7 @@ Variable: a1, Offset: -4
 Variable: a2, Offset: -8
 
 ======================3 Addr Generation======================
-GLOBAL:
+global:
         i3 = 0
         d1 = 3.0
         i4 = 0
@@ -109,4 +109,169 @@ L5:
         leave _event_open
 
 ====================Basic Block creation=====================
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        aparam "open: testing almost nothing"
+        __vreg2 = call logMessage
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        call g
+Block end: _event_open
+NextBlocks:L3,L5,
+
+PrevBlocks: _event_open,
+Block Start: L3
+        leave _event_open
+Block end: L3
+NextBlocks:
+
+PrevBlocks: _event_open,
+Block Start: L5
+        leave _event_open
+Block end: L5
+NextBlocks:
+
+====Basic Blocks Container: g=====
+
+
+PrevBlocks: 
+Block Start: g
+        enter g
+        a1 = 1
+        leave g
+Block end: g
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        i3 = 0
+        d1 = 3.0
+        i4 = 0
+        b1 = 1
+        b2 = 0
+        cs3 = "sdsd"
+Block end: global
+NextBlocks:global,
+
+=========================Optimization========================
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        aparam "open: testing almost nothing"
+        __vreg2 = call logMessage
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        call g
+Block end: _event_open
+NextBlocks:L3,L5,
+
+PrevBlocks: _event_open,
+Block Start: L3
+        leave _event_open
+Block end: L3
+NextBlocks:
+
+PrevBlocks: _event_open,
+Block Start: L5
+        leave _event_open
+Block end: L5
+NextBlocks:
+
+====Basic Blocks Container: g=====
+
+
+PrevBlocks: 
+Block Start: g
+        enter g
+        a1 = 1
+        leave g
+Block end: g
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        i3 = 0
+        d1 = 3.0
+        i4 = 0
+        b1 = 1
+        b2 = 0
+        cs3 = "sdsd"
+Block end: global
+NextBlocks:global,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+_event_open:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R020
+ADD  R000 4  R000
+LDI  R000 R021
+ADD  R000 4  R000
+LDI  R000 R022
+
+SUB  R000 4  R000
+
+STI R023  R000
+SUB  R000 4  R000
+JMP logMessage
+MOVI RRV_I R024
+
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R025
+ADD  R000 4  R000
+LDI  R000 R026
+ADD  R000 4  R000
+LDI  R000 R027
+STI R028  R000
+SUB  R000 4  R000
+JMP g
+
+L3:
+JMP  R004
+L5:
+JMP  R004
+g:
+ADD  R000 4  R000
+LDI  R000  R004
+MOVI 1  R029
+JMP  R004
+global:
+MOVI 0  R030
+MOVF 3.0  F010
+MOVI 0  R031
+MOVI 1  R032
+MOVI 0  R033
+MOVI "sdsd"  R034
 Compilation Successful

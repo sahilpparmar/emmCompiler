@@ -22,7 +22,7 @@
   
     kk=(k<<2);
     foo(k, kk);
-    if (b)     kk=(kk-1);
+    if (k>kk)     kk=(kk-1);
     else     if (k>kk)     k=(k+1);
   };
  
@@ -57,7 +57,7 @@ Variable: kk, Offset: -8
 Variable: b, Offset: -12
 
 ======================3 Addr Generation======================
-GLOBAL:
+global:
         a = 2
 foo:
         enter foo
@@ -87,7 +87,7 @@ main:
         aparam k
         call foo
 L4:
-        if b goto L6:
+        if k > kk goto L6:
         goto L7:
 L6:
         __vreg5 = kk - 1
@@ -104,4 +104,269 @@ L5:
         leave main
 
 ====================Basic Block creation=====================
+
+====Basic Blocks Container: foo=====
+
+
+PrevBlocks: 
+Block Start: foo
+        enter foo
+        fparam x
+        fparam z
+        __vreg0 = x + 1
+        z = __vreg0
+        leave foo
+Block end: foo
+NextBlocks:
+
+====Basic Blocks Container: foo1=====
+
+
+PrevBlocks: 
+Block Start: foo1
+        enter foo1
+        fparam x
+        __vreg1 = x + 1
+        x = __vreg1
+        __vreg2 = x * 2
+        return __vreg2
+        leave foo1
+Block end: foo1
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        a = 2
+        __vreg3 = a + b
+        x = __vreg3
+Block end: global
+NextBlocks:global,
+
+====Basic Blocks Container: main=====
+
+
+PrevBlocks: 
+Block Start: main
+        enter main
+        k = 4
+        kk = 8
+        b = 1
+        __vreg4 = k << 2
+        kk = __vreg4
+        aparam kk
+        aparam k
+        call foo
+Block end: main
+NextBlocks:L4,
+
+PrevBlocks: main,
+Block Start: L4
+        if k > kk goto L6:
+        goto L7:
+Block end: L4
+NextBlocks:L6,L7,
+
+PrevBlocks: L4,
+Block Start: L6
+        __vreg5 = kk - 1
+        kk = __vreg5
+        goto L5:
+Block end: L6
+NextBlocks:L5,
+
+PrevBlocks: L4,
+Block Start: L7
+        if k > kk goto L9:
+        goto L8:
+Block end: L7
+NextBlocks:L9,L8,
+
+PrevBlocks: L6,L8,
+Block Start: L5
+        leave main
+Block end: L5
+NextBlocks:
+
+PrevBlocks: L7,
+Block Start: L9
+        __vreg6 = k + 1
+        k = __vreg6
+Block end: L9
+NextBlocks:L8,
+
+PrevBlocks: L7,L9,
+Block Start: L8
+Block end: L8
+NextBlocks:L5,
+
+=========================Optimization========================
+
+====Basic Blocks Container: foo=====
+
+
+PrevBlocks: 
+Block Start: foo
+        enter foo
+        fparam x
+        fparam z
+        __vreg0 = x + 1
+        z = __vreg0
+        leave foo
+Block end: foo
+NextBlocks:
+
+====Basic Blocks Container: foo1=====
+
+
+PrevBlocks: 
+Block Start: foo1
+        enter foo1
+        fparam x
+        __vreg1 = x + 1
+        x = __vreg1
+        __vreg2 = __vreg1 * 2
+        return __vreg2
+        leave foo1
+Block end: foo1
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        a = 2
+        __vreg3 = 2 + b
+        x = __vreg3
+Block end: global
+NextBlocks:global,
+
+====Basic Blocks Container: main=====
+
+
+PrevBlocks: 
+Block Start: main
+        enter main
+        k = 4
+        kk = 8
+        b = 1
+        __vreg4 = 16
+        kk = 16
+        aparam kk
+        aparam k
+        call foo
+Block end: main
+NextBlocks:L4,
+
+PrevBlocks: main,
+Block Start: L4
+        if k > kk goto L6:
+        goto L7:
+Block end: L4
+NextBlocks:L6,L7,
+
+PrevBlocks: L4,
+Block Start: L6
+        __vreg5 = kk - 1
+        kk = __vreg5
+        goto L5:
+Block end: L6
+NextBlocks:L5,
+
+PrevBlocks: L4,
+Block Start: L7
+        if k > kk goto L9:
+        goto L8:
+Block end: L7
+NextBlocks:L9,L8,
+
+PrevBlocks: L6,L8,
+Block Start: L5
+        leave main
+Block end: L5
+NextBlocks:
+
+PrevBlocks: L7,
+Block Start: L9
+        __vreg6 = k + 1
+        k = __vreg6
+Block end: L9
+NextBlocks:L8,
+
+PrevBlocks: L7,L9,
+Block Start: L8
+Block end: L8
+NextBlocks:L5,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+foo:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R020
+ADD  R000 4  R000
+LDI  R000 F010
+ADD R020 1 R021
+MOVI R021  F010
+JMP  R004
+foo1:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R022
+ADD R022 1 R023
+MOVI R023  R022
+MUL R023 2 R024
+MOVI R024  R001
+JMP  R004
+global:
+MOVI 2  R025
+MOVIF 2 F012
+FADD F012 F013 F011
+MOVFI F011 R026
+MOVI R026  F014
+main:
+ADD  R000 4  R000
+LDI  R000  R004
+MOVI 4  R027
+MOVI 8  R028
+MOVI 1  R029
+MOVI 16  R030
+MOVI 16  R028
+STI R028  R000
+SUB  R000 4  R000
+
+STI R027  R000
+SUB  R000 4  R000
+
+STI R031  R000
+SUB  R000 4  R000
+JMP foo
+
+L4:
+JMPC GT R027 R028 L6
+JMP L7
+
+L6:
+SUB R028 1 R032
+MOVI R032  R028
+JMP 
+
+L7:
+JMPC GT R027 R028 L9
+JMP L8
+
+L5:
+JMP  R004
+L9:
+ADD R027 1 R033
+MOVI R033  R027
+L8:
 Compilation Successful

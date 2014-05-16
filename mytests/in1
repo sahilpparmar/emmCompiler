@@ -1,18 +1,21 @@
 int a = 5;
+int b = 10;
 
 int f(int i, int j) {
     int c = 2; 
-    int b = 2 + 3 + c;
-
-    double e = 8.5 + 1.1;
+    double e = 8.5 + 1.1 + c;
 
     if (e < b && e > c)
         b = 9 / 2;
     else
         b = 9 * 2;
-
     e = c + b;
     return c;
 }
 
-int b = 10;
+int bar() {
+    if (a > 0)
+        f(a, a + 2);
+
+    return a;
+}

@@ -79,7 +79,7 @@ Variable: bo1, Offset: 32
 Variable: bo2, Offset: 36
 Variable: bo3, Offset: 40
 ======================3 Addr Generation======================
-GLOBAL:
+global:
         i = 2
         j = 3
         k = 4
@@ -203,4 +203,273 @@ L32:
         leave _event_open
 
 ====================Basic Block creation=====================
-Compilation Successful
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if i < 6 goto L5:
+        goto L6:
+Block end: _event_open
+NextBlocks:L5,L6,
+
+PrevBlocks: _event_open,L6,
+Block Start: L5
+        if j >= k goto L3:
+        goto L4:
+Block end: L5
+NextBlocks:L3,L4,
+
+PrevBlocks: _event_open,
+Block Start: L6
+        if i <= j goto L3:
+        goto L5:
+Block end: L6
+NextBlocks:L3,L5,
+
+PrevBlocks: L6,L5,
+Block Start: L3
+        if i == j goto L8:
+        goto L10:
+Block end: L3
+NextBlocks:L8,L10,
+
+PrevBlocks: L5,
+Block Start: L4
+        __vreg12 = j >> i
+        __vreg13 = k << __vreg12
+        k = __vreg13
+Block end: L4
+NextBlocks:L2,
+
+PrevBlocks: L3,L10,
+Block Start: L8
+        __vreg1 = -i
+        __vreg2 = 23 * __vreg1
+        __vreg3 = __vreg2 / j
+        __vreg4 = __vreg3 - f
+        __vreg5 = 45 % j
+        __vreg6 = __vreg4 - __vreg5
+        f = __vreg6
+        goto L7:
+Block end: L8
+NextBlocks:L7,
+
+PrevBlocks: L3,
+Block Start: L10
+        if j != k goto L8:
+        goto L9:
+Block end: L10
+NextBlocks:L8,L9,
+
+PrevBlocks: L10,
+Block Start: L9
+        __vreg7 = j | k
+        __vreg8 = i & __vreg7
+        __vreg9 = ~j
+        __vreg10 = i & __vreg9
+        __vreg11 = __vreg8 ^ __vreg10
+        j = __vreg11
+Block end: L9
+NextBlocks:L7,
+
+PrevBlocks: L8,L9,
+Block Start: L7
+        goto L2:
+Block end: L7
+NextBlocks:L2,
+
+PrevBlocks: L7,L4,
+Block Start: L2
+        if bo goto L13:
+        goto L14:
+Block end: L2
+NextBlocks:L13,L14,
+
+PrevBlocks: L2,L14,
+Block Start: L13
+        if bo2 >= bo3 goto L12:
+        goto L11:
+Block end: L13
+NextBlocks:L12,L11,
+
+PrevBlocks: L2,
+Block Start: L14
+        if bo1 == bo2 goto L12:
+        goto L13:
+Block end: L14
+NextBlocks:L12,L13,
+
+PrevBlocks: L14,L13,
+Block Start: L12
+        if bo3 != bo1 goto L16:
+        goto L17:
+Block end: L12
+NextBlocks:L16,L17,
+
+PrevBlocks: L13,L15,
+Block Start: L11
+        if i > 9 goto L19:
+        goto L18:
+Block end: L11
+NextBlocks:L19,L18,
+
+PrevBlocks: L12,L17,
+Block Start: L16
+        __vreg14 = -i
+        __vreg15 = 23 * __vreg14
+        __vreg16 = __vreg15 / j
+        __vreg17 = __vreg16 - f
+        __vreg18 = 45 % j
+        __vreg19 = __vreg17 - __vreg18
+        f = __vreg19
+        __vreg20 = bo3 < bo1
+        __vreg21 = bo > bo2
+        __vreg22 = __vreg20 || __vreg21
+        bo = __vreg22
+Block end: L16
+NextBlocks:L15,
+
+PrevBlocks: L12,
+Block Start: L17
+        if bo > bo2 goto L16:
+        goto L15:
+Block end: L17
+NextBlocks:L16,L15,
+
+PrevBlocks: L17,L16,
+Block Start: L15
+Block end: L15
+NextBlocks:L11,
+
+PrevBlocks: L11,
+Block Start: L19
+        aparam "Bad if - condition is not boolean - but it i int"
+        __vreg23 = call logMessage
+Block end: L19
+NextBlocks:L20,
+
+PrevBlocks: L11,L20,
+Block Start: L18
+        __vreg24 = i + f
+        __vreg25 = __vreg24 + k
+        if __vreg25 > 9 goto L22:
+        goto L21:
+Block end: L18
+NextBlocks:L22,L21,
+
+PrevBlocks: L19,
+Block Start: L20
+Block end: L20
+NextBlocks:L18,
+
+PrevBlocks: L18,
+Block Start: L22
+        aparam "float + int in condition"
+        __vreg26 = call logMessage
+Block end: L22
+NextBlocks:L23,
+
+PrevBlocks: L18,L23,
+Block Start: L21
+        __vreg27 = i / f
+        __vreg28 = __vreg27 + k
+        if __vreg28 > 9 goto L25:
+        goto L24:
+Block end: L21
+NextBlocks:L25,L24,
+
+PrevBlocks: L22,
+Block Start: L23
+Block end: L23
+NextBlocks:L21,
+
+PrevBlocks: L21,
+Block Start: L25
+        aparam "float condition"
+        __vreg29 = call logMessage
+Block end: L25
+NextBlocks:L26,
+
+PrevBlocks: L21,L26,
+Block Start: L24
+        __vreg30 = f + k
+        __vreg31 = i / __vreg30
+        if __vreg31 > 9 goto L28:
+        goto L29:
+Block end: L24
+NextBlocks:L28,L29,
+
+PrevBlocks: L25,
+Block Start: L26
+Block end: L26
+NextBlocks:L24,
+
+PrevBlocks: L24,
+Block Start: L28
+        aparam "Bad if - condition is float - this is an err"
+        __vreg32 = call logMessage
+Block end: L28
+NextBlocks:L30,
+
+PrevBlocks: L24,
+Block Start: L29
+        aparam "OK"
+        __vreg33 = call logMessage
+Block end: L29
+NextBlocks:L31,
+
+PrevBlocks: L28,
+Block Start: L30
+        goto L27:
+Block end: L30
+NextBlocks:L27,
+
+PrevBlocks: L30,L31,
+Block Start: L27
+        if bo goto L33:
+        goto L32:
+Block end: L27
+NextBlocks:L33,L32,
+
+PrevBlocks: L29,
+Block Start: L31
+Block end: L31
+NextBlocks:L27,
+
+PrevBlocks: L27,
+Block Start: L33
+        aparam "boolean condition"
+        __vreg34 = call logMessage
+Block end: L33
+NextBlocks:L34,
+
+PrevBlocks: L27,L34,
+Block Start: L32
+        leave _event_open
+Block end: L32
+NextBlocks:
+
+PrevBlocks: L33,
+Block Start: L34
+Block end: L34
+NextBlocks:L32,
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        i = 2
+        j = 3
+        k = 4
+        f = 3.3
+Block end: global
+NextBlocks:global,
+
+Segmentation fault (core dumped)

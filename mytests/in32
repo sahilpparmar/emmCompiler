@@ -1,5 +1,5 @@
 event a(int aa, int bb);
-int sum;
+int sum=10;
 bool ii;
 a(i,j)-> {
     ii = i<j;

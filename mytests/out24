@@ -61,7 +61,7 @@ Variable: a3, Offset: 8
 
 Variable: condition, Offset: 12
 ======================3 Addr Generation======================
-GLOBAL:
+global:
         a = 5
 _event_open:
         enter _event_open
@@ -119,4 +119,391 @@ L11:
         leave _event_open
 
 ====================Basic Block creation=====================
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if a == 0 goto L3:
+        goto L4:
+Block end: _event_open
+NextBlocks:L3,L4,
+
+PrevBlocks: _event_open,
+Block Start: L3
+        aparam "Assignment in condition"
+        __vreg1 = call logMessage
+Block end: L3
+NextBlocks:L5,
+
+PrevBlocks: _event_open,
+Block Start: L4
+Block end: L4
+NextBlocks:
+
+PrevBlocks: L3,
+Block Start: L5
+        if a < 5 goto L7:
+        goto L8:
+Block end: L5
+NextBlocks:L7,L8,
+
+PrevBlocks: L5,
+Block Start: L7
+        b = 3
+        goto L6:
+Block end: L7
+NextBlocks:L6,
+
+PrevBlocks: L5,
+Block Start: L8
+Block end: L8
+NextBlocks:
+
+PrevBlocks: L7,
+Block Start: L6
+        goto L2:
+Block end: L6
+NextBlocks:L2,
+
+PrevBlocks: L6,
+Block Start: L2
+Block end: L2
+NextBlocks:
+
+PrevBlocks: L13,L19,L17,
+Block Start: L9
+        if a < 3 goto L10:
+        goto L11:
+Block end: L9
+NextBlocks:L10,L11,
+
+PrevBlocks: L9,
+Block Start: L10
+        a = 10
+        if a == 10 goto L13:
+        goto L12:
+Block end: L10
+NextBlocks:L13,L12,
+
+PrevBlocks: L9,L14,L20,
+Block Start: L11
+        leave _event_open
+Block end: L11
+NextBlocks:
+
+PrevBlocks: L10,
+Block Start: L13
+        goto L9:
+Block end: L13
+NextBlocks:L9,
+
+PrevBlocks: L10,
+Block Start: L12
+        aparam "Assignment in condition"
+        __vreg2 = call logMessage
+Block end: L12
+NextBlocks:L14,
+
+PrevBlocks: L12,
+Block Start: L14
+        goto L11:
+Block end: L14
+NextBlocks:L11,
+
+PrevBlocks: L18,
+Block Start: L15
+        if a > 10 goto L16:
+        goto L17:
+Block end: L15
+NextBlocks:L16,L17,
+
+PrevBlocks: L15,
+Block Start: L16
+        __vreg3 = b + c
+        a = __vreg3
+        if a > 20 goto L19:
+        goto L20:
+Block end: L16
+NextBlocks:L19,L20,
+
+PrevBlocks: L15,
+Block Start: L17
+        goto L9:
+Block end: L17
+NextBlocks:L9,
+
+PrevBlocks: L16,
+Block Start: L19
+        goto L9:
+        goto L18:
+Block end: L19
+NextBlocks:L9,L18,
+
+PrevBlocks: L16,
+Block Start: L20
+        goto L11:
+Block end: L20
+NextBlocks:L11,
+
+PrevBlocks: L19,
+Block Start: L18
+        goto L15:
+Block end: L18
+NextBlocks:L15,
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        a = 5
+Block end: global
+NextBlocks:global,
+
+=========================Optimization========================
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if a == 0 goto L3:
+        goto L4:
+Block end: _event_open
+NextBlocks:L3,L4,
+
+PrevBlocks: _event_open,
+Block Start: L3
+        aparam "Assignment in condition"
+        __vreg1 = call logMessage
+Block end: L3
+NextBlocks:L5,
+
+PrevBlocks: _event_open,
+Block Start: L4
+Block end: L4
+NextBlocks:
+
+PrevBlocks: L3,
+Block Start: L5
+        if a < 5 goto L7:
+        goto L8:
+Block end: L5
+NextBlocks:L7,L8,
+
+PrevBlocks: L5,
+Block Start: L7
+        b = 3
+        goto L6:
+Block end: L7
+NextBlocks:L6,
+
+PrevBlocks: L5,
+Block Start: L8
+Block end: L8
+NextBlocks:
+
+PrevBlocks: L7,
+Block Start: L6
+        goto L2:
+Block end: L6
+NextBlocks:L2,
+
+PrevBlocks: L6,
+Block Start: L2
+Block end: L2
+NextBlocks:
+
+PrevBlocks: L13,L19,L17,
+Block Start: L9
+        if a < 3 goto L10:
+        goto L11:
+Block end: L9
+NextBlocks:L10,L11,
+
+PrevBlocks: L9,
+Block Start: L10
+        a = 10
+        if a == 10 goto L13:
+        goto L12:
+Block end: L10
+NextBlocks:L13,L12,
+
+PrevBlocks: L9,L14,L20,
+Block Start: L11
+        leave _event_open
+Block end: L11
+NextBlocks:
+
+PrevBlocks: L10,
+Block Start: L13
+        goto L9:
+Block end: L13
+NextBlocks:L9,
+
+PrevBlocks: L10,
+Block Start: L12
+        aparam "Assignment in condition"
+        __vreg2 = call logMessage
+Block end: L12
+NextBlocks:L14,
+
+PrevBlocks: L12,
+Block Start: L14
+        goto L11:
+Block end: L14
+NextBlocks:L11,
+
+PrevBlocks: L18,
+Block Start: L15
+        if a > 10 goto L16:
+        goto L17:
+Block end: L15
+NextBlocks:L16,L17,
+
+PrevBlocks: L15,
+Block Start: L16
+        __vreg3 = b + c
+        a = __vreg3
+        if a > 20 goto L19:
+        goto L20:
+Block end: L16
+NextBlocks:L19,L20,
+
+PrevBlocks: L15,
+Block Start: L17
+        goto L9:
+Block end: L17
+NextBlocks:L9,
+
+PrevBlocks: L16,
+Block Start: L19
+        goto L9:
+        goto L18:
+Block end: L19
+NextBlocks:L9,L18,
+
+PrevBlocks: L16,
+Block Start: L20
+        goto L11:
+Block end: L20
+NextBlocks:L11,
+
+PrevBlocks: L19,
+Block Start: L18
+        goto L15:
+Block end: L18
+NextBlocks:L15,
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        a = 5
+Block end: global
+NextBlocks:global,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+_event_open:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 F010
+ADD  R000 4  R000
+LDI  R000 R020
+ADD  R000 4  R000
+LDI  R000 R021
+JMPC EQ R022 0 L3
+JMP L4
+
+L3:
+
+SUB  R000 4  R000
+
+STI R023  R000
+SUB  R000 4  R000
+JMP logMessage
+MOVI RRV_I R024
+
+L4:
+L5:
+JMPC GT 5 R022 L7
+JMP L8
+
+L7:
+MOVI 3  R025
+JMP 
+
+L8:
+L6:
+JMP 
+
+L2:
+L9:
+JMPC GT 3 R022 L10
+JMP L11
+
+L10:
+MOVI 10  R022
+JMPC EQ R022 10 L13
+JMP L12
+
+L11:
+JMP  R004
+L13:
+JMP 
+
+L12:
+
+SUB  R000 4  R000
+
+STI R026  R000
+SUB  R000 4  R000
+JMP logMessage
+MOVI RRV_I R027
+
+L14:
+JMP 
+
+L15:
+JMPC GT R022 10 L16
+JMP L17
+
+L16:
+ADD R025 R029 R028
+MOVI R028  R022
+JMPC GT R022 20 L19
+JMP L20
+
+L17:
+JMP 
+
+L19:
+JMP 
+
+JMP 
+
+L20:
+JMP 
+
+L18:
+JMP 
+
+global:
+MOVI 5  R022
 Compilation Successful
