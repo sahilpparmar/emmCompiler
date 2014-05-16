@@ -8,6 +8,7 @@
 
 #define RSH_Cnt   " R002"           //Shift Register Counter 
 #define RSH_Val   " R003"           //Shift Register Value 
+#define RRET_ADD  " R004" 
 
 enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
 string allocateNewRegName (bool isFloat = false);
