@@ -286,6 +286,7 @@ main(int argc, char *argv[], char *envp[]) {
         }
         
         DEBUG("===================Final Code generation=====================\n");
+        ge->eventHandler(cout);
         AbstractMachineCode::genAMC(bbC, cout);
 /*        
         

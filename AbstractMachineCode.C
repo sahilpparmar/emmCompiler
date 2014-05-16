@@ -43,13 +43,10 @@ string convertToFloat(ExprNode *expr, ostream &os)
 void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
     if (!bbCls)
         return;
-    LabelClass *l                        = new LabelClass();
-    InterCode* interCode                 = l->assignLabel("begin");
 
-    os<<"JMP begin: "<<endl;
-    os<<"begin: "<<endl;
-    os<<"MOVI "<<RSP<<" "<<10000<< "    // RSP Initialized" <<endl;
-    os<<"JMP global: "<<endl;
+    os <<"begin:" << endl;
+    os <<"MOVI " << RSP << " " << 10000 << "    // RSP Initialized" << endl;
+    os <<"JMP global" << endl << endl;
      
      map <string, BasicBlocksClass*>::iterator it = bbCls->getContainer()->begin();
      for (; it != bbCls->getContainer()->end(); ++it) {
@@ -59,13 +56,19 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
 
           for(; iter1 != basicBlock->end(); iter1++) {
                 vector <InterCode*> ::iterator iter2  = (*iter1)->getICodeVector()->begin();
-                os<<(*iter1)->getBlockLabel()<<":"<<endl;
+                os << (*iter1)->getBlockLabel() << ":" << endl;
                 for(; iter2 != (*iter1)->getICodeVector()->end(); iter2++) {
                     convert_IC_AMC(*iter2, os);
                     os<<endl;
                 }
+                // Jump to event handling
+                if ((*iter1)->getBlockLabel() == "global")
+                    os << "JMP " << S_START;
+                os << endl;
           }
     }
+    os << endl << S_END << ":" << endl;
+    os << "PRTS " << "\"DONE\"" << endl << endl;
 }
     
 
