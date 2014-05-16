@@ -1,0 +1,107 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  int a = 2;
+  void foo(int x, double z) {
+    
+    z=(x+1);
+  };
+  int foo1(int x) {
+    
+    x=(x+1);
+    return x*2;
+  };
+  double b;
+  double x = (a+b);
+  void main() {
+    int k = 4;
+    int kk = 8;
+    bool b = true;
+  
+    kk=(k<<2);
+    foo(k, kk);
+    if (b)     kk=(kk-1);
+    else     if (k>kk)     k=(k+1);
+  };
+ 
+
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+Variable: a, Offset: 0
+
+====Function 'foo'
+==Formal Parameters
+Variable: x, Offset: 8
+Variable: z, Offset: 12
+==Local Variables
+
+
+====Function 'foo1'
+==Formal Parameters
+Variable: x, Offset: 8
+==Local Variables
+
+Variable: b, Offset: 4
+Variable: x, Offset: 8
+
+====Function 'main'
+==Local Variables
+Variable: k, Offset: -4
+Variable: kk, Offset: -8
+Variable: b, Offset: -12
+
+======================3 Addr Generation======================
+GLOBAL:
+        a = 2
+foo:
+        enter foo
+        fparam x
+        fparam z
+        __vreg0 = x + 1
+        z = __vreg0
+        leave foo
+foo1:
+        enter foo1
+        fparam x
+        __vreg1 = x + 1
+        x = __vreg1
+        __vreg2 = x * 2
+        return __vreg2
+        leave foo1
+        __vreg3 = a + b
+        x = __vreg3
+main:
+        enter main
+        k = 4
+        kk = 8
+        b = 1
+        __vreg4 = k << 2
+        kk = __vreg4
+        aparam kk
+        aparam k
+        call foo
+L4:
+        if b goto L6:
+        goto L7:
+L6:
+        __vreg5 = kk - 1
+        kk = __vreg5
+        goto L5:
+L7:
+        if k > kk goto L9:
+        goto L8:
+L9:
+        __vreg6 = k + 1
+        k = __vreg6
+L8:
+L5:
+        leave main
+
+====================Basic Block creation=====================
+Compilation Successful

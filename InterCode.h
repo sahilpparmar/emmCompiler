@@ -217,7 +217,6 @@ class BasicBlock {
             for ( ; iter != NextBlockLabels.end(); ++iter) {
                 os << *iter << ",";
             }
-            
         }
         
         void constantFolding();
@@ -238,6 +237,10 @@ class BasicBlocksClass {
         
         vector<BasicBlock*>* getVector() {
             return &bbVector;
+        }
+
+        vector<BasicBlock*> getBasicBlock() {
+            return bbVector;
         }
 
         BasicBlock* getBlockWithLabel (string label) {
@@ -281,7 +284,10 @@ class BasicBlocksContainer {
         
     public:
        void createBlockStruct (InterCodesClass* ic);
-       
+       map <string, BasicBlocksClass*>* getContainer() {
+           return &bbContainer;
+       }        
+
        BasicBlocksClass* insertInContainer (string name) {
 
            if (bbContainer.find(name) == bbContainer.end()) {
@@ -289,14 +295,20 @@ class BasicBlocksContainer {
                bbContainer.insert (pair<string, BasicBlocksClass*> (name, bbCls));
                
                return bbCls;
-           }
-           else
+           } else {
                return bbContainer.find(name)->second;
+           }
        }
-       
+    
+       void optimize() {
+             map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+             for (; it != bbContainer.end(); ++it) {
+                 (*it).second->constantOptimize();
+             }
+       }
+        
        void print(ostream &os) {
             map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
-            
             for (; it != bbContainer.end(); ++it) {
                 os << "\n====Basic Blocks Container: " << (*it).first << "=====" << endl;
                 (*it).second->print(os);

@@ -11,6 +11,7 @@
 #include "CodeOpt.h"
 #include "SymTab.h"
 #include "Value.h"
+#include "AbstractMachineCode.h"
 
 using namespace std;
 
@@ -236,7 +237,7 @@ main(int argc, char *argv[], char *envp[]) {
         Type *te = new Type((vector<Type*>*)NULL, Type::EVENT);
         any->type(te);
     }
-    
+
     DEBUG("=================Lexical and Syntax Parsing==================\n");
     yyparse();
     if (errCount() > 0) {
@@ -265,28 +266,36 @@ main(int argc, char *argv[], char *envp[]) {
         DEBUG("======================3 Addr Generation======================\n");
         InterCodesClass* in = ge->codeGen();
         if (debugLevel > 0) {
-           // in->print(cout);
+           in->print(cout);
         }
-        //in->print(cout);
-        // TODO: Remove unwanted couts before uncommenting below code
+
         DEBUG("====================Basic Block creation=====================\n");
-        //BasicBlocksClass *bb = new BasicBlocksClass();
-        //bb->createBlocks(in);
-        //bb->constantOptimize();
-        //bb->print(cout);
-        //bb->check();
         BasicBlocksContainer *bbC = new BasicBlocksContainer();
         bbC->createBlockStruct (in);
-        bbC->print(cout);
- 
+        if (debugLevel > 0) {
+           bbC->print(cout);
+        }
+        
+        DEBUG("====================Optimization=====================\n");
+        bbC->optimize();
+        if (debugLevel > 0) {
+           bbC->print(cout);
+        }
+        
+        DEBUG("====================Final Code generation=====================\n");
+        AbstractMachineCode::genAMC(bbC, cout);
 /*        
         cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
         CodeOpt* codeOpt = new CodeOpt();
         InterCodesClass* out = codeOpt->codeOptimization(in);
         if (out)
             out->print(cout);
+
+        AbstractMachineCode::genAMC(bb, cout);
 */
+
         cout << "Compilation Successful" << endl;
     }
 #endif
+
 }

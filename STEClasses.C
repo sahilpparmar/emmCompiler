@@ -2,6 +2,7 @@
 #include "Value.h"
 #include "ParserUtil.h"
 #include "InterCode.h"
+#include "AbstractMachineCode.h"
 
 #define PRINT_OFFSET(s, i) DEBUG((string)"Variable: " + (string)s + (string)", Offset: " + (string)itoa(i));
 
@@ -89,6 +90,21 @@ void VariableEntry::print(ostream& out, int indent) const
         }
         out << ";";
     }   
+}
+
+string VariableEntry::getRegisterName()
+{
+    if(registerName_.length() != 0) return registerName_ ;
+    Type *type_ = type();
+//    cout<<"\n tag is: "<<type_->tag();
+    if(!type_) type_ = type();
+    (type_ && type_->isFloat(type_->tag())) ? setRegisterName(allocateNewRegName(true)) : setRegisterName(allocateNewRegName(false)) ; 
+    return registerName_;
+}
+
+void   VariableEntry::setRegisterName(string reg_name)
+{
+    registerName_ = reg_name;
 }
 
 InterCodesClass* VariableEntry::codeGen() 

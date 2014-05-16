@@ -64,4 +64,6 @@ foo:
         __vreg8 = __vreg7 + __vreg6
         __vreg9 = __vreg8
         leave foo
+
+====================Basic Block creation=====================
 Compilation Successful

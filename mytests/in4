@@ -16,7 +16,7 @@
         };
     };
 
-    event open (CString a1 , int a2 , unsigned int a3);
+    event open (int a1 , int a2 , unsigned int a3);
     int logMessage(string x) ;
 
     void g() {

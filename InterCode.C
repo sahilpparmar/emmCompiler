@@ -4,7 +4,6 @@
 long LabelClass::labelCount = 0;
 std::map <string, InterCode*> LabelClass::label_interCode_map;  
 
-
 void InterCode::print(ostream &os) {
     ExprNode** op = (ExprNode**)opnds_;
 
@@ -139,7 +138,6 @@ void InterCode::print(ostream &os) {
 
 
 void BasicBlock::constantFolding() {
-
     int result = 0, val_1 = 0, val_2 = 0, i;
     double resultf = 0.0, valf_1 = 0.0, valf_2 = 0.0;
     

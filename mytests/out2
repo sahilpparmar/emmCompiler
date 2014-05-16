@@ -1,27 +1,5 @@
 
 =================Lexical and Syntax Parsing==================
-
-=========================AST Builder=========================
- 
-  event open(string a1, int a2, unsigned int a3);
- 
-  (open(string file, int flags, unsigned int mode))-->   {  };
-  ;;
-  (any)-->   {  };
-  ;;
-
-========================Type Checking========================
-
-======================Memory Allocation======================
-
-
-====Global Declarations
-
-====Event 'open'
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
-Variable: a3, Offset: 8
-
-======================3 Addr Generation======================
-GLOBAL:
-Compilation Successful
+mytests/in2:8:Error: Invalid parameter type 'string' for event declaration
+mytests/in2:13:Error: 1 syntax error(s) reported.
+Compilation terminated.

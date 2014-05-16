@@ -92,10 +92,14 @@ class VariableEntry: public SymTabEntry {
         const Type* typeCheck();
         void memAlloc();
         InterCodesClass* codeGen();
+        string getRegisterName();
+        void   setRegisterName(string reg_name); 
+
     private:
         VarKind vkind_;
         int offSet_;
         ExprNode* initVal_;
+        string registerName_ ;
 };
 
 class ClassEntry: public SymTabEntry {

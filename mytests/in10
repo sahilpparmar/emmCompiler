@@ -3,7 +3,7 @@
  * Tests: all types
  */
 
-event open (string a1 , int a2 , unsigned int a3);
+event open (int a1 , int a2 , unsigned int a3);
         
 byte b3;
 
