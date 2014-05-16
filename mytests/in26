@@ -1,21 +1,9 @@
-class abc {
-    int m;
-    int n;
-};
 void foo(int a) {
     double b;
     int c = 5;
-    abc obj;
     print();
     print("hello");
     print(hi);
     print(b+c, b*c, 5, obj);
-    print(b,c);
-    bool d;
-    print(d,b);
-    print(d+b);
-    print(d,z);
-    print(b+"hi");
-    print(d+z);
 }
 
