@@ -32,7 +32,357 @@ Variable: a3, Offset: 8
 
 Variable: condition, Offset: 0
 ======================3 Addr Generation======================
-GLOBAL:
+global:
+_event_open:
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if condition goto L3:
+        goto L4:
+L3:
+        goto L2:
+L4:
+L2:
+        if condition goto L6:
+        goto L5:
+L6:
+        if condition goto L8:
+        goto L9:
+L8:
+        goto L7:
+L9:
+L7:
+L5:
+        if condition goto L11:
+        goto L12:
+L11:
+        if condition goto L14:
+        goto L15:
+L14:
+        goto L13:
+L15:
+L13:
+        goto L10:
+L12:
+        if condition goto L17:
+        goto L18:
+L17:
+        goto L16:
+L18:
+L16:
+L10:
+        leave _event_open
 
 ====================Basic Block creation=====================
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if condition goto L3:
+        goto L4:
+Block end: _event_open
+NextBlocks:L3,L4,
+
+PrevBlocks: _event_open,
+Block Start: L3
+        goto L2:
+Block end: L3
+NextBlocks:L2,
+
+PrevBlocks: _event_open,
+Block Start: L4
+Block end: L4
+NextBlocks:
+
+PrevBlocks: L3,
+Block Start: L2
+        if condition goto L6:
+        goto L5:
+Block end: L2
+NextBlocks:L6,L5,
+
+PrevBlocks: L2,
+Block Start: L6
+        if condition goto L8:
+        goto L9:
+Block end: L6
+NextBlocks:L8,L9,
+
+PrevBlocks: L2,
+Block Start: L5
+        if condition goto L11:
+        goto L12:
+Block end: L5
+NextBlocks:L11,L12,
+
+PrevBlocks: L6,
+Block Start: L8
+        goto L7:
+Block end: L8
+NextBlocks:L7,
+
+PrevBlocks: L6,
+Block Start: L9
+Block end: L9
+NextBlocks:
+
+PrevBlocks: L8,
+Block Start: L7
+Block end: L7
+NextBlocks:
+
+PrevBlocks: L5,
+Block Start: L11
+        if condition goto L14:
+        goto L15:
+Block end: L11
+NextBlocks:L14,L15,
+
+PrevBlocks: L5,
+Block Start: L12
+        if condition goto L17:
+        goto L18:
+Block end: L12
+NextBlocks:L17,L18,
+
+PrevBlocks: L11,
+Block Start: L14
+        goto L13:
+Block end: L14
+NextBlocks:L13,
+
+PrevBlocks: L11,
+Block Start: L15
+Block end: L15
+NextBlocks:
+
+PrevBlocks: L14,
+Block Start: L13
+        goto L10:
+Block end: L13
+NextBlocks:L10,
+
+PrevBlocks: L13,
+Block Start: L10
+        leave _event_open
+Block end: L10
+NextBlocks:
+
+PrevBlocks: L12,
+Block Start: L17
+        goto L16:
+Block end: L17
+NextBlocks:L16,
+
+PrevBlocks: L12,
+Block Start: L18
+Block end: L18
+NextBlocks:
+
+PrevBlocks: L17,
+Block Start: L16
+Block end: L16
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+Block end: global
+NextBlocks:global,
+
+=========================Optimization========================
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if condition goto L3:
+        goto L4:
+Block end: _event_open
+NextBlocks:L3,L4,
+
+PrevBlocks: _event_open,
+Block Start: L3
+        goto L2:
+Block end: L3
+NextBlocks:L2,
+
+PrevBlocks: _event_open,
+Block Start: L4
+Block end: L4
+NextBlocks:
+
+PrevBlocks: L3,
+Block Start: L2
+        if condition goto L6:
+        goto L5:
+Block end: L2
+NextBlocks:L6,L5,
+
+PrevBlocks: L2,
+Block Start: L6
+        if condition goto L8:
+        goto L9:
+Block end: L6
+NextBlocks:L8,L9,
+
+PrevBlocks: L2,
+Block Start: L5
+        if condition goto L11:
+        goto L12:
+Block end: L5
+NextBlocks:L11,L12,
+
+PrevBlocks: L6,
+Block Start: L8
+        goto L7:
+Block end: L8
+NextBlocks:L7,
+
+PrevBlocks: L6,
+Block Start: L9
+Block end: L9
+NextBlocks:
+
+PrevBlocks: L8,
+Block Start: L7
+Block end: L7
+NextBlocks:
+
+PrevBlocks: L5,
+Block Start: L11
+        if condition goto L14:
+        goto L15:
+Block end: L11
+NextBlocks:L14,L15,
+
+PrevBlocks: L5,
+Block Start: L12
+        if condition goto L17:
+        goto L18:
+Block end: L12
+NextBlocks:L17,L18,
+
+PrevBlocks: L11,
+Block Start: L14
+        goto L13:
+Block end: L14
+NextBlocks:L13,
+
+PrevBlocks: L11,
+Block Start: L15
+Block end: L15
+NextBlocks:
+
+PrevBlocks: L14,
+Block Start: L13
+        goto L10:
+Block end: L13
+NextBlocks:L10,
+
+PrevBlocks: L13,
+Block Start: L10
+        leave _event_open
+Block end: L10
+NextBlocks:
+
+PrevBlocks: L12,
+Block Start: L17
+        goto L16:
+Block end: L17
+NextBlocks:L16,
+
+PrevBlocks: L12,
+Block Start: L18
+Block end: L18
+NextBlocks:
+
+PrevBlocks: L17,
+Block Start: L16
+Block end: L16
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+Block end: global
+NextBlocks:global,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+_event_open:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R020
+ADD  R000 4  R000
+LDI  R000 R021
+ADD  R000 4  R000
+LDI  R000 R022
+JMPC NE  0 L3
+JMP L4
+
+L3:
+JMP 
+
+L4:
+L2:
+JMPC NE  0 L6
+JMP L5
+
+L6:
+JMPC NE  0 L8
+JMP L9
+
+L5:
+JMPC NE  0 L11
+JMP L12
+
+L8:
+JMP 
+
+L9:
+L7:
+L11:
+JMPC NE  0 L14
+JMP L15
+
+L12:
+JMPC NE  0 L17
+JMP L18
+
+L14:
+JMP 
+
+L15:
+L13:
+JMP 
+
+L10:
+JMP  R004
+L17:
+JMP 
+
+L18:
+L16:
+global:
 Compilation Successful

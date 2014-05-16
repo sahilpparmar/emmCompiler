@@ -25,7 +25,7 @@ void InterCode::print(ostream &os) {
                                     prtSpace(os, TAB_SPACE);
                                     os << op[0]->getRefName() << " = ";
                                     os << OpNode::opInfo[(int )subCode_].name_;
-                                    os << op[2]->getRefName();
+                                    os << op[1]->getRefName();
                                 }
                                 break;
 
@@ -42,7 +42,7 @@ void InterCode::print(ostream &os) {
                         prtSpace(os, TAB_SPACE);
                         os << "goto "; 
                         goto_lab->print(os);
-                    }
+                        }
                     break; 
 
         case LABEL: {
@@ -76,10 +76,13 @@ void InterCode::print(ostream &os) {
 
                         os << " goto ";
                         true_lab->print(os);
-                        os << endl;
-                        prtSpace(os, TAB_SPACE);
-                        os << "goto ";
-                        false_lab->print(os);
+
+                        if (false_lab) {
+                            os << endl;
+                            prtSpace(os, TAB_SPACE);
+                            os << "goto ";
+                            false_lab->print(os);
+                        }
                     }
                     break; 
 
@@ -136,13 +139,120 @@ void InterCode::print(ostream &os) {
     }
 }
 
+/****************************************************************************************************************************  
+ *  Input :
+ *
+ *  if a then goto L1 
+ *      else goto L2
+ *  L1: 
+ *      .... L1 body ........
+ *  L2:
+ *      .... L2 body ........
+ *
+ *  Output :
+ *
+ *  if !a then goto L2
+ *      else goto L1
+ *  L1:
+ *      .... L1.body ........
+ *  L2:
+ *      .... L2 body ........
+ *
+ *****************************************************************************************************************************/
 
-void BasicBlock::constantFolding() {
+void InterCodesClass::ifThenElseOpt(int *isOptimized) {
+    
+    int i;
+    vector<InterCode*>* dupICodeVector  = getICodeVector();
+    ExprNode* cond; 
+    InterCode* true_lab, *false_lab, *start_lab;
+    bool flag                           = false;
+
+    for ( i = 0; i < (int )dupICodeVector->size(); i++) {
+
+        if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
+
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
+            cond = operands[0];  
+
+            true_lab = cond->OnTrue();
+            false_lab = cond->OnFalse();
+            if(false_lab) {
+                if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
+                    start_lab = dupICodeVector->at(i+1);
+                    if (true_lab->getLabel() == start_lab->getLabel())  {
+                        cond->OnTrue(false_lab);
+                        cond->OnFalse(true_lab);
+                        dupICodeVector->at(i)->xchgSubcode();
+                    }
+                    else if (false_lab->getLabel() == start_lab->getLabel())  {
+                        cond->OnTrue(false_lab);
+                        cond->OnFalse(true_lab);
+                        dupICodeVector->at(i)->xchgSubcode();
+                    }
+                }
+            }
+        }
+    }       
+    if(flag)
+        *isOptimized = 1;
+
+}
+
+void InterCodesClass::removeContLabelGoto(int *isOptimized) {
+
+    int i;
+    vector<InterCode*>* dupICodeVector = getICodeVector();
+    ExprNode* cond; 
+    InterCode* goto_lab, *false_lab, *start_lab;
+    bool flag                           = false;
+
+    for ( i = 0; i < (int )dupICodeVector->size(); i++) {
+
+        if (dupICodeVector->at(i)->getOPNType() == InterCode::GOTO)  {
+
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
+            goto_lab = (InterCode *)operands[0];
+
+            //            cout << "\nLabel Name = " << goto_lab->getLabel();
+            if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
+                start_lab = dupICodeVector->at(i+1);
+                if (goto_lab->getLabel() == start_lab->getLabel()) {
+                    dupICodeVector->erase(dupICodeVector->begin() + i);
+                    flag = true;
+                }
+            }    
+        }
+        if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+            cond = operands[0];  
+            false_lab = cond->OnFalse();
+            if (false_lab) {
+                //cout << "\nLabel Name = " << false_lab->getLabel();
+                if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
+                    start_lab = dupICodeVector->at(i+1);
+                    if (false_lab->getLabel() == start_lab->getLabel()) {
+                        cond->OnFalse(NULL);
+                        flag = true;
+                    }
+                }
+            }
+        }
+    }    
+    if(flag)
+        *isOptimized = 1;
+
+}
+
+void BasicBlock::constantFolding (int *isOptimized) {
     int result = 0, val_1 = 0, val_2 = 0, i;
     double resultf = 0.0, valf_1 = 0.0, valf_2 = 0.0;
     
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
+    bool flag                           = false;
     bool isfloat;
 
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
@@ -179,36 +289,40 @@ void BasicBlock::constantFolding() {
                                       case OpNode::OpCode::PLUS :
                                                           if(isfloat) resultf = valf_1 + valf_2;
                                                           else result = val_1 + val_2;
+                                                          flag = true;
                                                           break; 
                                       case OpNode::OpCode::MINUS :
                                                           if(isfloat) resultf = valf_1 - valf_2;
                                                           else result = val_1 - val_2;
+                                                          flag = true;
                                                           break; 
                                       case OpNode::OpCode::MULT :
                                                           if(isfloat) resultf = valf_1 * valf_2;
                                                           else result = val_1 * val_2;
+                                                          flag = true;
                                                           break; 
                                       case OpNode::OpCode::DIV :
                                                           if(isfloat) resultf = valf_1 / valf_2;
                                                           else result = val_1 / val_2;
+                                                          flag = true;
                                                           break; 
                                       case OpNode::OpCode::MOD :
-                                                          if(!isfloat) result = val_1 % val_2;
+                                                          if(!isfloat) { result = val_1 % val_2; flag = true; }
                                                           break; 
                                       case OpNode::OpCode::BITOR :
-                                                          if(!isfloat) result = val_1 | val_2;
+                                                          if(!isfloat) { result = val_1 | val_2; flag = true; }
                                                           break;
                                       case OpNode::OpCode::BITAND :
-                                                          if(!isfloat) result = val_1 & val_2;
+                                                          if(!isfloat) { result = val_1 & val_2; flag = true; }
                                                           break;
                                       case OpNode::OpCode::BITXOR :
-                                                          if(!isfloat) result = val_1 ^ val_2;
+                                                          if(!isfloat) { result = val_1 ^ val_2; flag = true; }
                                                           break;
                                       case OpNode::OpCode::SHL :
-                                                          if(!isfloat) result = val_1 << val_2;
+                                                          if(!isfloat) { result = val_1 << val_2; flag = true; }
                                                           break;
                                       case OpNode::OpCode::SHR :
-                                                          if(!isfloat) result = val_1 >> val_2;
+                                                          if(!isfloat) { result = val_1 >> val_2; flag = true; }
                                                           break;
                                       default : 
                                               cout << "\nUnhandled OpCode \n";
@@ -237,22 +351,27 @@ void BasicBlock::constantFolding() {
                                        case OpNode::OpCode::NE:
                                                            if(!isfloat) cond = (val_1 != val_2);
                                                            else cond = (valf_1 != valf_2);
+                                                           flag = true; 
                                                            break;
                                        case OpNode::OpCode::GE:
                                                            if(!isfloat) cond = (val_1 >= val_2);
                                                            else cond = (valf_1 >= valf_2);
+                                                           flag = true; 
                                                            break;
                                        case OpNode::OpCode::LE:
                                                            if(!isfloat) cond = (val_1 <= val_2);
                                                            else cond = (valf_1 <= valf_2);
+                                                           flag = true; 
                                                            break;
                                        case OpNode::OpCode::GT:
                                                            if(!isfloat) cond = (val_1 > val_2);
                                                            else cond = (valf_1 > valf_2);
+                                                           flag = true; 
                                                            break;
                                        case OpNode::OpCode::LT:
                                                            if(!isfloat) cond = (val_1 < val_2);
                                                            else cond = (valf_1 < valf_2);
+                                                           flag = true; 
                                                            break;
                                        default : cout << "unknown opcode"; 
                                                  break;
@@ -279,6 +398,7 @@ void BasicBlock::constantFolding() {
                 
                 if ((new1->value()->type()->tag() == Type::TypeTag::INT || new1->value()->type()->tag() == Type::TypeTag::UINT)) {
                     
+                    flag            = true;
                     int val         = stoi(new1->getRefName());
                     ValueNode *temp =  new ValueNode(new Value(~val, Type::INT));
                     tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, OpNode::OpCode::ASSIGN, operands[0], temp));
@@ -293,25 +413,43 @@ void BasicBlock::constantFolding() {
     }
 
     setICodeVector(tempICodeVector);
-    //cout << "\nReturned \n";
+
+    if(flag)
+        *isOptimized = 1;
 }
 
-void BasicBlock::constantPropogation() {
+
+/***************************************************************************************************************
+ * 3 Address Code :
+ *      
+ *      a := 6
+ *      __vreg0 := c + a
+ *
+ * Code Optimized : Constant Propagation
+ *
+ *      a := 6
+ *      __vreg0 := c + 6
+ *
+ * **************************************************************************************************************/
+void BasicBlock::constantPropogation (int *isOptimized) {
    
-    //cout <<"\n ENTER\n";
+    //cout <<"\n ENTER " << this->getBlockLabel() << " Size = " << dupICodeVector->size() << "\n";
     map <string, ExprNode*> cvar_map;
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     vector<InterCode*>::iterator it     = dupICodeVector->begin();
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
+    bool flag                           = false;
     
     for (; it != dupICodeVector->end(); it++) {
         
         ExprNode** op = (ExprNode**)(*it)->get3Operands();
-        if (op[1] == NULL) {
+        
+        if (op[0] == NULL || op[1] == NULL)
+        {
             tempICodeVector->push_back(*it);
             continue;
         }
-
+        
         //Node of type EXPR and op[0] = op[1] , op[2] is NULL 
         if ((*it)->getOPNType() == InterCode::OPNTYPE::EXPR && 
              (*it)->getsubCode() == OpNode::OpCode::ASSIGN && 
@@ -323,6 +461,7 @@ void BasicBlock::constantPropogation() {
             if (cvar_map.find(str) != cvar_map.end()) {
                 cvar_map.erase(str);
             }
+            
             cvar_map.insert(pair<string, ExprNode*>(str, (ValueNode *)op[1]));
         }
         
@@ -354,10 +493,12 @@ void BasicBlock::constantPropogation() {
                                                 //iterate over map. check and replace op[0] and op[1] value
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                    flag     = true;
                                                 } 
                                                 
                                                 if (cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
                                                     oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
+                                                    flag     = true;
                                                 } 
                                             }
                                             break;
@@ -368,6 +509,7 @@ void BasicBlock::constantPropogation() {
                                             {
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                    flag     =  true;
                                                 }
                                                 cvar_map.insert(pair<string, ExprNode*>(oprnd[0]->getRefName(), (ValueNode *)op[1]));
                                             }
@@ -379,15 +521,159 @@ void BasicBlock::constantPropogation() {
             }
             break;
             
-            default : tempICodeVector->push_back(*it);
+            default : 
+                      tempICodeVector->push_back(*it);
                       break;
         }/*end outer switch*/
    
-   }/*end for*/ 
+    }/*end for*/ 
+    
+    //cout <<"\n Exit " << this->getBlockLabel() << " Size = " << tempICodeVector->size() << "\n";
 
-   setICodeVector(tempICodeVector);
+    setICodeVector(tempICodeVector);
+    if(flag)
+        *isOptimized = 1;
+}
+
+void BasicBlock::redundantGotoRemoval(int *isOptimized) {
+
+    unsigned int i = 0;
+    vector<InterCode*>* dupICodeVector  = getICodeVector();
+    vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
+    InterCode* gotoStart;
+    bool flag                           = false;
+    
+    //cout <<"\n ENTER " << this->getBlockLabel() << " Size = " << dupICodeVector->size() << "\n";
+    for (i = 0; i < dupICodeVector->size(); i++) {
+
+        gotoStart = dupICodeVector->at(i);
+        while (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::GOTO) {
+            i++;
+            if ( i == dupICodeVector->size())
+                break;
+        }
+        tempICodeVector->push_back(gotoStart);
+
+    }/*end for*/ 
+
+    setICodeVector(tempICodeVector);
+    
+    if (flag)
+        *isOptimized = 1;
+
+    //cout <<"\n Exit " << this->getBlockLabel() << " Size = " << tempICodeVector->size() << "\n";
 
 }
+
+void BasicBlock::zeroRemoval(int *isOptimized) {
+
+    int i;
+    vector<InterCode*>* dupICodeVector  = getICodeVector();
+    vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
+    bool flag                           = false;
+
+    for ( i = 0; i < (int )dupICodeVector->size(); i++) {
+
+        //tempICodeVector->push_back(dupICodeVector->at(i)); 
+        ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+        ExprNode *new1, *new2; 
+
+        if (operands[0] && operands[1] && operands[2]) {
+            new1 = operands[1]; 
+            new2 = operands[2]; 
+                
+            // Check if op[1] is valuenode and op[2] is not value and intercode type is expression
+            if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR) {
+
+                if ((new2->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) && 
+                        (new1->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)) {
+
+                    if (((new2->value()->type()->tag() == Type::TypeTag::INT || 
+                        new2->value()->type()->tag() == Type::TypeTag::UINT) && (new2->value()->ival() == 0)) 
+                            ||  ((new2->value()->type()->tag() == Type::TypeTag::DOUBLE) && (new2->value()->dval() == 0.0))) {
+
+
+                        switch(dupICodeVector->at(i)->getsubCode()) {
+                            case OpNode::OpCode::PLUS  :
+                            case OpNode::OpCode::MINUS :
+                                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                                OpNode::OpCode::ASSIGN, operands[0], new1));
+                                    flag = true;
+                                    break;
+                            case OpNode::OpCode::MULT  :
+                                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                                OpNode::OpCode::ASSIGN, operands[0], new2));
+                                    flag = true;
+                                    break;
+                            default :
+                                    tempICodeVector->push_back(dupICodeVector->at(i));
+                                    break;
+                        }                                 
+                    }
+                    else
+                        tempICodeVector->push_back(dupICodeVector->at(i));
+                }
+                else if ((new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) && 
+                        (new2->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)) {
+                    
+                    if (((new1->value()->type()->tag() == Type::TypeTag::INT || 
+                        new1->value()->type()->tag() == Type::TypeTag::UINT) && (new1->value()->ival() == 0)) 
+                            ||  ((new1->value()->type()->tag() == Type::TypeTag::DOUBLE) && (new1->value()->dval() == 0.0))) {
+
+                        switch(dupICodeVector->at(i)->getsubCode()) {
+                            case OpNode::OpCode::PLUS  :
+                                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                            OpNode::OpCode::ASSIGN, operands[0], new2));
+                                    flag = true;
+                                    break;
+                            case OpNode::OpCode::MULT  :
+                                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                                OpNode::OpCode::ASSIGN, operands[0], new1));
+                                    flag = true;
+                                    break;
+                            default :
+                                    tempICodeVector->push_back(dupICodeVector->at(i));
+                                    break;
+                        }                                 
+                    }    
+                    else
+                        tempICodeVector->push_back(dupICodeVector->at(i));
+                }
+                else
+                    tempICodeVector->push_back(dupICodeVector->at(i));
+            }
+            else
+                tempICodeVector->push_back(dupICodeVector->at(i));
+        }
+        else if ((operands[0]) && (operands[1])) { 
+                    /* TODO : Remove self (dead) assignment by not pushing */
+                    if ((dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR) && 
+                            (operands[0]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) && 
+                                (operands[1]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)) {
+
+                        if (operands[0]->getRefName() == operands[1]->getRefName()) {
+                                flag = true;
+                            }
+                            else
+                                tempICodeVector->push_back(dupICodeVector->at(i));
+                    }
+                    else
+                        tempICodeVector->push_back(dupICodeVector->at(i));
+        }
+        else
+            tempICodeVector->push_back(dupICodeVector->at(i));
+    }
+    
+    setICodeVector(tempICodeVector);
+    
+    //cout << "\nReturned \n";
+    
+    if (flag)
+        *isOptimized = 1;
+}
+
+
+
 
 void InterCodesClass::addCode (InterCode *code) {
     if (code != NULL) 
@@ -499,7 +785,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                            bb->addPrevBlock (block->getBlockLabel());
                         }
                         block = BBcls->getBlockWithLabel(str);
-                   }
+                    }
                 }
             
             } else if (op == InterCode::OPNTYPE::LEAVE ) {

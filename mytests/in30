@@ -27,3 +27,26 @@ void main()
         k = k+1;
 //  kk =  foo1(k) + k;
 }
+
+void fooo (int b)  {
+
+    int a = 10;
+
+    if (a == b) {
+        a = a + b;
+    }
+    else {
+        a = a - b;
+    }
+
+    while ( a <= b ) {
+        continue 1; 
+        break 1;
+    }
+
+    int c = 1, d = 5, e = 9;
+    d = 0 * d;
+
+    b = b + 0;
+//    e = 0 + e;
+}

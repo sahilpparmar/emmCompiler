@@ -58,7 +58,95 @@ Variable: w, Offset: 12
 Variable: j, Offset: 16
 Variable: y, Offset: 20
 ======================3 Addr Generation======================
-GLOBAL:
+global:
+_event_a:
+        enter _event_a
+        fparam e
+        __vreg8 = z + 1
+        z = __vreg8
+        leave _event_a
+_event_a:
+        enter _event_a
+        fparam k
+        __vreg9 = k + y
+        z = __vreg9
+        leave _event_a
 
 ====================Basic Block creation=====================
+
+====Basic Blocks Container: _event_a=====
+
+
+PrevBlocks: 
+Block Start: _event_a
+        enter _event_a
+        fparam e
+        __vreg8 = z + 1
+        z = __vreg8
+        leave _event_a
+        enter _event_a
+        fparam k
+        __vreg9 = k + y
+        z = __vreg9
+        leave _event_a
+Block end: _event_a
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+Block end: global
+NextBlocks:global,
+
+=========================Optimization========================
+
+====Basic Blocks Container: _event_a=====
+
+
+PrevBlocks: 
+Block Start: _event_a
+        enter _event_a
+        fparam e
+        __vreg8 = z + 1
+        z = __vreg8
+        leave _event_a
+        enter _event_a
+        fparam k
+        __vreg9 = k + y
+        z = __vreg9
+        leave _event_a
+Block end: _event_a
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+Block end: global
+NextBlocks:global,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+_event_a:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R020
+ADD R022 1 R021
+MOVI R021  R022
+JMP  R004
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R023
+ADD R023 R025 R024
+MOVI R024  R022
+JMP  R004
+global:
 Compilation Successful

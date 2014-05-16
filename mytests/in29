@@ -22,9 +22,15 @@ int bar(int aa) {
 
 int foo (int a) { 
     a = 10; 
+    if (!a) 
+        a = 2;
+    else
+        a = 3;
+    
     if (a == 1)
         a = 2;
     else
         a = 3+bar(a)+bar(a)*2;
     return a;
+
 }

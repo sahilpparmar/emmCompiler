@@ -26,7 +26,7 @@ Variable: a, Offset: 8
 ==Local Variables
 
 ======================3 Addr Generation======================
-GLOBAL:
+global:
         mul = 0
 foo:
         enter foo
@@ -45,4 +45,124 @@ L2:
         leave foo
 
 ====================Basic Block creation=====================
+
+====Basic Blocks Container: foo=====
+
+
+PrevBlocks: 
+Block Start: foo
+        enter foo
+        fparam a
+        __vreg0 = mul * 2
+        mul = __vreg0
+        if a <= 10 goto L3:
+        goto L2:
+Block end: foo
+NextBlocks:L3,L2,
+
+PrevBlocks: foo,
+Block Start: L3
+        __vreg1 = a + 1
+        aparam __vreg1
+        __vreg2 = call foo
+Block end: L3
+NextBlocks:L4,
+
+PrevBlocks: foo,L4,
+Block Start: L2
+        return mul
+        leave foo
+Block end: L2
+NextBlocks:
+
+PrevBlocks: L3,
+Block Start: L4
+Block end: L4
+NextBlocks:L2,
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        mul = 0
+Block end: global
+NextBlocks:global,
+
+=========================Optimization========================
+
+====Basic Blocks Container: foo=====
+
+
+PrevBlocks: 
+Block Start: foo
+        enter foo
+        fparam a
+        __vreg0 = mul * 2
+        mul = __vreg0
+        if a <= 10 goto L3:
+        goto L2:
+Block end: foo
+NextBlocks:L3,L2,
+
+PrevBlocks: foo,
+Block Start: L3
+        __vreg1 = a + 1
+        aparam __vreg1
+        __vreg2 = call foo
+Block end: L3
+NextBlocks:L4,
+
+PrevBlocks: foo,L4,
+Block Start: L2
+        return mul
+        leave foo
+Block end: L2
+NextBlocks:
+
+PrevBlocks: L3,
+Block Start: L4
+Block end: L4
+NextBlocks:L2,
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        mul = 0
+Block end: global
+NextBlocks:global,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+foo:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R020
+MUL R022 2 R021
+MOVI R021  R022
+JMPC GE 10 R020 L3
+JMP L2
+
+L3:
+ADD R020 1 R023
+STI R023  R000
+SUB  R000 4  R000
+
+STI R024  R000
+SUB  R000 4  R000
+JMP foo
+MOVI RRV_I R025
+
+L2:
+MOVI R022  R001
+JMP  R004
+L4:
+global:
+MOVI 0  R022
 Compilation Successful

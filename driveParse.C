@@ -240,10 +240,7 @@ main(int argc, char *argv[], char *envp[]) {
 
     DEBUG("=================Lexical and Syntax Parsing==================\n");
     yyparse();
-    if (errCount() > 0) {
-        errMsg(itoa(errCount()) + " syntax error(s) reported.\nCompilation terminated.");
-        return 1;
-    }
+    // TODO: Terminate compilation if errCount() > 0
 
     stm.leaveToScope(SymTabEntry::Kind::GLOBAL_KIND);
     GlobalEntry *ge = (GlobalEntry*)(stm.currentScope());
@@ -255,10 +252,7 @@ main(int argc, char *argv[], char *envp[]) {
 
         DEBUG("========================Type Checking========================\n");
         ge->typeCheck();
-        if (errCount() > 0) {
-            errMsg(itoa(errCount()) + " error(s) reported.\nCompilation terminated.");
-            return 1;
-        }
+        // TODO: Terminate compilation if errCount() > 0
 
         DEBUG("======================Memory Allocation======================\n");
         ge->memAlloc(); 
@@ -269,6 +263,15 @@ main(int argc, char *argv[], char *envp[]) {
            in->print(cout);
         }
 
+        DEBUG("====================== Basic Code Optimization ======================\n");
+        if (debugLevel > 0) {
+            if (in) {
+                in->optimize();
+                in->print(cout);
+            }
+        }
+        
+        cout << endl;
         DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksContainer *bbC = new BasicBlocksContainer();
         bbC->createBlockStruct (in);
@@ -276,26 +279,40 @@ main(int argc, char *argv[], char *envp[]) {
            bbC->print(cout);
         }
         
-        DEBUG("====================Optimization=====================\n");
+        DEBUG("=========================Optimization========================\n");
         bbC->optimize();
         if (debugLevel > 0) {
            bbC->print(cout);
         }
         
-        DEBUG("====================Final Code generation=====================\n");
+        DEBUG("===================Final Code generation=====================\n");
         AbstractMachineCode::genAMC(bbC, cout);
 /*        
-        cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
-        CodeOpt* codeOpt = new CodeOpt();
-        InterCodesClass* out = codeOpt->codeOptimization(in);
-        if (out)
-            out->print(cout);
+        
+        DEBUG("====================Basic Block creation=====================\n");
+        BasicBlocksClass *bb = new BasicBlocksClass();
+        bb->createBlocks(in);
+        bb->print(cout);
 
-        AbstractMachineCode::genAMC(bb, cout);
-*/
+        cout<<"====================== Block Code Optimization ======================\n";
+        bb->blockOptimize();
+        bb->print(cout);
+        //bb->check();
+*/        
+        //TODO: Segfault in mytests/in29
+        //bb->constantOptimize();
+         
+        //TODO: Remove unwanted couts before uncommenting below code
+        //bb->print(cout);
+
+        //TODO: Enable below once all correctly printed
+        //cout<<"=====================Abstract Code============================\n";
+        //AbstractMachineCode::genAMC(bb, cout);
+
 
         cout << "Compilation Successful" << endl;
     }
 #endif
 
 }
+
