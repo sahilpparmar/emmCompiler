@@ -266,29 +266,36 @@ main(int argc, char *argv[], char *envp[]) {
         DEBUG("======================3 Addr Generation======================\n");
         InterCodesClass* in = ge->codeGen();
         if (debugLevel > 0) {
-            in->print(cout);
+           in->print(cout);
         }
 
-        cout<<"======================Basic Block creation======================\n";
-         //TODO: Remove unwanted couts before uncommenting below code
         DEBUG("====================Basic Block creation=====================\n");
-        BasicBlocksClass *bb = new BasicBlocksClass();
-        bb->createBlocks(in);
-//        bb->constantOptimize();
-//        bb->print(cout);
-//        bb->check();
+        BasicBlocksContainer *bbC = new BasicBlocksContainer();
+        bbC->createBlockStruct (in);
+        if (debugLevel > 0) {
+           bbC->print(cout);
+        }
+        
+        DEBUG("====================Optimization=====================\n");
+        bbC->optimize();
+        if (debugLevel > 0) {
+           bbC->print(cout);
+        }
+        
+        DEBUG("====================Final Code generation=====================\n");
+        AbstractMachineCode::genAMC(bbC, cout);
+/*        
+        cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
+        CodeOpt* codeOpt = new CodeOpt();
+        InterCodesClass* out = codeOpt->codeOptimization(in);
+        if (out)
+            out->print(cout);
 
-        cout<<"=====================Abstract Code============================\n";
         AbstractMachineCode::genAMC(bb, cout);
+*/
 
-        /*        
-                  cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
-                  CodeOpt* codeOpt = new CodeOpt();
-                  InterCodesClass* out = codeOpt->codeOptimization(in);
-                  if (out)
-                  out->print(cout);
-                  */
         cout << "Compilation Successful" << endl;
     }
 #endif
+
 }

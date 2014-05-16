@@ -7,7 +7,7 @@
     long b = 12345678;
     bit c = 1;
     short d = 1;
-    event open (string a1 , int a2 , unsigned int a3);
+    event open (int a1 , int a2 , unsigned int a3);
 
     open(file, flags, mode) -> {
     if (a == 0)

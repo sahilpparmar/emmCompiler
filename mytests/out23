@@ -4,7 +4,7 @@
 =========================AST Builder=========================
  
   class CString;
-  event open(string a1, int a2, unsigned int a3);
+  event open(double a1, int a2, unsigned int a3);
   int i = 2;
   int j = 3;
   int k = 4;
@@ -25,7 +25,7 @@
     return (a+b);
   };
  
-  (open(string file, int flags, unsigned int mode))-->   {
+  (open(double file, int flags, unsigned int mode))-->   {
     if ((i<j||j>k))     {
       i=(23*-i/j);
     };

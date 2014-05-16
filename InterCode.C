@@ -4,7 +4,6 @@
 long LabelClass::labelCount = 0;
 std::map <string, InterCode*> LabelClass::label_interCode_map;  
 
-
 void InterCode::print(ostream &os) {
     ExprNode** op = (ExprNode**)opnds_;
 
@@ -139,7 +138,6 @@ void InterCode::print(ostream &os) {
 
 
 void BasicBlock::constantFolding() {
-
     int result = 0, val_1 = 0, val_2 = 0, i;
     double resultf = 0.0, valf_1 = 0.0, valf_2 = 0.0;
     
@@ -309,8 +307,10 @@ void BasicBlock::constantPropogation() {
     for (; it != dupICodeVector->end(); it++) {
         
         ExprNode** op = (ExprNode**)(*it)->get3Operands();
-        if (op[0] == NULL || op[1] == NULL)
+        if (op[1] == NULL) {
+            tempICodeVector->push_back(*it);
             continue;
+        }
 
         //Node of type EXPR and op[0] = op[1] , op[2] is NULL 
         if ((*it)->getOPNType() == InterCode::OPNTYPE::EXPR && 
@@ -416,28 +416,39 @@ void InterCodesClass::print (ostream &os) {
     }
 }
 
-void BasicBlocksClass::createBlocks (InterCodesClass* ic) {
 
+void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
+    
     vector <InterCode*>* icvec = ic->getICodeVector();
     vector <InterCode*>::iterator it =  icvec->begin();
     
     string str;
-    bool isPrevJmp = false; 
-    BasicBlock* block = NULL;
+    BasicBlocksClass *BBcls = insertInContainer ("global");
+    BasicBlock* block       = BBcls->getBlockWithLabel("global");
+    bool isPrevJmp          = false; 
+    bool isLastLeave        = false;
+    BasicBlock* bb          = NULL; 
     
     for (; it != icvec->end(); ++it) {
             InterCode::OPNTYPE op = (*it)->getOPNType();
-            void** opd = (*it)->get3Operands();
+            void** opd            = (*it)->get3Operands();
             
-            if (block == NULL)
-                block = getBlockWithLabel("Global_block"); 
-
+            if ((block == NULL || BBcls == NULL)) { 
+                BBcls = insertInContainer ("global"); 
+                block = BBcls->getBlockWithLabel("global");
+            }
+            
             if (op == InterCode::OPNTYPE::GOTO ) {
                 block->addCode (*it); 
                 
                 str = ((InterCode *)opd[0])->getLabel(); 
                 block->addNextBlock(str);
-                isPrevJmp = true;
+                
+                bb =  BBcls->getBlockWithLabel(str); 
+                bb->addPrevBlock (block->getBlockLabel());
+                
+                isPrevJmp   = true;
+                isLastLeave = false;
 
             } else if (op == InterCode::OPNTYPE::IFREL) {
                 block->addCode (*it); 
@@ -446,34 +457,62 @@ void BasicBlocksClass::createBlocks (InterCodesClass* ic) {
                 InterCode* true_lab  = cond->OnTrue();
                 InterCode* false_lab = cond->OnFalse();
 
-                if(true_lab)
+                if(true_lab) {
                     block->addNextBlock(true_lab->getLabel());
+                    bb =  BBcls->getBlockWithLabel(true_lab->getLabel()); 
+                    bb->addPrevBlock (block->getBlockLabel());
+                }
                 
-                if(false_lab)
+                if(false_lab) {
                     block->addNextBlock(false_lab->getLabel());
+                    bb =  BBcls->getBlockWithLabel(false_lab->getLabel()); 
+                    bb->addPrevBlock (block->getBlockLabel());
+                }
                 
-                isPrevJmp = true;
+                isPrevJmp   = true;
+                isLastLeave = false;
             
             } else if (op == InterCode::OPNTYPE::LABEL) {
                 str = (*it)->getLabel();
-               
-                if (str.compare("GLOBAL") == 0) {
-                    block = getBlockWithLabel("Global_block"); 
+                
+                if (block == NULL) {
+                    /* to determine if new container to create or to add it to global block*/ 
+                    
+                    if ( ((it + 1) != icvec->end())  && ((*(it + 1))->getOPNType() != InterCode::OPNTYPE::ENTER))
+                        str = "global"; 
+                    
+                    BBcls = insertInContainer (str);
+                    block = BBcls->getBlockWithLabel(str);
+                
                 } else {
-                    // to check if previous stmt was a jmp
-                    if (isPrevJmp == false)
-                       block->addNextBlock(str); 
-                    block = getBlockWithLabel(str);
+                    /* when new label appeared and last statement was not leave */
+                    
+                    if ( ((it + 1) != icvec->end())  && ((*(it + 1))->getOPNType() == InterCode::OPNTYPE::ENTER)) {
+                        BBcls = insertInContainer (str);
+                        block = BBcls->getBlockWithLabel(str);
+                    } else {
+                        /* this is normal block*/
+                         
+                        if (isPrevJmp == false) {
+                           block->addNextBlock(str); 
+                           bb =  BBcls->getBlockWithLabel(str); 
+                           bb->addPrevBlock (block->getBlockLabel());
+                        }
+                        block = BBcls->getBlockWithLabel(str);
+                   }
                 }
             
             } else if (op == InterCode::OPNTYPE::LEAVE ) {
                 block->addCode (*it); 
-                block = NULL; 
-                isPrevJmp = true;
+                block       = NULL; 
+                isPrevJmp   = true;
+                isLastLeave = true;
             
             } else {
                 block->addCode (*it); 
-                isPrevJmp = false;
+                isPrevJmp   = false;
+                isLastLeave = false;
             }
     }
+
 }

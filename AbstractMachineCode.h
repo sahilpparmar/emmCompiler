@@ -10,16 +10,12 @@
 #define RSH_Val   " R003"           //Shift Register Value 
 #define RRET_ADD  " R004" 
 
-       enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
+enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
+string allocateNewRegName (bool isFloat = false);
 
-string allocateNewRegName(bool isFloat = false);
-class AbstractMachineCode 
-{
+class AbstractMachineCode {
     public:
-    AbstractMachineCode()
-    {}
-
-static    void   genAMC(BasicBlocksClass *basicBlocksClass, ostream & os);
-static    void   convert_IC_AMC(InterCode *interCode, ostream &os);
-
-    };
+        AbstractMachineCode() {}
+        static void genAMC (BasicBlocksContainer *bbCls, ostream & os);
+        static void convert_IC_AMC (InterCode *interCode, ostream &os);
+};

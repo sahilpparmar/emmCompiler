@@ -6,7 +6,7 @@
 
    class CString;
 
-    event open (string a1 , int a2 , unsigned int a3);
+    event open (double a1 , int a2 , unsigned int a3);
 
     int i = 2 ;
     int j = 3 ;

@@ -18,23 +18,23 @@
     int logMessageInt(string x, int y) ;    
     int getpid();
     int isChild(pid_t a);
-    event open (CString a1 , int a2 , unsigned int a3);
+    event open (double a1 , int a2 , unsigned int a3);
     event close (int a1);
-    event lstat(CString a1 , NewStatP a2 );
+    event lstat(int a1 , int a2 );
     event execve();
     event fork();
     event clone();
-    event unlink(CString a1);
-    event kill ( pid_t a1 , int a2 );
-    event ptrace ( pid_t a1 , int a2 , int a3 , int a4);
-    event sched_setscheduler ( pid_t a1 , int a2 , SchedParamP a3);
+    event unlink(int a1);
+    event kill ( int a1 , int a2 );
+    event ptrace ( int a1 , int a2 , int a3 , int a4);
+    event sched_setscheduler ( int a1 , int a2 , int a3);
     event umask(int a1) ;
-    event write(int a1, CString a2, int a3) ;
-    event chmod(CString a1, unsigned int a2) ;
-    event truncate(CString a1, int a2) ;    
+    event write(int a1, int a2, int a3) ;
+    event chmod(int a1, unsigned int a2) ;
+    event truncate(int a1, int a2) ;    
     event sysinfo(int a1) ;
-    event sched_setparam (pid_t a1, int a2);
-    event setpriority(pid_t a1, int a2,pid_t a3);
+    event sched_setparam (int a1, int a2);
+    event setpriority(int a1, int a2,int a3);
 
 #define proc_ops() ((execve()) \/ (clone()) \/ (fork()))
 #define procInterference(x) \

@@ -40,28 +40,31 @@ string convertToFloat(ExprNode *expr, ostream &os)
     return new_reg;
 }
 
-void   AbstractMachineCode::genAMC(BasicBlocksClass *basicBlocksClass, ostream & os)
-{
-          vector <BasicBlock*> basicBlock       = basicBlocksClass->getBasicBlock();      
-          vector <BasicBlock*>::iterator iter1   = (basicBlock).begin();
- 
-           LabelClass *l = new LabelClass();
-           InterCode* interCode = l->assignLabel("begin");
-    
-           os<<"JMP begin: "<<endl;
-           os<<"begin: "<<endl;
-           os<<"MOVI "<<RSP<<" "<<10000<<endl;
+void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
+    if (!bbCls)
+        return;
+    LabelClass *l                        = new LabelClass();
+    InterCode* interCode                 = l->assignLabel("begin");
 
-            for(; iter1 != (basicBlock).end(); iter1++)
-            {
-               vector <InterCode*> *interCodeVector = (*iter1)->getICodeVector();
-               vector <InterCode*>::iterator iter2  = (*interCodeVector).begin();
-           for(; iter2 != (*interCodeVector).end(); iter2++)
-            {
-                convert_IC_AMC(*iter2, os);
-                os<<endl;
-            }
-            }
+    os<<"JMP begin: "<<endl;
+    os<<"begin: "<<endl;
+    os<<"MOVI "<<RSP<<" "<<10000<<endl;
+     
+     map <string, BasicBlocksClass*>::iterator it = bbCls->getContainer()->begin();
+     for (; it != bbCls->getContainer()->end(); ++it) {
+          
+          vector <BasicBlock*>* basicBlock     = (*it).second->getVector();      
+          vector <BasicBlock*>::iterator iter1 = basicBlock->begin();
+
+          for(; iter1 != basicBlock->end(); iter1++) {
+                vector <InterCode*> ::iterator iter2  = (*iter1)->getICodeVector()->begin();
+                os<<(*iter1)->getBlockLabel()<<":"<<endl;
+                for(; iter2 != (*iter1)->getICodeVector()->end(); iter2++) {
+                    convert_IC_AMC(*iter2, os);
+                    os<<endl;
+                }
+          }
+    }
 }
     
 
@@ -297,7 +300,6 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                }
                                else if(opndsList[1])
                                {
-                                 cout<<"\n single opnd 1: "<<(opndsList[1]->getRefName());
                                  src1_regName = expr1->getRegisterName();
                                    if(Type::isBool(type_src1->tag()))
                                    {
@@ -316,7 +318,6 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                break;
                              }
              case ENTER  :   { 
-                               os << ((FunctionEntry*)opndsList[0])->name()<<":";
 //                               string retAddrReg =   allocateNewRegName(false); 
                                os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
                                os<<"LDI "<<RSP <<" "<<RRET_ADD;

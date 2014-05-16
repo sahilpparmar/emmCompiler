@@ -7,10 +7,10 @@
   int a = 5;
   int b;
   int c;
-  event open(string a1, int a2, unsigned int a3);
+  event open(double a1, int a2, unsigned int a3);
   bool condition;
  
-  (open(string file, int flags, unsigned int mode))-->   {
+  (open(double file, int flags, unsigned int mode))-->   {
     if (a==0)     {
       logMessage("Assignment in condition");
       if (a<5)       {
@@ -63,4 +63,6 @@ Variable: condition, Offset: 12
 ======================3 Addr Generation======================
 GLOBAL:
         a = 5
+
+====================Basic Block creation=====================
 Compilation Successful
