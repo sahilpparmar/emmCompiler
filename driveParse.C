@@ -274,9 +274,9 @@ main(int argc, char *argv[], char *envp[]) {
         DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksClass *bb = new BasicBlocksClass();
         bb->createBlocks(in);
-        bb->constantOptimize();
-        bb->print(cout);
-        bb->check();
+//        bb->constantOptimize();
+//        bb->print(cout);
+//        bb->check();
 
         cout<<"=====================Abstract Code============================\n";
         AbstractMachineCode::genAMC(bb, cout);
