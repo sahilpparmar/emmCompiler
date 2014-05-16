@@ -1,6 +1,7 @@
 #include "Ast.h"
 #include "ParserUtil.h"
 #include "InterCode.h"
+#include "AbstractMachineCode.h"
 
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) 
@@ -22,8 +23,26 @@ VregNode::VregNode (int line=0, int column=0, string file="") :
     refnode_ = this;
 }
 
-/****************************************************************/
+string VregNode::getRegisterName()
+{
+    if(registerName_.length() != 0) return registerName_ ;
+    Type *type_ = (Type*)coercedType();
+    if(!type_) type_ = type();
+    (type_ && type_->isFloat(type_->tag())) ? setRegisterName(allocateNewRegName(true)) : setRegisterName(allocateNewRegName(false)) ; 
+    return registerName_;
+}
 
+void   VregNode::setRegisterName(string reg_name)
+{
+    registerName_ = reg_name;
+}
+
+const Type* VregNode::typeCheck()
+{
+    return type();
+    }
+
+/****************************************************************/
 ExprNode* ExprNode:: getRefNode () 
 {
     if (refnode_ == NULL) {
@@ -32,7 +51,12 @@ ExprNode* ExprNode:: getRefNode ()
         Type* t = const_cast<Type*>(typeCheck());
         refnode_->type(t);
         if (refnode_->type() == NULL)
-            refnode_->type(type());
+       {
+         //refnode_->type(type()); }
+        Type *t = const_cast<Type*>(typeCheck());
+        refnode_->type(t);
+        }
+
     }
     return (ExprNode *)refnode_;
 }
@@ -56,6 +80,7 @@ RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
         int line, int column, string file): 
     ExprNode(ExprNode::ExprNodeType::REF_EXPR_NODE, 0, line, column, file)
 {
+    type((Type*)ste->type());
     ext_     = ext;
     sym_     = ste;
     refnode_ = this;
@@ -86,6 +111,16 @@ InterCodesClass* RefExprNode::codeGen()
     return NULL;
 }
 
+string RefExprNode::getRegisterName()
+{
+    return ((SymTabEntry*)sym_)->getRegisterName();
+}
+
+void   RefExprNode::setRegisterName(string reg_name)
+{
+    SymTabEntry* ste = (SymTabEntry *)sym_ ;
+    if(ste) ste -> setRegisterName(reg_name);
+}
 /****************************************************************/
 
 void ValueNode::print(ostream& os, int indent) const
@@ -159,7 +194,7 @@ const Type* IfNode::typeCheck()
         
         if (cond_type && cond_type->tag() != Type::TypeTag::BOOL) {
             errMsg("Boolean argument expected", cond_);
-        }
+       }
 
         if (then_)
             then_->typeCheck();
@@ -1063,10 +1098,10 @@ const Type* OpNode::typeCheck() {
                //cout<<"\n types same";
            
             } else if (targ1->isSubType(targ2->tag())) {
-                arg_[0]->coercedType(new Type(targ2->tag()));
+                arg_[1]->coercedType(new Type(targ2->tag()));
 
             } else if (targ2->isSubType(targ1->tag())) {
-                arg_[1]->coercedType(new Type(targ1->tag()));
+                arg_[0]->coercedType(new Type(targ1->tag()));
             }
             
         } else {
@@ -1081,21 +1116,21 @@ const Type* OpNode::typeCheck() {
             }
             
             if (targ1->tag() == targ2->tag()) {
-                //cout<<"\n types same";
-                tp = new Type(targ1->tag());
+               { //cout<<"\n binary types same";
+                tp = new Type(targ1->tag()); }
             
             } else if (targ1->isSubType(targ2->tag())) {
                 //cout<<"\n diff arith args";
-                arg_[0]->coercedType(new Type(targ2->tag()));
+                arg_[1]->coercedType(new Type(targ2->tag()));
                 tp = new Type(targ1->tag());
             
             } else if (targ2->isSubType(targ1->tag())) {
                 //cout<<"\n diff arith args";
-                arg_[1]->coercedType(new Type(targ1->tag()));
+                arg_[0]->coercedType(new Type(targ1->tag()));
                 tp = new Type(targ2->tag());
             }
             if(tp)
-                return tp; 
+                return tp;
         }
     
     } else if((iopcode >= (int)OpNode::OpCode::EQ && iopcode <= (int)OpNode::OpCode::LE)) {
@@ -1118,12 +1153,12 @@ const Type* OpNode::typeCheck() {
         
         } else if(targ1->isSubType(targ2->tag())) {
            
-           arg_[0]->coercedType(new Type(targ2->tag()));
+           arg_[1]->coercedType(new Type(targ2->tag()));
            //cout<<"\n diff args";
 
         } else if(targ2->isSubType(targ1->tag())) {
            
-           arg_[1]->coercedType(new Type(targ1->tag()));
+           arg_[0]->coercedType(new Type(targ1->tag()));
            //cout<<"\n diff args";
         }
         
@@ -1186,10 +1221,8 @@ const Type* OpNode::typeCheck() {
         assert(arg_[0] && arg_[1] && "Invalid args");
         
         if(targ1->isNative(targ1->tag()) && targ2->isNative(targ2->tag())) {
-              //cout<<"\n assign operands satisfied";
           
               if(targ1->tag() == targ2->tag()) {
-                 //cout<<"\n types same";
               } else if(targ1->isSubType(targ2->tag())) {
                   arg_[0]->coercedType(new Type(targ2->tag()));
 

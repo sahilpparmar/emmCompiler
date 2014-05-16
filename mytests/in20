@@ -28,9 +28,9 @@
     void setstat(StatP s);
     class NewStatP;
     void setnstat(NewStatP n, int i);
-    event open (CString a1 , int a2 , unsigned int a3);
-    event close (Integer a1);
-    event chroot (CString a1);
+    event open (int a1 , int a2 , unsigned int a3);
+    event close (int a1);
+    event chroot (int a1);
     event lstat(CString a1 , NewStatP a2 );
 	event read(int r);
 	event write(int r);
@@ -44,17 +44,17 @@
     int getpid();
     int isChild(pid_t a);
 
-    event execve(CString a1, ArgV a2, ArgV a3);
+    event execve(int a1, ArgV a2, ArgV a3);
     event fork();
     event clone();
  
-    event kill ( pid_t a1 , int a2);
-    event ptrace ( pid_t a1 , int a2 , int a3 , int a4);
-    event sched_setparam ( pid_t a1 , SchedParamP a2 );
-    event sched_setscheduler ( pid_t a1 , int a2 , SchedParamP a3);
-    event setpgid ( pid_t a1 , pid_t a2 );
+    event kill ( int a1 , int a2);
+    event ptrace ( int a1 , int a2 , int a3 , int a4);
+    event sched_setparam ( int a1 , double a2 );
+    event sched_setscheduler ( int a1 , int a2 , double a3);
+    event setpgid ( int a1 , int a2 );
     event setpriority ( pid_t a1 , int a2 , int a3);
-    event mlock (VoidP a1, size_t a2);
+    event mlock (VoidP a1, double a2);
     event mlockall ( int a1);
     event munlockall ( );
         

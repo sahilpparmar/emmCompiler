@@ -243,6 +243,11 @@ class BasicBlocksClass {
         vector <BasicBlock*> bbVector;
     
     public:
+        vector<BasicBlock*> getBasicBlock()
+        {
+            return bbVector;
+        }
+
         BasicBlock* getBlockWithLabel (string label) {
            vector <BasicBlock*>::iterator it = bbVector.begin();
 

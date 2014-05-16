@@ -11,6 +11,7 @@
 #include "CodeOpt.h"
 #include "SymTab.h"
 #include "Value.h"
+#include "AbstractMachineCode.h"
 
 using namespace std;
 
@@ -236,7 +237,7 @@ main(int argc, char *argv[], char *envp[]) {
         Type *te = new Type((vector<Type*>*)NULL, Type::EVENT);
         any->type(te);
     }
-    
+
     DEBUG("=================Lexical and Syntax Parsing==================\n");
     yyparse();
     // TODO: Terminate compilation if errCount() > 0
@@ -255,6 +256,7 @@ main(int argc, char *argv[], char *envp[]) {
 
         DEBUG("======================Memory Allocation======================\n");
         ge->memAlloc(); 
+        cout << endl;
 
         cout<<"======================3 Addr Generation======================\n";
         InterCodesClass* in = ge->codeGen();
@@ -262,6 +264,10 @@ main(int argc, char *argv[], char *envp[]) {
             in->print(cout);
         cout << endl;
 
+        DEBUG("====================Basic Block creation=====================\n");
+        BasicBlocksClass *bb = new BasicBlocksClass();
+        bb->createBlocks(in);
+/*        
         cout<<"====================== Basic Code Optimization ======================\n";
         if (in) {
             in->optimize();
@@ -269,7 +275,7 @@ main(int argc, char *argv[], char *envp[]) {
         }
         cout << endl;
         
-        cout<<"======================Basic Block creation======================\n";
+        DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksClass *bb = new BasicBlocksClass();
         bb->createBlocks(in);
         bb->print(cout);
@@ -278,6 +284,19 @@ main(int argc, char *argv[], char *envp[]) {
         bb->blockOptimize();
         bb->print(cout);
         //bb->check();
+*/        
+        //TODO: Segfault in mytests/in29
+        //bb->constantOptimize();
+         
+        //TODO: Remove unwanted couts before uncommenting below code
+        //bb->print(cout);
+
+        //TODO: Enable below once all correctly printed
+        //cout<<"=====================Abstract Code============================\n";
+        //AbstractMachineCode::genAMC(bb, cout);
+
+
+        cout << "Compilation Successful" << endl;
     }
 #endif
 }

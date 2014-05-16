@@ -11,7 +11,7 @@
   int isLong(int l);
   unsigned int isULong(unsigned int l);
   int y(string s, string t);
-  event open(string a1, int a2, unsigned int a3);
+  event open(int a1, int a2, unsigned int a3);
   int i;
   int ci;
   string us;
@@ -24,7 +24,7 @@
   double f;
   byte b;
  
-  (open(string file, int flags, unsigned int mode))-->   {
+  (open(int file, int flags, unsigned int mode))-->   {
     y("checking function invocation", "for open event");
     isInFile(file, "abc");
     isInFile(file, "1");
@@ -72,6 +72,8 @@
   ;;
 
 ========================Type Checking========================
+mytests/in8:34:Error: Type Mismatch for argument 1 to isInFile
+mytests/in8:35:Error: Type Mismatch for argument 1 to isInFile
 mytests/in8:39:Error: Type Mismatch for argument 1 to isInt
 mytests/in8:42:Error: Type Mismatch for argument 1 to isInt
 mytests/in8:44:Error: Type Mismatch for argument 1 to isUInt
@@ -94,5 +96,5 @@ mytests/in8:81:Error: Type Mismatch for argument 1 to isULong
 mytests/in8:88:Error: Type Mismatch for argument 1 to isInt
 mytests/in8:89:Error: Type Mismatch for argument 1 to isShort
 mytests/in8:90:Error: Type Mismatch for argument 1 to isLong
-mytests/in8:92:Error: 22 error(s) reported.
+mytests/in8:92:Error: 24 error(s) reported.
 Compilation terminated.

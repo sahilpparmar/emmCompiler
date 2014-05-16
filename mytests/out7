@@ -3,7 +3,7 @@
 
 =========================AST Builder=========================
  
-  event open(string a1, int a2, unsigned int a3);
+  event open(int a1, int a2, unsigned int a3);
   byte b3;
   int s;
   int l;
@@ -19,7 +19,7 @@
   string str = "sss";
   string str1;
  
-  (open(string file, int flags, unsigned int mode))-->   {
+  (open(int file, int flags, unsigned int mode))-->   {
     i=s;
     l=s;
     l=i;

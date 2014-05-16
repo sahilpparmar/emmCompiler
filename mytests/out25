@@ -11,9 +11,9 @@ mytests/in25:9:Warning: Unsupported datatype, converting 'short' to 'int'
   int b = 12345678;
   int c = 1;
   int d = 1;
-  event open(string a1, int a2, unsigned int a3);
+  event open(int a1, int a2, unsigned int a3);
  
-  (open(string file, int flags, unsigned int mode))-->   {
+  (open(int file, int flags, unsigned int mode))-->   {
     if (a==0)     {
       logMessage("Assignment in condition");
       c=0;
@@ -59,4 +59,6 @@ GLOBAL:
         b = 12345678
         c = 1
         d = 1
+
+====================Basic Block creation=====================
 Compilation Successful

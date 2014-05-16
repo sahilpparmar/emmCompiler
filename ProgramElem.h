@@ -82,7 +82,8 @@ class ProgramElem {
   
   ExprNode* getRefNode      () { return NULL; }
   virtual string getRefName () { return NULL; }
-  
+  virtual string getRegisterName() { return ""; }
+  virtual void   setRegisterName(string reg_name) {}
   virtual InterCodesClass* codeGen () { return NULL; }
 };
 

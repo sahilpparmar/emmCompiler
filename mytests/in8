@@ -13,7 +13,7 @@
     unsigned int isULong(unsigned int l) ;
 	int y(string s, string t);
 
-	event open (string a1 , int a2 , unsigned int a3);
+	event open (int a1 , int a2 , unsigned int a3);
     
     int i;
 

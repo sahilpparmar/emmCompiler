@@ -3,13 +3,14 @@
 
 =========================AST Builder=========================
  
-  event open(int a1, int a2, unsigned int a3);
-  int logMessage(string x);
- 
-  (open(int file, int flags, unsigned int mode))-->   {
-    logMessage("open: testing almost nothing");
+  int mul = 0;
+  int foo(int a) {
+    
+    mul=mul*2;
+    if (a<=10)     foo((a+1));
+    return mul;
   };
-  ;;
+ 
 
 ========================Type Checking========================
 
@@ -17,19 +18,31 @@
 
 
 ====Global Declarations
+Variable: mul, Offset: 0
 
-====Event 'open'
-Variable: a1, Offset: 0
-Variable: a2, Offset: 4
-Variable: a3, Offset: 8
-
-
-====Function 'logMessage'
+====Function 'foo'
 ==Formal Parameters
-Variable: x, Offset: 8
+Variable: a, Offset: 8
+==Local Variables
 
 ======================3 Addr Generation======================
 GLOBAL:
+        mul = 0
+foo:
+        enter foo
+        fparam a
+        __vreg0 = mul * 2
+        mul = __vreg0
+        if a <= 10 goto L3:
+        goto L2:
+L3:
+        __vreg1 = a + 1
+        aparam __vreg1
+        __vreg2 = call foo
+L4:
+L2:
+        return mul
+        leave foo
 
 ====================Basic Block creation=====================
 Compilation Successful
