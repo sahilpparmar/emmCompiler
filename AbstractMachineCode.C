@@ -48,7 +48,8 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
 
     os<<"JMP begin: "<<endl;
     os<<"begin: "<<endl;
-    os<<"MOVI "<<RSP<<" "<<10000<<endl;
+    os<<"MOVI "<<RSP<<" "<<10000<< "    // RSP Initialized" <<endl;
+    os<<"JMP global: "<<endl;
      
      map <string, BasicBlocksClass*>::iterator it = bbCls->getContainer()->begin();
      for (; it != bbCls->getContainer()->end(); ++it) {
@@ -296,7 +297,8 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                     src2_regName = temp;
                                 }
                                 os<<src1_regName<<" "<<src2_regName<<" "<<(true_lab->getLabel())<<endl;
-                                os<<"JMP "<<(false_lab->getLabel())<<endl;
+                                if(false_lab)
+                                    os<<"JMP "<<(false_lab->getLabel())<<endl;
                                }
                                else if(opndsList[1])
                                {
@@ -306,14 +308,16 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                        if(interCode->getsubCode() == OpNode::OpCode::NOT)
                                                 os<<"JMPC EQ ";
                                         os<<src1_regName<<" 0 "<<(true_lab->getLabel())<<endl;
-                                        os<<"JMP "<<(false_lab->getLabel())<<endl;
+                                        if(false_lab)
+                                            os<<"JMP "<<(false_lab->getLabel())<<endl;
                                    }
                                }
                                else
                                {
                                     os<<"JMPC NE ";
                                 os<<src1_regName<<" 0 "<<(true_lab->getLabel())<<endl;
-                                os<<"JMP "<<(false_lab->getLabel())<<endl;
+                                if(false_lab)
+                                    os<<"JMP "<<(false_lab->getLabel())<<endl;
                                }
                                break;
                              }

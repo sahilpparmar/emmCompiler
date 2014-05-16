@@ -1,0 +1,237 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  event a(int aa, int bb);
+  int sum = 10;
+  bool ii;
+ 
+  (a(int i, int j))-->   {
+    ii=i<j;
+    if (((ii||!i<6)&&(i<=j||j>=i)))     sum=(i+j);
+    else     sum=(i-j);
+  };
+  ;;
+
+========================Type Checking========================
+
+======================Memory Allocation======================
+
+
+====Global Declarations
+
+====Event 'a'
+Variable: aa, Offset: 0
+Variable: bb, Offset: 4
+
+Variable: sum, Offset: 0
+Variable: ii, Offset: 4
+======================3 Addr Generation======================
+global:
+        sum = 10
+_event_a:
+        enter _event_a
+        fparam i
+        fparam j
+        __vreg1 = i < j
+        ii = __vreg1
+        if ii goto L5:
+        goto L6:
+L6:
+        if i < 6 goto L4:
+        goto L5:
+L5:
+        if i <= j goto L3:
+        goto L7:
+L7:
+        if j >= i goto L3:
+        goto L4:
+L3:
+        __vreg2 = i + j
+        sum = __vreg2
+        goto L2:
+L4:
+        __vreg3 = i - j
+        sum = __vreg3
+L2:
+        leave _event_a
+
+====================Basic Block creation=====================
+
+====Basic Blocks Container: _event_a=====
+
+
+PrevBlocks: 
+Block Start: _event_a
+        enter _event_a
+        fparam i
+        fparam j
+        __vreg1 = i < j
+        ii = __vreg1
+        if ii goto L5:
+        goto L6:
+Block end: _event_a
+NextBlocks:L5,L6,
+
+PrevBlocks: _event_a,L6,
+Block Start: L5
+        if i <= j goto L3:
+        goto L7:
+Block end: L5
+NextBlocks:L3,L7,
+
+PrevBlocks: _event_a,
+Block Start: L6
+        if i < 6 goto L4:
+        goto L5:
+Block end: L6
+NextBlocks:L4,L5,
+
+PrevBlocks: L6,L7,
+Block Start: L4
+        __vreg3 = i - j
+        sum = __vreg3
+Block end: L4
+NextBlocks:L2,
+
+PrevBlocks: L5,L7,
+Block Start: L3
+        __vreg2 = i + j
+        sum = __vreg2
+        goto L2:
+Block end: L3
+NextBlocks:L2,
+
+PrevBlocks: L5,
+Block Start: L7
+        if j >= i goto L3:
+        goto L4:
+Block end: L7
+NextBlocks:L3,L4,
+
+PrevBlocks: L3,L4,
+Block Start: L2
+        leave _event_a
+Block end: L2
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        sum = 10
+Block end: global
+NextBlocks:global,
+
+=========================Optimization========================
+
+====Basic Blocks Container: _event_a=====
+
+
+PrevBlocks: 
+Block Start: _event_a
+        enter _event_a
+        fparam i
+        fparam j
+        __vreg1 = i < j
+        ii = __vreg1
+        if ii goto L5:
+        goto L6:
+Block end: _event_a
+NextBlocks:L5,L6,
+
+PrevBlocks: _event_a,L6,
+Block Start: L5
+        if i <= j goto L3:
+        goto L7:
+Block end: L5
+NextBlocks:L3,L7,
+
+PrevBlocks: _event_a,
+Block Start: L6
+        if i < 6 goto L4:
+        goto L5:
+Block end: L6
+NextBlocks:L4,L5,
+
+PrevBlocks: L6,L7,
+Block Start: L4
+        __vreg3 = i - j
+        sum = __vreg3
+Block end: L4
+NextBlocks:L2,
+
+PrevBlocks: L5,L7,
+Block Start: L3
+        __vreg2 = i + j
+        sum = __vreg2
+        goto L2:
+Block end: L3
+NextBlocks:L2,
+
+PrevBlocks: L5,
+Block Start: L7
+        if j >= i goto L3:
+        goto L4:
+Block end: L7
+NextBlocks:L3,L4,
+
+PrevBlocks: L3,L4,
+Block Start: L2
+        leave _event_a
+Block end: L2
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        sum = 10
+Block end: global
+NextBlocks:global,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+_event_a:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R020
+ADD  R000 4  R000
+LDI  R000 R021
+R020 R021 R022
+MOVI R022  R023
+JMPC NE  0 L5
+JMP L6
+
+L5:
+JMPC GE R021 R020 L3
+JMP L7
+
+L6:
+JMPC GT 6 R020 L4
+JMP L5
+
+L4:
+SUB R020 R021 R024
+MOVI R024  R025
+L3:
+ADD R020 R021 R026
+MOVI R026  R025
+JMP 
+
+L7:
+JMPC GE R021 R020 L3
+JMP L4
+
+L2:
+JMP  R004
+global:
+MOVI 10  R025
+Compilation Successful

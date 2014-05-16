@@ -33,11 +33,10 @@ const Type* GlobalEntry::typeCheck()
 
 InterCodesClass* GlobalEntry::codeGen()
 {
-    //assign new label Global
-    InterCodesClass *cls = NULL;
+    InterCodesClass *cls = new InterCodesClass();
 
     if (symTab()) {
-        cls = new InterCodesClass();
+        // Assign new global label
         cls->addCode(LabelClass::assignLabel ("global"));
         
         SymTab::iterator it = symTab()->begin();
@@ -46,7 +45,12 @@ InterCodesClass* GlobalEntry::codeGen()
                 cls->addCode((*it)->codeGen());
         }
     }
-    //TODO: Handle for RUle Node
+
+    vector<RuleNode*>::const_iterator it; 
+    for (it = rules_.begin(); it != rules_.end(); ++it) {
+        cls->addCode((*it)->codeGen());
+    }
+    
     return cls;
 }
 

@@ -263,6 +263,13 @@ main(int argc, char *argv[], char *envp[]) {
            in->print(cout);
         }
 
+        DEBUG("====================== Basic Code Optimization ======================\n");
+        if (in) {
+            in->optimize();
+            in->print(cout);
+        }
+        
+        cout << endl;
         DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksContainer *bbC = new BasicBlocksContainer();
         bbC->createBlockStruct (in);
@@ -270,21 +277,15 @@ main(int argc, char *argv[], char *envp[]) {
            bbC->print(cout);
         }
         
-        DEBUG("====================Optimization=====================\n");
+        DEBUG("=========================Optimization========================\n");
         bbC->optimize();
         if (debugLevel > 0) {
            bbC->print(cout);
         }
         
-        DEBUG("====================Final Code generation=====================\n");
+        DEBUG("===================Final Code generation=====================\n");
         AbstractMachineCode::genAMC(bbC, cout);
 /*        
-        cout<<"====================== Basic Code Optimization ======================\n";
-        if (in) {
-            in->optimize();
-            in->print(cout);
-        }
-        cout << endl;
         
         DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksClass *bb = new BasicBlocksClass();

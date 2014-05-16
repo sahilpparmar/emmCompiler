@@ -54,11 +54,318 @@ Variable: a2, Offset: 4
 Variable: a3, Offset: 8
 
 ======================3 Addr Generation======================
-GLOBAL:
+global:
         a = 5
         b = 12345678
         c = 1
         d = 1
+_event_open:
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if a == 0 goto L3:
+        goto L4:
+L3:
+        aparam "Assignment in condition"
+        __vreg1 = call logMessage
+L5:
+        c = 0
+        goto L2:
+L4:
+L2:
+L6:
+        if a < 3 goto L7:
+        goto L8:
+L7:
+        a = 10
+        aparam "Assignment in condition"
+        __vreg2 = call logMessage
+L9:
+        b = 987654321
+        goto L8:
+L10:
+        if a > 10 goto L11:
+        goto L12:
+L11:
+        c = 1
+        goto L8:
+        goto L10:
+L12:
+        goto L6:
+L8:
+        leave _event_open
 
 ====================Basic Block creation=====================
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if a == 0 goto L3:
+        goto L4:
+Block end: _event_open
+NextBlocks:L3,L4,
+
+PrevBlocks: _event_open,
+Block Start: L3
+        aparam "Assignment in condition"
+        __vreg1 = call logMessage
+Block end: L3
+NextBlocks:L5,
+
+PrevBlocks: _event_open,
+Block Start: L4
+Block end: L4
+NextBlocks:
+
+PrevBlocks: L3,
+Block Start: L5
+        c = 0
+        goto L2:
+Block end: L5
+NextBlocks:L2,
+
+PrevBlocks: L5,
+Block Start: L2
+Block end: L2
+NextBlocks:
+
+PrevBlocks: L12,
+Block Start: L6
+        if a < 3 goto L7:
+        goto L8:
+Block end: L6
+NextBlocks:L7,L8,
+
+PrevBlocks: L6,
+Block Start: L7
+        a = 10
+        aparam "Assignment in condition"
+        __vreg2 = call logMessage
+Block end: L7
+NextBlocks:L9,
+
+PrevBlocks: L6,L9,L11,
+Block Start: L8
+        leave _event_open
+Block end: L8
+NextBlocks:
+
+PrevBlocks: L7,
+Block Start: L9
+        b = 987654321
+        goto L8:
+Block end: L9
+NextBlocks:L8,
+
+PrevBlocks: L11,
+Block Start: L10
+        if a > 10 goto L11:
+        goto L12:
+Block end: L10
+NextBlocks:L11,L12,
+
+PrevBlocks: L10,
+Block Start: L11
+        c = 1
+        goto L8:
+        goto L10:
+Block end: L11
+NextBlocks:L8,L10,
+
+PrevBlocks: L10,
+Block Start: L12
+        goto L6:
+Block end: L12
+NextBlocks:L6,
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        a = 5
+        b = 12345678
+        c = 1
+        d = 1
+Block end: global
+NextBlocks:global,
+
+=========================Optimization========================
+
+====Basic Blocks Container: _event_open=====
+
+
+PrevBlocks: 
+Block Start: _event_open
+        enter _event_open
+        fparam file
+        fparam flags
+        fparam mode
+        if a == 0 goto L3:
+        goto L4:
+Block end: _event_open
+NextBlocks:L3,L4,
+
+PrevBlocks: _event_open,
+Block Start: L3
+        aparam "Assignment in condition"
+        __vreg1 = call logMessage
+Block end: L3
+NextBlocks:L5,
+
+PrevBlocks: _event_open,
+Block Start: L4
+Block end: L4
+NextBlocks:
+
+PrevBlocks: L3,
+Block Start: L5
+        c = 0
+        goto L2:
+Block end: L5
+NextBlocks:L2,
+
+PrevBlocks: L5,
+Block Start: L2
+Block end: L2
+NextBlocks:
+
+PrevBlocks: L12,
+Block Start: L6
+        if a < 3 goto L7:
+        goto L8:
+Block end: L6
+NextBlocks:L7,L8,
+
+PrevBlocks: L6,
+Block Start: L7
+        a = 10
+        aparam "Assignment in condition"
+        __vreg2 = call logMessage
+Block end: L7
+NextBlocks:L9,
+
+PrevBlocks: L6,L9,L11,
+Block Start: L8
+        leave _event_open
+Block end: L8
+NextBlocks:
+
+PrevBlocks: L7,
+Block Start: L9
+        b = 987654321
+        goto L8:
+Block end: L9
+NextBlocks:L8,
+
+PrevBlocks: L11,
+Block Start: L10
+        if a > 10 goto L11:
+        goto L12:
+Block end: L10
+NextBlocks:L11,L12,
+
+PrevBlocks: L10,
+Block Start: L11
+        c = 1
+        goto L8:
+        goto L10:
+Block end: L11
+NextBlocks:L8,L10,
+
+PrevBlocks: L10,
+Block Start: L12
+        goto L6:
+Block end: L12
+NextBlocks:L6,
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+        a = 5
+        b = 12345678
+        c = 1
+        d = 1
+Block end: global
+NextBlocks:global,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+_event_open:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R020
+ADD  R000 4  R000
+LDI  R000 R021
+ADD  R000 4  R000
+LDI  R000 R022
+JMPC EQ R023 0 L3
+JMP L4
+
+L3:
+
+SUB  R000 4  R000
+
+STI R024  R000
+SUB  R000 4  R000
+JMP logMessage
+MOVI RRV_I R025
+
+L4:
+L5:
+MOVI 0  R026
+JMP 
+
+L2:
+L6:
+JMPC GT 3 R023 L7
+JMP L8
+
+L7:
+MOVI 10  R023
+
+SUB  R000 4  R000
+
+STI R027  R000
+SUB  R000 4  R000
+JMP logMessage
+MOVI RRV_I R028
+
+L8:
+JMP  R004
+L9:
+MOVI 987654321  R029
+JMP 
+
+L10:
+JMPC GT R023 10 L11
+JMP L12
+
+L11:
+MOVI 1  R026
+JMP 
+
+JMP 
+
+L12:
+JMP 
+
+global:
+MOVI 5  R023
+MOVI 12345678  R029
+MOVI 1  R026
+MOVI 1  R030
 Compilation Successful

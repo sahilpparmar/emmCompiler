@@ -469,7 +469,6 @@ class PrimitivePatNode: public BasePatNode {
             /* condition_ contains all expresions in cond_ other than assignments */
             cond_= c;      
             condition_ = c; 
-            //asgs_ = 
         }
         //PrimitivePatNode(const PrimitivePatNode& ppn);
         ~PrimitivePatNode() {};
@@ -494,7 +493,6 @@ class PrimitivePatNode: public BasePatNode {
         } 
         list<OpNode*>& asgs() { return asgs_; }  
 
-        // TODO
         bool hasNeg() const {
             if (kind() == BasePatNode::PatNodeKind::NEG)
                 return true;
@@ -507,6 +505,7 @@ class PrimitivePatNode: public BasePatNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck();
+        InterCodesClass* codeGen();
 
     private:
 
@@ -558,6 +557,7 @@ class PatNode: public BasePatNode {
         }
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck();
+
     private: 
         PatNode(const PatNode&);
 
@@ -780,6 +780,7 @@ class RuleNode: public AstNode {
 
         void print(ostream& os, int indent=0) const;
         const Type* typeCheck();
+        InterCodesClass* codeGen();  
 
     private:
         BlockEntry  *rste_;

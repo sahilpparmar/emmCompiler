@@ -52,7 +52,7 @@ Variable: obj, Offset: -16
 Variable: xyz, Offset: -24
 
 ======================3 Addr Generation======================
-GLOBAL:
+global:
 foo:
         enter foo
         fparam a
@@ -66,4 +66,78 @@ foo:
         leave foo
 
 ====================Basic Block creation=====================
+
+====Basic Blocks Container: foo=====
+
+
+PrevBlocks: 
+Block Start: foo
+        enter foo
+        fparam a
+        c = 5
+        __vreg0 = 5
+        __vreg2 = __vreg1
+        __vreg4 = __vreg3 * 2
+        __vreg5 = __vreg4
+        __vreg8 = __vreg7 + __vreg6
+        __vreg9 = __vreg8
+        leave foo
+Block end: foo
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+Block end: global
+NextBlocks:global,
+
+=========================Optimization========================
+
+====Basic Blocks Container: foo=====
+
+
+PrevBlocks: 
+Block Start: foo
+        enter foo
+        fparam a
+        c = 5
+        __vreg0 = 5
+        __vreg2 = __vreg1
+        __vreg4 = __vreg3 * 2
+        __vreg5 = __vreg4
+        __vreg8 = __vreg7 + __vreg6
+        __vreg9 = __vreg8
+        leave foo
+Block end: foo
+NextBlocks:
+
+====Basic Blocks Container: global=====
+
+
+PrevBlocks: global,
+Block Start: global
+Block end: global
+NextBlocks:global,
+
+===================Final Code generation=====================
+JMP begin: 
+begin: 
+MOVI  R000 10000    // RSP Initialized
+JMP global: 
+foo:
+ADD  R000 4  R000
+LDI  R000  R004
+ADD  R000 4  R000
+LDI  R000 R020
+MOVI 5  R021
+MOVI 5  R022
+MOVI R024  R023
+MUL R026 2 R025
+MOVI R025  R027
+ADD R029 R030 R028
+MOVI R028  R031
+JMP  R004
+global:
 Compilation Successful

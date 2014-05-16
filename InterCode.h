@@ -78,7 +78,8 @@ class InterCode {
                         subCode_ = OpNode::OpCode::GE;
                         break;
                 default:
-                        cout<<"Cannot negate the subcode_";
+                        subCode_ = OpNode::OpCode::INVALID;
+                        //cout<<"Cannot negate the subcode_";
                         break;
             }
         }
@@ -112,12 +113,16 @@ class InterCodesClass {
                 InterCodeVector = *tempVector;
         }
         
-        void ifThenElseOpt();
-        void removeContLabelGoto();
+        void ifThenElseOpt(int *isOptimized);
+        void removeContLabelGoto(int *isOptimized);
 
         void optimize () {
-                ifThenElseOpt();
-                removeContLabelGoto();
+            int isOptimized = 0; 
+            do {
+                    isOptimized = 0;
+                    ifThenElseOpt(&isOptimized);
+                    removeContLabelGoto(&isOptimized);
+            } while (isOptimized);
         }
         
     protected:

@@ -25,7 +25,7 @@ void InterCode::print(ostream &os) {
                                     prtSpace(os, TAB_SPACE);
                                     os << op[0]->getRefName() << " = ";
                                     os << OpNode::opInfo[(int )subCode_].name_;
-                                    os << op[2]->getRefName();
+                                    os << op[1]->getRefName();
                                 }
                                 break;
 
@@ -76,7 +76,8 @@ void InterCode::print(ostream &os) {
 
                         os << " goto ";
                         true_lab->print(os);
-                        if (false_lab)  {
+
+                        if (false_lab) {
                             os << endl;
                             prtSpace(os, TAB_SPACE);
                             os << "goto ";
@@ -159,73 +160,90 @@ void InterCode::print(ostream &os) {
  *
  *****************************************************************************************************************************/
 
-void InterCodesClass::ifThenElseOpt() {
+void InterCodesClass::ifThenElseOpt(int *isOptimized) {
     
     int i;
-    vector<InterCode*>* dupICodeVector = getICodeVector();
+    vector<InterCode*>* dupICodeVector  = getICodeVector();
     ExprNode* cond; 
-    InterCode* true_lab, *false_lab;
+    InterCode* true_lab, *false_lab, *start_lab;
+    bool flag                           = false;
 
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
 
-	if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
-            
+        if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
+
             ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
 
             cond = operands[0];  
-            
+
             true_lab = cond->OnTrue();
             false_lab = cond->OnFalse();
-            
-            cond->OnTrue(false_lab);
-            cond->OnFalse(true_lab);
-            
-            dupICodeVector->at(i)->xchgSubcode();
-            
+            if(false_lab) {
+                if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
+                    start_lab = dupICodeVector->at(i+1);
+                    if (true_lab->getLabel() == start_lab->getLabel())  {
+                        cond->OnTrue(false_lab);
+                        cond->OnFalse(true_lab);
+                        dupICodeVector->at(i)->xchgSubcode();
+                    }
+                    else if (false_lab->getLabel() == start_lab->getLabel())  {
+                        cond->OnTrue(false_lab);
+                        cond->OnFalse(true_lab);
+                        dupICodeVector->at(i)->xchgSubcode();
+                    }
+                }
+            }
         }
-    }        
+    }       
+    if(flag)
+        *isOptimized = 1;
+
 }
 
-void InterCodesClass::removeContLabelGoto() {
-    
+void InterCodesClass::removeContLabelGoto(int *isOptimized) {
+
     int i;
     vector<InterCode*>* dupICodeVector = getICodeVector();
     ExprNode* cond; 
     InterCode* goto_lab, *false_lab, *start_lab;
-    
+    bool flag                           = false;
+
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
 
-	if (dupICodeVector->at(i)->getOPNType() == InterCode::GOTO)  {
+        if (dupICodeVector->at(i)->getOPNType() == InterCode::GOTO)  {
 
             ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
 
             goto_lab = (InterCode *)operands[0];
-            
-//            cout << "\nLabel Name = " << goto_lab->getLabel();
+
+            //            cout << "\nLabel Name = " << goto_lab->getLabel();
             if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
-                        start_lab = dupICodeVector->at(i+1);
-                        if (goto_lab->getLabel() == start_lab->getLabel())
-                                dupICodeVector->erase(dupICodeVector->begin() + i);
+                start_lab = dupICodeVector->at(i+1);
+                if (goto_lab->getLabel() == start_lab->getLabel()) {
+                    dupICodeVector->erase(dupICodeVector->begin() + i);
+                    flag = true;
+                }
             }    
         }
-	else if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
-            
+        if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
             ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
-            
             cond = operands[0];  
             false_lab = cond->OnFalse();
-            
-//            cout << "\nLabel Name = " << false_lab->getLabel();
-            if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
-                        start_lab = dupICodeVector->at(i+1);
-                        if (false_lab->getLabel() == start_lab->getLabel())
-                                cond->OnFalse(NULL);
-            }    
-            
+            if (false_lab) {
+                //cout << "\nLabel Name = " << false_lab->getLabel();
+                if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
+                    start_lab = dupICodeVector->at(i+1);
+                    if (false_lab->getLabel() == start_lab->getLabel()) {
+                        cond->OnFalse(NULL);
+                        flag = true;
+                    }
+                }
+            }
         }
+    }    
+    if(flag)
+        *isOptimized = 1;
 
-
-    }        
 }
 
 void BasicBlock::constantFolding (int *isOptimized) {
