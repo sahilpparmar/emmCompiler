@@ -1,0 +1,12 @@
+event a(double aa, int bb);
+event b(int aa, unsigned int bb);
+a(i,j)-> {
+    print("\nFirst Param:", i);
+    print("\nSecond Param:", j);
+}
+
+b(i,j)-> {
+    print("\nFirst Param:", i);
+    print("\nSecond Param:", j);
+}
+
