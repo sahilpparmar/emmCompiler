@@ -260,6 +260,7 @@ main(int argc, char *argv[], char *envp[]) {
 
         cout<<"======================3 Addr Generation======================\n";
         InterCodesClass* in = ge->codeGen();
+<<<<<<< HEAD
         if (in)
             in->print(cout);
         cout << endl;
@@ -295,9 +296,40 @@ main(int argc, char *argv[], char *envp[]) {
         //cout<<"=====================Abstract Code============================\n";
         //AbstractMachineCode::genAMC(bb, cout);
 
+=======
+        if (debugLevel > 0) {
+           in->print(cout);
+        }
+
+        DEBUG("====================Basic Block creation=====================\n");
+        BasicBlocksContainer *bbC = new BasicBlocksContainer();
+        bbC->createBlockStruct (in);
+        if (debugLevel > 0) {
+           bbC->print(cout);
+        }
+        
+        DEBUG("====================Optimization=====================\n");
+        bbC->optimize();
+        if (debugLevel > 0) {
+           bbC->print(cout);
+        }
+        
+        DEBUG("====================Final Code generation=====================\n");
+        AbstractMachineCode::genAMC(bbC, cout);
+/*        
+        cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
+        CodeOpt* codeOpt = new CodeOpt();
+        InterCodesClass* out = codeOpt->codeOptimization(in);
+        if (out)
+            out->print(cout);
+
+        AbstractMachineCode::genAMC(bb, cout);
+*/
+>>>>>>> bf7a7b0f6c684218f72a74b2d1c2871da98d9ccc
 
         cout << "Compilation Successful" << endl;
     }
 #endif
+
 }
 
