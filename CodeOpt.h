@@ -9,7 +9,7 @@ class CodeOpt {
     
 public:
     CodeOpt()   {}
-    InterCodesClass* codeOptimization(InterCodesClass* org);
+    //InterCodesClass* codeOptimization(InterCodesClass* org);
 
     InterCodesClass* peephole_optimization(InterCodesClass* org, bool* optStatus);
     //InterCodesClass* constant_folding(InterCodesClass* org);

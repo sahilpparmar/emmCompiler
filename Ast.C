@@ -1,7 +1,7 @@
 #include "Ast.h"
 #include "ParserUtil.h"
 #include "InterCode.h"
-#include "AbstractMachineCode.h"
+#include "FinalMachineCodeGen.h"
 
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) 

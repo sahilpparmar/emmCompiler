@@ -3,17 +3,17 @@
 #include "all.h"
 #include <sstream>
 
-InterCodesClass* CodeOpt::codeOptimization(InterCodesClass* org) {
-
-    cout << "\n Basic Block Code Optimization \n";
-
-    //bool optStatus = true;
-
-    InterCodesClass* opt;
-    //opt = constant_folding(org);
-    //opt = peephole_optimization(org, &(optStatus));
-    return opt;
-}
+//InterCodesClass* CodeOpt::codeOptimization(InterCodesClass* org) {
+//
+//    cout << "\n Basic Block Code Optimization \n";
+//
+//    bool optStatus = true;
+//
+//    InterCodesClass* opt;
+//    opt = constant_folding(org);
+//    opt = peephole_optimization(org, &(optStatus));
+//    return opt;
+//}
 
 //InterCodesClass* CodeOpt::constant_folding(InterCodesClass* org) {
 //
