@@ -19,6 +19,7 @@ void InterCode::print(ostream &os) {
                                 }
                                 break;
 
+                            case OpNode::OpCode::NOT:
                             case OpNode::OpCode::BITNOT:
                             case OpNode::OpCode::UMINUS:
                                 if (op[0] && op[1]) {
@@ -34,16 +35,16 @@ void InterCode::print(ostream &os) {
                                 os << op[0]->getRefName() << " = " << op[1]->getRefName();
                                 break;
                         }
+                        break;
                     }                
-                    break;
 
         case GOTO:  {
                         InterCode* goto_lab = (InterCode*) op[0];
                         prtSpace(os, TAB_SPACE);
                         os << "goto "; 
                         goto_lab->print(os);
-                        }
-                    break; 
+                        break; 
+                    }
 
         case LABEL: {
                         string *n = (string *)op[1];
