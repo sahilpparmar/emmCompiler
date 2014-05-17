@@ -1,0 +1,9 @@
+int bar(int aa) {
+    return aa + 1;
+}
+
+int foo (int a) { 
+    
+        a = 3+bar(a);
+    return a;
+}

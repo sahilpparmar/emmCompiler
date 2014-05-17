@@ -5,7 +5,7 @@
 #define     IS_FLOAT(type)   Type::isFloat(type->tag())
 #define     IS_INT(type)     Type::isInt  (type->tag())
 #define     IS_STRING(type)  Type::isString  (type->tag())
-#define     PRT_REG          os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName;
+#define     PRT_REG          os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName<<endl;
 
 static int float_reg_count  = 10;
 static int int_reg_count    = 20;
@@ -206,8 +206,7 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
             vector <InterCode*> ::iterator iter2  = (*iter1)->getICodeVector()->begin();
             os << (*iter1)->getBlockLabel() << ": ";
             for(; iter2 != (*iter1)->getICodeVector()->end(); iter2++) {
-                convert_IC_AMC(*iter2, os);
-                os<<endl;
+                 convert_IC_AMC(*iter2, os);
             }
             // Jump to event handling
             if ((*iter1)->getBlockLabel() == "global")
@@ -267,7 +266,8 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                             else if(IS_INT(src1->type()))
                             {
                                 os<<"LDI "<<RSP<<" "<<dst_regName;
-                            } 
+                            }
+                            os<<endl;
                             break; 
                         } 
         case APARAM:    {
@@ -294,6 +294,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                 dst_regName = ret_val->getRegisterName();
                                 os<<"MOVI "<<dst_regName<<" "<<RRV_I;
                             }
+                            os<<endl;
                             break;
                         }
         case EXPR:      {
@@ -451,6 +452,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                         NOTLogic(src1_regName, dst_regName, os);
 
                                 }
+                                os<<endl;
                             }
                             break;
                         }
@@ -557,12 +559,12 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                             os<<"PRTI "<<opndsList[0]->getRefName();
                         else if(IS_STRING(type_dst))
                             os<<"PRTS "<<opndsList[0]->getRefName();
-
+                        os<<endl;
                             break;
                         }
                      
-         default:       { 
-                            cout<<"\n in default"; 
+         default:       {
+                            assert(0 && "in OPNType default");
                         }
     }
 }
