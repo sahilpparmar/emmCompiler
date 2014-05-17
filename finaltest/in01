@@ -1,0 +1,56 @@
+// While & break test
+
+	int a = 2;
+	int b;
+	int f = 1;
+	string str = "Hello, compiler!";
+	
+	int foo(int a0, double f0, bool en) {
+		print ("param 0:");
+		print (a0);print ("\\n");
+		print ("param 1:");
+		print (f0);print( "\\n");
+		print ("param 2:");
+		if (en == true) print ("true\\n");
+		else print ("false\\n");
+		if (en == true) {
+			return 22;
+		}
+		return 23;
+	}
+	void test() {
+		int ret = 0;
+		ret = foo(1,2.2,true);
+		print ("return of foo : ");
+		print (ret);
+		print ("\\n");
+		print ("hello world\\n");
+		while(true) {print ("");};
+	}
+
+	void fa(int arg0, int arg1) {
+		if (a >1.0 ) {
+			print (a);
+		}
+		if (f < 22) {
+			b=b+4;
+			print (b);
+		}
+		if (f >= 22) {
+			print  ("blabla");
+		}
+		if (f <= 23) {
+			b=b+22;
+		}
+		if (f > 24) {
+			b=b+4;
+		}
+	}
+    event o(int a2 , unsigned int a3);
+    o( flags, mode) -> {
+		fa(flags,mode);
+                print("b b4: ",b);
+		b = foo(24,f,false);
+                print("b after: ",b);
+	};
+

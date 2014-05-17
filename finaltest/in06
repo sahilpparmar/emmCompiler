@@ -1,0 +1,24 @@
+event b(int x);
+event c(int x);
+int a1;
+
+int g(int a) {
+	
+	a = a +2;
+	a = a+2;
+	
+
+
+
+
+	return a;
+        
+   }
+void fr() {
+
+print "str";
+print "str";
+
+}
+c(e) -> { fr();}
+any** : c(e) -> { print "hello";}

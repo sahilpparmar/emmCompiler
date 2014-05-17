@@ -5,6 +5,15 @@ int fac (int a) {
     return a * fac(a-1);
 }
 
+int bar (int a) {
+    bool b = true, c=false;
+    if(b && c)
+        a=100;
+    else
+        a=99;
+    return a;
+}
+
 a(i, j)-> {
     print("\\nFirst Param :", i);
     i = fac(i);

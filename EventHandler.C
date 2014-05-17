@@ -28,18 +28,18 @@ void GlobalEntry::eventHandler(ostream& os) {
         argtype_l = event->type()->argTypes();
 
         os << "MOVL " << S_START << R_PARAM << endl;
-        os << "STI" << R_PARAM << RSP << endl;
+        os << "STI" << R_PARAM << RSP << C_PUSH_RET << endl;
         os << "SUB" << RSP << " 4" << RSP << endl;
         
         std::vector<Type*>::iterator type_it = argtype_l->begin();
         for (; type_it != argtype_l->end(); ++type_it) {
 
             if ((*type_it)->tag() == Type::DOUBLE) {
-                os << "INF" << F_PARAM << endl;
-                os << "STF" << F_PARAM << RSP << endl;
+                os << "INF" << F_PARAM << C_IN_EPARAM << endl;
+                os << "STF" << F_PARAM << RSP << C_APARAM << endl;
             } else {
-                os << "INI" << R_PARAM << endl;
-                os << "STI" << R_PARAM << RSP << endl;
+                os << "INI" << R_PARAM << C_IN_EPARAM << endl;
+                os << "STI" << R_PARAM << RSP << C_APARAM << endl;
             }
             os << "SUB" << RSP << " 4" << RSP << endl;
         }

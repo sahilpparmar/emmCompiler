@@ -116,6 +116,8 @@ class InterCodesClass {
         
         void ifThenElseOpt(int *isOptimized);
         void removeContLabelGoto(int *isOptimized);
+        void createLabelDUChain();
+        void insertMap(string str, InterCode* ic);
 
         void optimize () {
             int isOptimized = 0; 
@@ -124,10 +126,15 @@ class InterCodesClass {
                     ifThenElseOpt(&isOptimized);
                     removeContLabelGoto(&isOptimized);
             } while (isOptimized);
+            createLabelDUChain();
+            //printMap();
         }
-        
+
+        void printMap();
+
     protected:
         vector <InterCode*> InterCodeVector;       
+        map <string, vector <InterCode*>*> labelUsageMap;  
 };
 
 
@@ -357,8 +364,8 @@ class BasicBlocksContainer {
              
              for (it = bbContainer.begin() ; it != bbContainer.end(); ++it) {
                  //no need of live var analysis for global 
-                 if ((*it).first.compare("global") != 0) 
-                    (*it).second->liveVariableAnalysis();
+                 //if ((*it).first.compare("global") != 0) 
+                 //   (*it).second->liveVariableAnalysis();
              }
 
              if (debugLevel > 0) {
