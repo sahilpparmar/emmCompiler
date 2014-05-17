@@ -287,7 +287,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                 else
                                 {
                                     if(IS_FLOAT(ret_type))
-                                        str = "STF ##"+param->getRegisterName()+" "+RSP;
+                                        str = "STF "+param->getRegisterName()+" "+RSP;
                                     else
                                         str = "STI "+param->getRegisterName()+" "+RSP;
 

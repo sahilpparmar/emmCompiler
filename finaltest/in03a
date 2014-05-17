@@ -1,0 +1,10 @@
+// recursion
+
+	void foo() {
+		print "blabla";
+	};
+	event a();
+	event b();
+	a():b() -> print "0\\n";
+	(a():b()):a():b() -> {;};
+
