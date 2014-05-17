@@ -1,0 +1,308 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  event a(int aa, int bb);
+  int fac(int a) {
+    
+    if (a<=1)     return 1;
+    return a*fac((a-1));
+  };
+  int bar(int a) {
+    bool b = true;
+    bool c = false;
+  
+    if ((b&&c))     a=100;
+    else     a=99;
+    return a;
+  };
+ 
+  (a(int i, int j))-->   {
+    print("\nFirst Param :", i);
+    i=fac(i);
+    print("\nResult(fac) :", i);
+    print("\nSecond Param :", j);
+    j=fac(j);
+    print("\nResult(fac) :", j);
+  };
+  ;;
+
+========================Type Checking========================
+
+======================3 Addr Generation======================
+global:
+fac:
+        enter fac
+        fparam a
+        if a <= 1 goto L3:
+        goto L2:
+L3:
+        return 1
+L2:
+        __vreg1 = a - 1
+        aparam __vreg1
+        __vreg2 = call fac
+L4:
+        __vreg3 = a * __vreg2
+        return __vreg3
+        leave fac
+bar:
+        enter bar
+        fparam a
+        b = 1
+        c = 0
+        if b goto L9:
+        goto L8:
+L9:
+        if c goto L7:
+        goto L8:
+L7:
+        a = 100
+        goto L6:
+L8:
+        a = 99
+L6:
+        return a
+        leave bar
+_event_a:
+        enter _event_a
+        fparam j
+        fparam i
+        print "\nFirst Param :"
+        print i
+        aparam i
+        __vreg4 = call fac
+L11:
+        i = __vreg4
+        print "\nResult(fac) :"
+        print i
+        print "\nSecond Param :"
+        print j
+        aparam j
+        __vreg5 = call fac
+L12:
+        j = __vreg5
+        print "\nResult(fac) :"
+        print j
+        leave _event_a
+
+====================Basic Block creation=====================
+
+#####_event_a#####
+_event_a:
+        enter _event_a
+        fparam j
+        fparam i
+        print "\nFirst Param :"
+        print i
+        aparam i
+        __vreg4 = call fac
+        next: ( L11 )
+L11:
+        i = __vreg4
+        print "\nResult(fac) :"
+        print i
+        print "\nSecond Param :"
+        print j
+        aparam j
+        __vreg5 = call fac
+        next: ( L12 )
+L12:
+        j = __vreg5
+        print "\nResult(fac) :"
+        print j
+        leave _event_a
+        next: ( )
+
+
+#####bar#####
+bar:
+        enter bar
+        fparam a
+        b = 1
+        c = 0
+        if b goto L9:
+        goto L8:
+        next: ( L9 L8 )
+L9:
+        if c goto L7:
+        goto L8:
+        next: ( L7 L8 )
+L7:
+        a = 100
+        goto L6:
+        next: ( L6 )
+L8:
+        a = 99
+        next: ( L6 )
+L6:
+        return a
+        leave bar
+        next: ( )
+
+
+#####fac#####
+fac:
+        enter fac
+        fparam a
+        if a <= 1 goto L3:
+        goto L2:
+        next: ( L3 L2 )
+L3:
+        return 1
+        next: ( L2 )
+L2:
+        __vreg1 = a - 1
+        aparam __vreg1
+        __vreg2 = call fac
+        next: ( L4 )
+L4:
+        __vreg3 = a * __vreg2
+        return __vreg3
+        leave fac
+        next: ( )
+
+
+#####global#####
+global:
+        next: ( )
+global:
+        next: ( )
+
+
+===================Final Code generation=====================
+JMP begin
+_S_a: MOVL _S_START R005
+STI R005 R000           // Return Addr Pushed on Stack
+SUB R000 4 R000
+INI R005           // READ Event Parameter Input
+STI R005 R000           // Parameter Pushed on Stack
+SUB R000 4 R000
+INI R005           // READ Event Parameter Input
+STI R005 R000           // Parameter Pushed on Stack
+SUB R000 4 R000
+JMP _event_a
+
+_S_START: PRTS "\nEnter event name:"
+IN R005
+JMPC EQ R005 97 _S_a
+JMPC EQ R005 120 _S_END
+PRTS "Invalid Input\n"
+JMP _S_START
+
+begin: MOVI  10000 R000           // RSP Initialized
+JMP global
+
+// Function/Event Module begins
+_event_a: ADD  R000 4  R000
+LDI  R000 R020           // Parameter Poped from Stack
+ADD  R000 4  R000
+LDI  R000 R021           // Parameter Poped from Stack
+PRTS "\nFirst Param :"
+PRTI R021
+STI  R021  R000
+SUB  R000 4  R000
+STI  R020  R000
+SUB  R000 4  R000
+MOVL L13 R022
+STI  R022  R000           // Return Addr Pushed on Stack
+SUB  R000 4  R000
+STI R021  R000           // Parameter Pushed on Stack
+SUB  R000 4  R000
+JMP  fac
+L13: MOVI  R001 R023
+ADD  R000 4  R000
+LDI  R000 R020
+ADD  R000 4  R000
+LDI  R000 R021
+L11: MOVI R023 R021
+PRTS "\nResult(fac) :"
+PRTI R021
+PRTS "\nSecond Param :"
+PRTI R020
+STI  R023  R000
+SUB  R000 4  R000
+STI  R022  R000
+SUB  R000 4  R000
+MOVL L14 R024
+STI  R024  R000           // Return Addr Pushed on Stack
+SUB  R000 4  R000
+STI R020  R000           // Parameter Pushed on Stack
+SUB  R000 4  R000
+JMP  fac
+L14: MOVI  R001 R025
+ADD  R000 4  R000
+LDI  R000 R022
+ADD  R000 4  R000
+LDI  R000 R023
+L12: MOVI R025 R020
+PRTS "\nResult(fac) :"
+PRTI R020
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+// Function/Event Module begins
+bar: ADD  R000 4  R000
+LDI  R000 R026           // Parameter Poped from Stack
+MOVI 1 R027
+MOVI 0 R028
+JMPC NE R027 0 L9
+JMP L8
+L9: JMPC NE R028 0 L7
+JMP L8
+L7: MOVI 100 R026
+JMP L6
+L8: MOVI 99 R026
+L6: MOVI R026  R001
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+// Function/Event Module begins
+fac: ADD  R000 4  R000
+LDI  R000 R029           // Parameter Poped from Stack
+JMPC LE R029 1 L3
+JMP L2
+L3: MOVI 1  R001
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+L2: SUB R029 1 R030
+STI  R030  R000
+SUB  R000 4  R000
+STI  R029  R000
+SUB  R000 4  R000
+MOVL L15 R031
+STI  R031  R000           // Return Addr Pushed on Stack
+SUB  R000 4  R000
+STI R030  R000           // Parameter Pushed on Stack
+SUB  R000 4  R000
+JMP  fac
+L15: MOVI  R001 R032
+ADD  R000 4  R000
+LDI  R000 R029
+ADD  R000 4  R000
+LDI  R000 R030
+L4: MUL R029 R032 R033
+MOVI R033  R001
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+global: global: JMP _S_START
+
+_S_END: PRTS "DONE"
+
+
+Compilation Successful
