@@ -309,8 +309,8 @@ class BasicBlocksClass {
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
                      (*it)->constantFolding (&isOptimized);
                      (*it)->constantPropogation (&isOptimized);
-                     //(*it)->redundantGotoRemoval(&isOptimized);
-                     //(*it)->zeroRemoval(&isOptimized);
+                     (*it)->redundantGotoRemoval(&isOptimized);
+                     (*it)->zeroRemoval(&isOptimized);
                  }
             } while (isOptimized);
         }
@@ -364,8 +364,8 @@ class BasicBlocksContainer {
              
              for (it = bbContainer.begin() ; it != bbContainer.end(); ++it) {
                  //no need of live var analysis for global 
-                 //if ((*it).first.compare("global") != 0) 
-                 //   (*it).second->liveVariableAnalysis();
+                 if ((*it).first.compare("global") != 0) 
+                     (*it).second->liveVariableAnalysis();
              }
 
              if (debugLevel > 0) {
