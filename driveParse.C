@@ -271,7 +271,7 @@ main(int argc, char *argv[], char *envp[]) {
 
         if (optLevel) {
             DEBUG("====================== Basic Code Optimization ======================\n");
-            in->optimize();
+           // in->optimize();
             if (debugLevel > 0) {
                 in->print(cout);
                 cout << endl;

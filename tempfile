@@ -1,0 +1,68 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  int a = 5;
+  int b = 10;
+  int f(int i, int j) {
+    int c = 2;
+    double e = ((8.5+1.1)+c);
+  
+    if ((e<b&&e>c))     b=(9/2);
+    else     b=9*2;
+    e=(c+b);
+    return c;
+  };
+  int bar() {
+    
+    if (a>0)     f(a, (a+2));
+    return a;
+  };
+ 
+
+========================Type Checking========================
+
+======================3 Addr Generation======================
+global:
+        a = 5
+        b = 10
+f:
+        enter f
+        fparam i
+        fparam j
+        c = 2
+        __vreg0 = 8.5 + 1.1
+        __vreg1 = __vreg0 + c
+        e = __vreg1
+        if e < b goto L5:
+        goto L4:
+L5:
+        if e > c goto L3:
+        goto L4:
+L3:
+        __vreg2 = 9 / 2
+        b = __vreg2
+        goto L2:
+L4:
+        __vreg3 = 9 * 2
+        b = __vreg3
+L2:
+        __vreg4 = c + b
+        e = __vreg4
+        return c
+        leave f
+bar:
+        enter bar
+        if a > 0 goto L8:
+        goto L7:
+L8:
+        __vreg5 = a + 2
+        aparam __vreg5
+        aparam a
+        __vreg6 = call f
+L9:
+L7:
+        return a
+        leave bar
+
