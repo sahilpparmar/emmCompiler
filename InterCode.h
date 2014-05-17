@@ -115,6 +115,8 @@ class InterCodesClass {
         
         void ifThenElseOpt(int *isOptimized);
         void removeContLabelGoto(int *isOptimized);
+        void createLabelDUChain();
+        void insertMap(string str, InterCode* ic);
 
         void optimize () {
             int isOptimized = 0; 
@@ -123,10 +125,15 @@ class InterCodesClass {
                     ifThenElseOpt(&isOptimized);
                     removeContLabelGoto(&isOptimized);
             } while (isOptimized);
+            createLabelDUChain();
+            //printMap();
         }
-        
+
+        void printMap();
+
     protected:
         vector <InterCode*> InterCodeVector;       
+        map <string, vector <InterCode*>*> labelUsageMap;  
 };
 
 
@@ -283,14 +290,15 @@ class BasicBlocksClass {
         void blockOptimize () {
            vector <BasicBlock*>::iterator it; 
             int isOptimized = 0; 
+                 cout << "in blk3 container ";
             do {
                  isOptimized = 0;
                  //TODO : Need to convert this to iterative 
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
                      (*it)->constantFolding (&isOptimized);
-                     (*it)->constantPropogation (&isOptimized);
-                     (*it)->redundantGotoRemoval(&isOptimized);
-                     (*it)->zeroRemoval(&isOptimized);
+                     //(*it)->constantPropogation (&isOptimized);
+                     //(*it)->redundantGotoRemoval(&isOptimized);
+                     //(*it)->zeroRemoval(&isOptimized);
                  }
             } while (isOptimized);
         }
@@ -327,6 +335,8 @@ class BasicBlocksContainer {
        }
     
        void optimize() {
+                 cout << "in blk2 container ";
+
              map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
              for (; it != bbContainer.end(); ++it) {
                  (*it).second->blockOptimize();

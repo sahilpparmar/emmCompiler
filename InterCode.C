@@ -139,6 +139,86 @@ void InterCode::print(ostream &os) {
     }
 }
 
+void InterCodesClass::printMap() {
+    map <string, vector<InterCode*>*>::iterator it = labelUsageMap.begin();
+    for (; it != labelUsageMap.end(); it++) {
+        cout << "\n##### Label Name : " << (*it).first << "\t References : " << (*it).second->size() << "#####" << endl;
+    }
+}
+
+void InterCodesClass::insertMap(string name, InterCode* ic) {
+    
+    vector <InterCode*>* tempVector;  
+
+    if (labelUsageMap.find(name) == labelUsageMap.end()) {
+        tempVector = new vector<InterCode*>;
+        if (ic->getOPNType() != InterCode::LABEL)
+            tempVector->push_back(ic);
+    }
+    else
+    {
+        tempVector = labelUsageMap.find(name)->second;
+        if (ic->getOPNType() != InterCode::LABEL)
+            tempVector->push_back(ic);
+    }
+    labelUsageMap.insert (pair<string, vector <InterCode*>*> (name, tempVector));
+}
+
+void InterCodesClass::createLabelDUChain()
+{
+    int i;
+    vector<InterCode*>* dupICodeVector  = getICodeVector();
+    ExprNode* cond; 
+    InterCode* true_lab, *false_lab, *goto_lab, *start_lab;
+
+    for ( i = 0; i < (int )dupICodeVector->size(); i++) {
+
+        if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
+
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
+            cond = operands[0];  
+
+            true_lab = cond->OnTrue();
+            insertMap(true_lab->getLabel(), dupICodeVector->at(i));
+
+            false_lab = cond->OnFalse();
+            if(false_lab)
+                insertMap(true_lab->getLabel(), dupICodeVector->at(i));
+        }
+        else if (dupICodeVector->at(i)->getOPNType() == InterCode::GOTO)  {
+
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
+            // cout << "\nLabel Name = " << goto_lab->getLabel();
+            goto_lab = (InterCode *)operands[0];
+            insertMap(goto_lab->getLabel(), dupICodeVector->at(i));
+
+        }
+        else if (dupICodeVector->at(i)->getOPNType() == InterCode::LABEL)  {
+
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
+            // cout << "\nLabel Name = " << goto_lab->getLabel();
+            start_lab = dupICodeVector->at(i);
+            insertMap(start_lab->getLabel(), dupICodeVector->at(i));
+
+        }
+        else if (dupICodeVector->at(i)->getOPNType() == InterCode::CALL)  {
+
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
+            //goto_lab = (ExprNode *)operands[0];
+            InvocationNode *temp = (InvocationNode *)operands[0]; 
+//            cout << "\nLabel Name = " << (InvocationNode *)goto_lab->symTabEntry()->name();
+            insertMap(temp->symTabEntry()->name(), dupICodeVector->at(i));
+
+        }
+    }
+}
+
+
+
 /****************************************************************************************************************************  
  *  Input :
  *
@@ -255,8 +335,10 @@ void BasicBlock::constantFolding (int *isOptimized) {
     bool flag                           = false;
     bool isfloat;
 
+    cout << "\t Inside Folding" << dupICodeVector->size();
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
         
+        cout << "\t " << i;
         //tempICodeVector->push_back(dupICodeVector->at(i)); 
         ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
         isfloat = false;
@@ -264,6 +346,7 @@ void BasicBlock::constantFolding (int *isOptimized) {
         if (operands[0] && operands[1] && operands[2]) {
             ExprNode* new1 = operands[1]; 
             ExprNode* new2 = operands[2]; 
+            cout << "\t if part";
 
              // Check if op[1] and op[2] are valuenodes and intercode type is expression
             
@@ -407,7 +490,8 @@ void BasicBlock::constantFolding (int *isOptimized) {
                     tempICodeVector->push_back(dupICodeVector->at(i));
                 }
         
-        } else{
+        } else {
+            cout << "\t else part";
             tempICodeVector->push_back(dupICodeVector->at(i));
         }
     }

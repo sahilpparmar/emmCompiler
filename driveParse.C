@@ -240,7 +240,10 @@ main(int argc, char *argv[], char *envp[]) {
 
     DEBUG("=================Lexical and Syntax Parsing==================\n");
     yyparse();
-    // TODO: Terminate compilation if errCount() > 0
+    if (errCount() > 0) {
+        errMsg(itoa(errCount()) + " syntax error(s) reported.\nCompilation terminated.");
+        return 1;
+    }
 
     stm.leaveToScope(SymTabEntry::Kind::GLOBAL_KIND);
     GlobalEntry *ge = (GlobalEntry*)(stm.currentScope());
@@ -252,7 +255,10 @@ main(int argc, char *argv[], char *envp[]) {
 
         DEBUG("========================Type Checking========================\n");
         ge->typeCheck();
-        // TODO: Terminate compilation if errCount() > 0
+        if (errCount() > 0) {
+            errMsg(itoa(errCount()) + " error(s) reported.\nCompilation terminated.");
+            return 1;
+        }
 
         DEBUG("======================Memory Allocation======================\n");
         ge->memAlloc(); 
@@ -280,8 +286,10 @@ main(int argc, char *argv[], char *envp[]) {
         }
         
         DEBUG("=========================Optimization========================\n");
+          cout << "in blk1 container ";
         bbC->optimize();
         if (debugLevel > 0) {
+          cout << "in blk container ";
            bbC->print(cout);
         }
         
