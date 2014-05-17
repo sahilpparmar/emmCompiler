@@ -260,8 +260,8 @@ main(int argc, char *argv[], char *envp[]) {
             return 1;
         }
 
-        DEBUG("======================Memory Allocation======================\n");
-        ge->memAlloc(); 
+        //DEBUG("======================Memory Allocation======================\n");
+        //ge->memAlloc(); 
 
         DEBUG("======================3 Addr Generation======================\n");
         InterCodesClass* in = ge->codeGen();
@@ -271,13 +271,11 @@ main(int argc, char *argv[], char *envp[]) {
 
         if (optLevel) {
             DEBUG("====================== Basic Code Optimization ======================\n");
+            in->optimize();
             if (debugLevel > 0) {
-                if (in) {
-                    //in->optimize();
-                    //in->print(cout);
-                }
+                in->print(cout);
+                cout << endl;
             }
-            cout << endl;
         }
             
         DEBUG("====================Basic Block creation=====================\n");
@@ -298,28 +296,6 @@ main(int argc, char *argv[], char *envp[]) {
         DEBUG("===================Final Code generation=====================\n");
         ge->eventHandler(cout);
         AbstractMachineCode::genAMC(bbC, cout);
-/*        
-        
-        DEBUG("====================Basic Block creation=====================\n");
-        BasicBlocksClass *bb = new BasicBlocksClass();
-        bb->createBlocks(in);
-        bb->print(cout);
-
-        cout<<"====================== Block Code Optimization ======================\n";
-        bb->blockOptimize();
-        bb->print(cout);
-        //bb->check();
-*/        
-        //TODO: Segfault in mytests/in29
-        //bb->constantOptimize();
-         
-        //TODO: Remove unwanted couts before uncommenting below code
-        //bb->print(cout);
-
-        //TODO: Enable below once all correctly printed
-        //cout<<"=====================Abstract Code============================\n";
-        //AbstractMachineCode::genAMC(bb, cout);
-
 
         DEBUG("Compilation Successful\n");
     }
