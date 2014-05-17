@@ -57,7 +57,7 @@ class InterCode {
                 return os.str();
             }
         }    
-        void xchgSubcode() { 
+        bool xchgSubcode() { 
             
             switch (subCode_) {
                 case OpNode::OpCode::EQ:
@@ -79,10 +79,12 @@ class InterCode {
                         subCode_ = OpNode::OpCode::GE;
                         break;
                 default:
-                        subCode_ = OpNode::OpCode::INVALID;
+                        return false;
+                        //subCode_ = OpNode::OpCode::INVALID;
                         //cout<<"Cannot negate the subcode_";
                         break;
             }
+            return true;
         }
         
     protected:
@@ -222,17 +224,19 @@ class BasicBlock {
         }
 
         void print(ostream &os) {
-            /*
-            os << "\n\nPrevBlocks: ";
-            for ( ; iter != PrevBlockLabels.end(); ++iter) {
-                os << *iter << ",";
-            }
-            os << endl; */
-            os << blocklabel << ":" << endl;
+            
             vector <InterCode*>::iterator it = InterCodeVector.begin();
             vector<string>::iterator iter = PrevBlockLabels.begin();
+            os << "\n\n";
+            prtSpace(os, TAB_SPACE);
+            os << "prev: (";
+            for ( ; iter != PrevBlockLabels.end(); ++iter) {
+                os << " " << *iter;
+            }
+            os << " )";
+            os << endl;
+            os << blocklabel << ":" << endl;
             
-
             for (; it != InterCodeVector.end(); ++it) {
                 (*it)->print(os);
                 os << endl;
@@ -295,11 +299,12 @@ class BasicBlocksClass {
         void createBlocks (InterCodesClass* ic);
         
         void blockOptimize () {
-           vector <BasicBlock*>::iterator it; 
+           vector <BasicBlock*>::iterator it; int i = 0;
             int isOptimized = 0; 
             do {
                  isOptimized = 0;
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+                    cout << (*it)->getBlockLabel();
                      (*it)->constantFolding (&isOptimized);
                      (*it)->constantPropogation (&isOptimized);
                      (*it)->redundantGotoRemoval(&isOptimized);

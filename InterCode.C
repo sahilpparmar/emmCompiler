@@ -242,6 +242,7 @@ void InterCodesClass::createLabelDUChain()
  *****************************************************************************************************************************/
 
 void InterCodesClass::ifThenElseOpt(int *isOptimized) {
+           // cout << "Into OPt if node";
     
     int i;
     vector<InterCode*>* dupICodeVector  = getICodeVector();
@@ -252,7 +253,6 @@ void InterCodesClass::ifThenElseOpt(int *isOptimized) {
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
 
         if (dupICodeVector->at(i)->getOPNType() == InterCode::IFREL)  {
-
             ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
 
             cond = operands[0];  
@@ -263,14 +263,16 @@ void InterCodesClass::ifThenElseOpt(int *isOptimized) {
                 if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
                     start_lab = dupICodeVector->at(i+1);
                     if (true_lab->getLabel() == start_lab->getLabel())  {
-                        cond->OnTrue(false_lab);
-                        cond->OnFalse(true_lab);
-                        dupICodeVector->at(i)->xchgSubcode();
+                        if (dupICodeVector->at(i)->xchgSubcode())   {
+                            cond->OnTrue(false_lab);
+                            cond->OnFalse(true_lab);
+                        }
                     }
                     else if (false_lab->getLabel() == start_lab->getLabel())  {
-                        cond->OnTrue(false_lab);
-                        cond->OnFalse(true_lab);
-                        dupICodeVector->at(i)->xchgSubcode();
+                        if (dupICodeVector->at(i)->xchgSubcode())   {
+                            cond->OnTrue(false_lab);
+                            cond->OnFalse(true_lab);
+                        }
                     }
                 }
             }
@@ -596,6 +598,7 @@ void BasicBlock::constantPropogation (int *isOptimized) {
                      case OpNode::OpCode::UMINUS:
                      case OpNode::OpCode::ASSIGN:
                                             {
+                                                oprnd[1]->type()->name();
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
                                                     flag     =  true;
