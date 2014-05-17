@@ -13,11 +13,11 @@
 	double foo(int depth) {
 		double r = 3.2;
 		int x= f1(f2(1));
-		print "ret of f1(f2) : ";
-		print x;
-		print "\\n";
-		r == 3;
-		while(1) {print "";};
+		print ("ret of f1(f2) : ");
+		print (x);
+		print ("\\n");
+		r = 3;
+		while(true) {print ("");};
 
 		return r;
 	}
@@ -25,13 +25,13 @@
 		double ret;
 		ret = foo(1);
 		ret = ret + 2.8;
-		print "ret-->";
-		print ret;
-		print "\\n";
-		while(1) {print "";};
+		print ("ret-->");
+		print (ret);
+		print ("\\n");
+		while(true) {print ("");};
 	}
-    event o(string a1 , int a2 , unsigned int a3);
-    o(file, flags, mode) -> {
+    event o( int a2 , unsigned int a3);
+    o( flags, mode) -> {
 		foo(0);
 	};
 

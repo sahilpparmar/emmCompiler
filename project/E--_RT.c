@@ -38,12 +38,12 @@ unsigned *mem;
 #define EQ(x, y) (x == y)
 #define NE(x, y) (x != y)
 
-#define FGT(x, y) (x > y)
-#define FGE(x, y) (x <= y)
-#define FLT(x, y) (x < y)
-#define FLE(x, y) (x >= y)
-#define FEQ(x, y) (x == y)
-#define FNE(x, y) (x != y)
+#define FGT(x, y) ((int)x > (int)y)
+#define FGE(x, y) ((int)x <=(int)y)
+#define FLT(x, y) ((int)x < (int)y)
+#define FLE(x, y) ((int)x >=(int)y)
+#define FEQ(x, y) ((int)x ==(int)y)
+#define FNE(x, y) ((int)x !=(int)y)
 
 #define PRTS(x) printf((char *)(x))
 #define PRTI(x) printf("%d", (x))

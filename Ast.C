@@ -1264,7 +1264,6 @@ const Type* OpNode::typeCheck() {
             return tp;
         }
     } else if(iopcode == (int)OpNode::OpCode::ASSIGN) {
-
         targ2 = arg_[1]->typeCheck();
         assert(arg_[0] && arg_[1] && "Invalid args");
         
@@ -1272,7 +1271,7 @@ const Type* OpNode::typeCheck() {
           
               if(targ1->tag() == targ2->tag()) {
               } else if(targ1->isSubType(targ2->tag())) {
-                  arg_[0]->coercedType(new Type(targ2->tag()));
+                  arg_[1]->coercedType(new Type(targ2->tag()));
 
               } else {
                   errMsg("Assigned expression must be a subtype of target", this);
