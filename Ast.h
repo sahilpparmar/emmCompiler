@@ -234,10 +234,11 @@ class ValueNode: public ExprNode {
             if (tp==NULL) {
                 tp = type();
             }
-            if (Type::isBool(tp->tag())) {
+            
+            if (tp && tp->tag() && Type::isBool(tp->tag())) {
                 os << value()->bval();
             } else {
-                if (Type::isFloat(tp->tag())) {
+                if (tp && tp->tag() && Type::isFloat(tp->tag())) {
                     os.precision(1);
                     os.setf(ios::fixed,ios::floatfield);
                     os << value()->dval();

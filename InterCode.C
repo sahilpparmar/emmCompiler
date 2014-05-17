@@ -397,13 +397,15 @@ void BasicBlock::constantFolding (int *isOptimized) {
                 //special case where third operand is null 
                 ExprNode* new1 = operands[1]; 
                 
-                if ((new1->value()->type()->tag() == Type::TypeTag::INT || new1->value()->type()->tag() == Type::TypeTag::UINT)) {
+                if (new1 && new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE
+                     && (new1->value()->type()->tag() == Type::TypeTag::INT 
+                      || new1->value()->type()->tag() == Type::TypeTag::UINT)) {
                     
                     flag            = true;
                     int val         = stoi(new1->getRefName());
                     ValueNode *temp =  new ValueNode(new Value(~val, Type::INT));
                     tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, OpNode::OpCode::ASSIGN, operands[0], temp));
-                 
+                
                 } else {
                     tempICodeVector->push_back(dupICodeVector->at(i));
                 }
@@ -508,7 +510,6 @@ void BasicBlock::constantPropogation (int *isOptimized) {
                      case OpNode::OpCode::UMINUS:
                      case OpNode::OpCode::ASSIGN:
                                             {
-                                                if(oprnd[1])
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
                                                     flag     =  true;
@@ -766,7 +767,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 if (block == NULL) {
                     /* to determine if new container to create or to add it to global block*/ 
                     
-                    if ( ((it + 1) != icvec->end())  && ((*(it + 1))->getOPNType() != InterCode::OPNTYPE::ENTER))
+                    if (((it + 1) != icvec->end()) && ((*(it + 1))->getOPNType() != InterCode::OPNTYPE::ENTER))
                         str = "global"; 
                     
                     BBcls = insertInContainer (str);
@@ -775,13 +776,13 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 } else {
                     /* when new label appeared and last statement was not leave */
                     
-                    if ( ((it + 1) != icvec->end())  && ((*(it + 1))->getOPNType() == InterCode::OPNTYPE::ENTER)) {
+                    if (((it + 1) != icvec->end()) && ((*(it + 1))->getOPNType() == InterCode::OPNTYPE::ENTER)) {
                         BBcls = insertInContainer (str);
                         block = BBcls->getBlockWithLabel(str);
                     } else {
                         /* this is normal block*/
                          
-                        if (isPrevJmp == false) {
+                        if (isPrevJmp == false && (str.compare("global") != 0)) {
                            block->addNextBlock(str); 
                            bb =  BBcls->getBlockWithLabel(str); 
                            bb->addPrevBlock (block->getBlockLabel());
@@ -801,6 +802,219 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 isPrevJmp   = false;
                 isLastLeave = false;
             }
+    }
+
+}
+
+void inline check_remove (set<string> &st, string str) {
+    set<string>::iterator it = st.find(str);
+    if(it != st.end())
+        st.erase(it);
+
+}
+
+void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksClass *bbCls, bool remove) {
+
+        string bb_label = BB->getBlockLabel(); 
+        
+        //mark block as visited
+        if (ifVisited.find(bb_label)->second == 0) {
+            ifVisited.erase(bb_label); 
+            ifVisited.insert (pair<string, bool>(bb_label, 1));
+        }
+
+        //start from bottom.
+        //define vector of variables which are being used and if definition is encountered then remove it
+        set <string> variablesUsed;
+           
+        //initialize start live vars of block as equal to end vars
+        //and when corresponding def is encountered in this block, remove them from start live vars
+        BB->StartLiveVars = BB->EndLiveVars;
+        
+        vector <InterCode*>::reverse_iterator rit = BB->getICodeVector()->rbegin();
+        
+        for (; rit != BB->getICodeVector()->rend(); ++rit) {
+               
+               ExprNode** opnds = (ExprNode**)(*rit)->get3Operands();
+               
+               switch ((*rit)->getOPNType()) {
+                       case InterCode::OPNTYPE::EXPR : {
+                                    
+                                    switch ((*rit)->getsubCode()) {
+                                           case OpNode::OpCode::ASSIGN :  
+                                                      if (remove) {
+                                                            //check if its present in variables used and endliveVar else remove it
+                                                            if (variablesUsed.find(opnds[0]->getRefName()) == variablesUsed.end() 
+                                                                && BB->EndLiveVars.find(opnds[0]->getRefName()) == BB->EndLiveVars.end()) {
+                                                                   
+                                                                    vector <InterCode*>::iterator it = rit.base();
+                                                                    it--;
+                                                                    BB->getICodeVector()->erase(it);
+                                                                    break;
+                                                            }
+                                                      } 
+                                                      check_remove (variablesUsed, opnds[0]->getRefName()); 
+                                                      check_remove (BB->StartLiveVars, opnds[0]->getRefName()); 
+                                                            
+                                                      if (opnds[1]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) 
+                                                           variablesUsed.insert(opnds[1]->getRefName());
+                                                      
+                                                      break;
+                                           default: 
+                                                      if (opnds[0]) {
+                                                             if (remove) {
+                                                                //check if its present in variables used and endliveVar else remove it
+                                                                if (variablesUsed.find(opnds[0]->getRefName()) == variablesUsed.end() 
+                                                                    && BB->EndLiveVars.find(opnds[0]->getRefName()) == BB->EndLiveVars.end()) {
+                                                                       
+                                                                        vector <InterCode*>::iterator it = rit.base();
+                                                                        it--;
+                                                                        BB->getICodeVector()->erase(it);
+                                                                        break;
+                                                                }
+                                                             } 
+                                                             check_remove (variablesUsed, opnds[0]->getRefName()); 
+                                                             check_remove (BB->StartLiveVars, opnds[0]->getRefName()); 
+                                                      }
+                                                     
+                                                      if (opnds[1] && opnds[1]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)
+                                                              variablesUsed.insert(opnds[1]->getRefName());
+                                                      if (opnds[2] && opnds[2]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)
+                                                              variablesUsed.insert(opnds[2]->getRefName());
+                                                      
+                                                      break;
+                                    }
+                       }
+                       break;
+                       
+                       case InterCode::OPNTYPE::CALL: {
+                                    if (opnds[1]) {
+                                          if (remove) {
+                                              //check if its present in variables used and endliveVar else remove it
+                                              if (variablesUsed.find(opnds[1]->getRefName()) == variablesUsed.end() 
+                                                  && BB->EndLiveVars.find(opnds[1]->getRefName()) == BB->EndLiveVars.end()) {
+                                                     
+                                                      vector <InterCode*>::iterator it = rit.base();
+                                                      it--;
+                                                      BB->getICodeVector()->erase(it);
+                                                      break;
+                                              }
+                                          } 
+                                          check_remove (variablesUsed, opnds[1]->getRefName()); 
+                                          check_remove (BB->StartLiveVars, opnds[1]->getRefName()); 
+                                    }
+                       }
+                       break;
+
+                       case InterCode::OPNTYPE::RETURN : 
+                       case InterCode::OPNTYPE::APARAM : {
+                                    if (opnds[0] && opnds[0]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)
+                                           variablesUsed.insert(opnds[0]->getRefName());
+                       } 
+                       break;
+
+                       case InterCode::OPNTYPE::FPARAM : {
+                                   check_remove (variablesUsed, opnds[0]->getRefName()); 
+                                   check_remove (BB->StartLiveVars, opnds[0]->getRefName()); 
+                       }
+                       break;
+                       
+                       case InterCode::OPNTYPE::IFREL : {
+                                   if (opnds[2] && opnds[1]) {
+                                        
+                                        if (opnds[1]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) 
+                                            variablesUsed.insert(opnds[1]->getRefName());
+                                        if (opnds[2]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) 
+                                            variablesUsed.insert(opnds[2]->getRefName());
+                                        
+                                   } else if (opnds[1] && opnds[1]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) {
+                                        variablesUsed.insert(opnds[1]->getRefName());
+                                   } else if (opnds[0]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) {
+                                        variablesUsed.insert(opnds[0]->getRefName());
+                                   }
+                       }
+                       break;
+                       
+                       default: break; 
+               }
+        }
+
+        //push back used vars in livevars at start of block
+        for (set<string>::iterator iter = variablesUsed.begin(); iter != variablesUsed.end(); ++iter) {
+           BB->StartLiveVars.insert(*iter);
+        }
+}
+
+void recurseOnBlocks (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksClass *bbCls) {
+
+        if(BB == NULL)
+            return;
+        
+        iterateOnSingleBlock(BB, ifVisited, bbCls, false);
+        //go over all its previous blocks
+        vector<string>::iterator it = BB->getPrevBlockLabels()->begin();
+        for (; it != BB->getPrevBlockLabels()->end(); ++it) {
+            
+            BasicBlock *newBB =  bbCls->getLabelMap()->find(*it)->second;
+            
+            //add livevars to parent's end vars
+            for (set<string>::iterator it = BB->StartLiveVars.begin();
+                        it != BB->StartLiveVars.end(); ++it) {
+                newBB->EndLiveVars.insert(*it);
+            }
+
+            //recursive calls to all previous blocks 
+            recurseOnBlocks (newBB, ifVisited, bbCls); 
+        }
+
+}
+
+
+void BasicBlocksClass::liveVariableAnalysis() {
+
+    //keep bit vector of all blocks to check which are visited
+    map <string, bool> ifVisited;
+    vector <BasicBlock*>::iterator it;
+    string bb_label;
+    
+    //all blocks are initially unvisited
+    for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+        ifVisited.insert (pair<string, bool>((*it)->getBlockLabel(), 0));
+    }
+
+    //iterate over all blocks
+    for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+      
+        BasicBlock *BB = (BasicBlock *)(*it); 
+        string bb_label = BB->getBlockLabel(); 
+        
+        //if block is unvisited
+        if (ifVisited.find(bb_label)->second == 0) {
+            recurseOnBlocks (BB, ifVisited, this); 
+        }
+    }
+
+    //Dead code removal
+    for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+
+        iterateOnSingleBlock((BasicBlock *)(*it), ifVisited, this, true);
+    }
+
+    //DEBUG
+    if (debugLevel > 0) {
+        for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+            BasicBlock *BB = (BasicBlock *)(*it);
+            bb_label       = BB->getBlockLabel(); 
+            
+            cout << "\n\n blockName: " << bb_label << endl;
+            cout << "live vars at start: ";
+            for (set<string>::iterator it = BB->StartLiveVars.begin(); it != BB->StartLiveVars.end(); ++it) 
+                cout << *it << ",";
+            
+            cout << endl << "live vars at End: ";
+            for (set<string>::iterator it = BB->EndLiveVars.begin(); it != BB->EndLiveVars.end(); ++it) 
+                cout << *it << ",";
+        }
     }
 
 }
