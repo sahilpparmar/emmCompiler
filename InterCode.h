@@ -19,6 +19,7 @@
 #include "Ast.h"
 #include <map>
 #include <utility>
+#include <set>
 
 #define TAB_SPACE 8
 
@@ -216,6 +217,9 @@ class BasicBlock {
             if (cs) InterCodeVector.push_back (cs);
         }
        
+        vector <string>* getPrevBlockLabels() {
+            return &PrevBlockLabels;
+        }
 
         void print(ostream &os) {
             /*
@@ -249,11 +253,11 @@ class BasicBlock {
         void redundantGotoRemoval(int *isOptimized);
         void zeroRemoval(int *isOptimized);
 
+        set <string> EndLiveVars, StartLiveVars;
     private : 
         string blocklabel; 
         vector <InterCode*> InterCodeVector;       
-        vector <string> NextBlockLabels;
-        vector <string> PrevBlockLabels;
+        vector <string> NextBlockLabels, PrevBlockLabels;
 };
 
 
@@ -262,6 +266,9 @@ class BasicBlocksClass {
         vector <BasicBlock*> bbVector;
         map <string, BasicBlock*> label_block_map; 
     public:
+        map <string, BasicBlock*>* getLabelMap() {
+            return &label_block_map;
+        }
         
         vector<BasicBlock*>* getVector() {
             return &bbVector;
@@ -292,7 +299,6 @@ class BasicBlocksClass {
             int isOptimized = 0; 
             do {
                  isOptimized = 0;
-                 //TODO : Need to convert this to iterative 
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
                      (*it)->constantFolding (&isOptimized);
                      (*it)->constantPropogation (&isOptimized);
@@ -301,6 +307,8 @@ class BasicBlocksClass {
                  }
             } while (isOptimized);
         }
+        
+        void liveVariableAnalysis();
         
         void print(ostream &os) {
              vector <BasicBlock*>::iterator it = bbVector.begin();
@@ -337,6 +345,10 @@ class BasicBlocksContainer {
              map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
              for (; it != bbContainer.end(); ++it) {
                  (*it).second->blockOptimize();
+                
+                 //no need of live var analysis for global 
+                 //if ((*it).first.compare("global") != 0) 
+                 //   (*it).second->liveVariableAnalysis();
              }
        }
         

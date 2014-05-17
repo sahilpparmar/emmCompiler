@@ -54,11 +54,11 @@ void NOTLogic(string src1_regName, string dst_regName, ostream &os)
     InterCode  *ic2 = false_lab->assignLabel();
     os<<"JMPC EQ ";
     os<<src1_regName<<" 0 "<<(ic2->getLabel())<<endl;
-    os<<"MOVI 1 "<<dst_regName<<" "<<endl;
+    os<<"MOVI 0 "<<dst_regName<<" "<<endl;
     os<<"JMP "<<(ic1->getLabel())<<endl;
-    os<<(ic2->getLabel())<<":";
-    os<<"MOVI 0 "<<dst_regName<<endl;
-    os<<(ic1->getLabel());
+    os<<(ic2->getLabel())<<": ";
+    os<<"MOVI 1 "<<dst_regName<<endl;
+    os<<(ic1->getLabel()) << ": ";
 }
 
 void ShiftLogic(bool isSHL, string src1_regName, string src2_regName, string dst_regName, ostream &os)
@@ -72,13 +72,13 @@ void ShiftLogic(bool isSHL, string src1_regName, string src2_regName, string dst
      os<<"MOVI "<<src2_regName<<" "<<RSH_Cnt<<endl;
      os<<ic2->getLabel()<<": ";
      os<<"JMPC GT 0 "<<RSH_Cnt<<" "<<ic1->getLabel()<<endl;
-     if(isSHL)
+     if (isSHL)
          os<<"MUL "<<RSH_Val<<" 2 "<<RSH_Val<<endl;
      else
          os<<"DIV "<<RSH_Val<<" 2 "<<RSH_Val<<endl;
      os<<"SUB "<<RSH_Cnt<<" 1 "<<RSH_Cnt<<endl;
      os<<"JMP "<<ic2->getLabel()<<endl;
-     os<<ic1->getLabel()<<":"<<endl;
+     os<<ic1->getLabel()<<": ";
      os<<"MOVI "<<RSH_Val<<" "<<dst_regName<<endl;
 }
 
@@ -95,12 +95,11 @@ void ANDLogic  (string src1_regName, string src2_regName, string dst_regName, os
     os<<"JMP "      <<(ic1->getLabel())<<endl;
     os<<(ic2->getLabel())<<": ";
     os<<"MOVI 0 "   <<dst_regName<<endl;
-    os<<(ic1->getLabel())<<":"<<endl;
+    os<<(ic1->getLabel())<<": ";
 
 }
 
-void ORLogic  (string src1_regName, string src2_regName, string dst_regName, ostream &os)
-{
+void ORLogic  (string src1_regName, string src2_regName, string dst_regName, ostream &os) {
     LabelClass *true_lab  = new LabelClass(); 
     InterCode  *ic1 = true_lab->assignLabel();
     LabelClass *false_lab = new LabelClass(); 
@@ -112,19 +111,13 @@ void ORLogic  (string src1_regName, string src2_regName, string dst_regName, ost
     os<<"JMP "      <<(ic1->getLabel())<<endl;
     os<<(ic2->getLabel())<<": ";
     os<<"MOVI 1 "   <<dst_regName<<endl;
-    os<<(ic1->getLabel())<<":"<<endl;
-
+    os<<(ic1->getLabel())<<": ";
 }
 
-void push_registers(string retAdd, ostream &os)
-{
+void push_registers(string retAdd, ostream &os) {
     char newRegName[5];
-//   cout<<"\n registers to be pushed"<<(int_reg_used_cnt + fl_reg_used_cnt)<<"\n";
-     in = int_reg_count-1;
-     fl = float_reg_count-1;
-//    os<<"STI "<<RRET_ADD<<" "<<RSP<<endl;
-//    os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
-    
+    in = int_reg_count-1;
+    fl = float_reg_count-1;
     for(int i=0; i<int_reg_used_cnt; i++)
     {
         sprintf(newRegName, "R%.3d", in);
@@ -133,7 +126,7 @@ void push_registers(string retAdd, ostream &os)
         os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
         in--;
     }
-    
+
     for(int i=0; i<fl_reg_used_cnt; i++)
     {
         sprintf(newRegName, "F%.3d", fl);
@@ -142,7 +135,7 @@ void push_registers(string retAdd, ostream &os)
         os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
         fl--;
     }
-    
+
     string dst_regName     = allocateNewRegName(false);
     int_reg_used_cnt--;
     os<<"MOVL "<<retAdd<<" "<<dst_regName<<endl;
@@ -161,14 +154,9 @@ void push_registers(string retAdd, ostream &os)
     }
 }
 
-void pop_registers(ostream &os)
-{
+void pop_registers(ostream &os) {
     char newRegName[5];
-   // int in = int_reg_count-int_reg_used_cnt+1;
-   // int fl = float_reg_count-fl_reg_used_cnt+1;
 
-//    cout<<"\n reg to be popped: "<<int_reg_used_cnt; 
-    
     for(int i=0; i<fl_reg_used_cnt; i++)
     {
         sprintf(newRegName, "F%.3d", ++fl);
@@ -177,7 +165,7 @@ void pop_registers(ostream &os)
         os<<"LDF "<<RSP<<" "<< temp<<endl;
         fl++;
     }
-    
+
     for(int i=0; i<int_reg_used_cnt; i++)
     {
         sprintf(newRegName, "R%.3d", ++in);
@@ -218,9 +206,7 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
     os << "PRTS " << "\"DONE\"" << endl << endl;
 }
 
-
-void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
-{
+void AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os) {
     string  dst_regName ;
     string  src1_regName;
     string  src2_regName;
@@ -302,32 +288,27 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
         case EXPR:      {
                             ExprNode *dst        = opndsList[0];
                             Type   *type_dst  = (dst ) ?  (dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type()): NULL ;
-                            if(opndsList[0] && opndsList[1] && opndsList[2])
-                            {
+                            if (opndsList[0] && opndsList[1] && opndsList[2]) {
                                 ExprNode *src1       = opndsList[1];
                                 ExprNode *src2       = opndsList[2];
 
                                 Type   *type_src1 = (src1) ?  (src1->coercedType() ? (Type*)src1->coercedType() : src1->type()): NULL ;
                                 Type   *type_src2 = (src2) ?  (src2->coercedType() ? (Type*)src2->coercedType() : src2->type()): NULL ;
-                                if(IS_FLOAT(type_dst))
-                                {
-                                    if(src1)
-                                    {
+                                if (IS_FLOAT(type_dst)) {
+                                    if (src1) {
                                         src1_regName = src1->getRegisterName();
-                                        if(!IS_FLOAT(type_src1)) 
+                                        if (!IS_FLOAT(type_src1)) 
                                             src1_regName = convertToFloat(src1, os);
                                     }
-                                    if(src2)
-                                    {
+                                    if (src2) {
                                         src2_regName = src2->getRegisterName();
                                         if(!IS_FLOAT(type_src2))
                                             src2_regName= convertToFloat(src2, os);
                                     }
-                                    if(dst)
+                                    if (dst)
                                         dst_regName = dst->getRegisterName();
 
-                                    switch(interCode->getsubCode())
-                                    {
+                                    switch(interCode->getsubCode()) {
                                         case OpNode::OpCode::PLUS  :   {   os<<"FADD ";    PRT_REG;    break; } 
                                         case OpNode::OpCode::MINUS :   {   os<<"FSUB ";    PRT_REG;    break; }
                                         case OpNode::OpCode::MULT  :   {   os<<"FMUL ";    PRT_REG;    break; }     
@@ -340,26 +321,21 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                         case OpNode::OpCode::NE    :   {   os<<"FEQ " ;    PRT_REG;    break; }
                                         default                    :                  break;    
                                     }
-                                }
-                                else
-                                {
-                                    if(src1)
-                                    {
+                                } else {
+                                    if (src1) {
                                         src1_regName = src1->getRegisterName();
                                         if(IS_FLOAT(type_src1)) 
                                             src1_regName = convertToInt(src1, os);
                                     }
-                                    if(src2)
-                                    {
+                                    if (src2) {
                                         src2_regName = src2->getRegisterName();
                                         if(IS_FLOAT(type_src2))
                                             src2_regName= convertToInt(src2, os);
                                     }
-                                    if(dst)
+                                    if (dst)
                                         dst_regName = dst->getRegisterName();
                                     
-                                    switch(interCode->getsubCode())
-                                    {
+                                    switch(interCode->getsubCode()) {
                                         case OpNode::OpCode::PLUS  :   {  os<<"ADD ";    PRT_REG;    break; }
                                         case OpNode::OpCode::MINUS :   {  os<<"SUB ";    PRT_REG;    break; }
                                         case OpNode::OpCode::MULT  :   {  os<<"MUL ";    PRT_REG;    break; }    
@@ -380,79 +356,49 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                         case OpNode::OpCode::OR    :   {  ORLogic   (src1_regName, src2_regName, dst_regName, os);           break; }
                                         default                    :                  break;    
                                     }
-
                                 }
+                            } else if (opndsList[0] && opndsList[1]) {
+                                ExprNode *src1 = opndsList[1];
+                                Type *type_src1 = src1->coercedType() ? (Type*)src1->coercedType() : src1->type();
+                                bool IsEndlNeeded = true;
 
-                            }
-                            else if(opndsList[0] && opndsList[1])
-                            {
-                                ExprNode *src1       = opndsList[1];
-                                Type   *type_src1 = (src1) ?  (src1->coercedType() ? (Type*)src1->coercedType() : src1->type()): NULL ;
-
-                                if(dst)
+                                src1_regName = src1->getRegisterName();
+                                if (dst)
                                     dst_regName = dst->getRegisterName();
 
-                                if(IS_FLOAT(type_dst))
-                                {
-                                    if(interCode->getsubCode() == OpNode::OpCode::ASSIGN)
-                                    {
-                                        if(src1)
-                                        {
-                                            src1_regName = src1->getRegisterName();
-                                            if(!IS_FLOAT(type_src1)) 
-                                                src1_regName = convertToFloat(src1, os);
-                                            else
-                                                os<<"MOVF "<<src1_regName<<" "<<dst_regName;
-                                        }
+                                if (IS_FLOAT(type_dst)) {
+                                    if (interCode->getsubCode() == OpNode::OpCode::ASSIGN) {
+                                        if (!IS_FLOAT(type_src1)) 
+                                            src1_regName = convertToFloat(src1, os);
+                                        os << "MOVF " << src1_regName << " " << dst_regName;
+                                    } else if (interCode->getsubCode() == OpNode::OpCode::UMINUS) {
+                                        if (!IS_FLOAT(type_src1)) 
+                                            src1_regName = convertToFloat(src1, os);
+                                        os << "FNEG " << src1_regName << " " << dst_regName;
                                     }
-
-                                    else if(interCode->getsubCode() == OpNode::OpCode::UMINUS)
-                                    {
-                                        if(src1)
-                                        {
-                                            src1_regName = src1->getRegisterName();
-                                            if(!IS_FLOAT(type_src1)) 
-                                                src1_regName = convertToFloat(src1, os);
-                                            os<<"FNEG "<<src1_regName<<" "<<dst_regName;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if(interCode->getsubCode() == OpNode::OpCode::ASSIGN)
-                                    {
-                                        if(src1)
-                                        {
-                                            src1_regName = src1->getRegisterName();
-                                            if(IS_FLOAT(type_src1)) 
-                                                src1_regName = convertToInt(src1, os);
-                                            else
-                                                os<<"MOVI "<<src1_regName<<" "<<dst_regName;
-                                        }
-                                } else if(interCode->getsubCode() == OpNode::OpCode::UMINUS) {
-                                        if(src1)
-                                        {
-                                            src1_regName = src1->getRegisterName();
-                                            if(!IS_FLOAT(type_src1)) 
-                                                src1_regName = convertToFloat(src1, os);
-                                            os<<"NEG "<<src1_regName<<" "<<dst_regName;
-                                        }
-                                    }
-                                    else if( interCode->getsubCode() ==  OpNode::OpCode::NOT)
+                                } else {
+                                    if (interCode->getsubCode() == OpNode::OpCode::ASSIGN) {
+                                        if(IS_FLOAT(type_src1)) 
+                                            src1_regName = convertToInt(src1, os);
+                                        os << "MOVI " << src1_regName << " " << dst_regName;
+                                    } else if (interCode->getsubCode() == OpNode::OpCode::UMINUS) {
+                                        if (!IS_FLOAT(type_src1)) 
+                                            src1_regName = convertToFloat(src1, os);
+                                        os << "NEG " << src1_regName << " " << dst_regName;
+                                    } else if (interCode->getsubCode() == OpNode::OpCode::NOT) {
                                         NOTLogic(src1_regName, dst_regName, os);
-
+                                        IsEndlNeeded = false;
+                                    }
                                 }
-                                os<<endl;
+                                if (IsEndlNeeded) os << endl;
                             }
                             break;
                         }
           case LABEL  : {
-                            //cout<<"\n in label "<<interCode->getLabel();
                             os<<interCode->getLabel()<<endl;
                             break; 
                         }
           case GOTO   : { 
-                            // cout<<"\n in goto";
                             InterCode* goto_lab = (InterCode*) opndsList[0];
 
                             os<<"JMP "<<goto_lab->getLabel() <<endl;
