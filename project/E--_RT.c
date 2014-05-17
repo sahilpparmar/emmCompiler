@@ -33,11 +33,15 @@ unsigned *mem;
 #define UGE(x, y) ((unsigned)x >= (unsigned)y)
 #define GT(x, y) (x > y)
 #define GE(x, y) (x >= y)
+#define LT(x, y) (x < y)
+#define LE(x, y) (x <= y)
 #define EQ(x, y) (x == y)
 #define NE(x, y) (x != y)
 
 #define FGT(x, y) (x > y)
-#define FGE(x, y) (x >= y)
+#define FGE(x, y) (x <= y)
+#define FLT(x, y) (x < y)
+#define FLE(x, y) (x >= y)
 #define FEQ(x, y) (x == y)
 #define FNE(x, y) (x != y)
 

@@ -281,20 +281,22 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                             break;
                         }
         case RETURN:    {
-                            ExprNode *ret_val    = opndsList[0];
-                            Type     *ret_type   = (ret_val) ?  (ret_val ->coercedType() ? (Type*)ret_val ->coercedType() : ret_val ->type()): NULL ;
+                            if (opndsList[0]) {
+                                ExprNode *ret_val  = opndsList[0];
+                                Type     *ret_type = (ret_val) ? (ret_val ->coercedType() ? (Type*)ret_val ->coercedType() : ret_val ->type()): NULL ;
 
-                            if(IS_FLOAT(ret_type))
-                            {
-                                dst_regName = ret_val->getRegisterName();
-                                os<<"MOVF "<<dst_regName<<" "<<RRV_F;
+                                if (IS_FLOAT(ret_type)) {
+                                    dst_regName = ret_val->getRegisterName();
+                                    os<<"MOVF "<<dst_regName<<" "<<RRV_F;
+                                } else {
+                                    dst_regName = ret_val->getRegisterName();
+                                    os<<"MOVI "<<dst_regName<<" "<<RRV_I;
+                                }
+                                os<<endl;
                             }
-                            else
-                            {
-                                dst_regName = ret_val->getRegisterName();
-                                os<<"MOVI "<<dst_regName<<" "<<RRV_I;
-                            }
-                            os<<endl;
+                            os<<"ADD " << RSP << " 4 " << RSP << endl;
+                            os<<"LDI " << RSP << " " << RRET_ADD << endl;
+                            os << "JMPI " << RRET_ADD << endl;
                             break;
                         }
         case EXPR:      {
@@ -332,16 +334,10 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                         case OpNode::OpCode::DIV   :   {   os<<"FDIV ";    PRT_REG;    break; }
                                         case OpNode::OpCode::GT    :   {   os<<"FGT " ;    PRT_REG;    break; }
                                         case OpNode::OpCode::GE    :   {   os<<"FGE " ;    PRT_REG;    break; }
+                                        case OpNode::OpCode::LT    :   {   os<<"FLT " ;    PRT_REG;    break; }
+                                        case OpNode::OpCode::LE    :   {   os<<"FLE " ;    PRT_REG;    break; }
                                         case OpNode::OpCode::EQ    :   {   os<<"FEQ " ;    PRT_REG;    break; }
                                         case OpNode::OpCode::NE    :   {   os<<"FEQ " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::LT    :   {   string temp = src1_regName;
-                                                                           src1_regName= src2_regName; 
-                                                                           src2_regName= temp        ; 
-                                                                           os<<"FGT " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::LE    :   {   string temp = src1_regName;
-                                                                           src1_regName= src2_regName; 
-                                                                           src2_regName= temp        ; 
-                                                                           os<<"FGE " ;    PRT_REG;    break; }
                                         default                    :                  break;    
                                     }
                                 }
@@ -374,16 +370,10 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                         case OpNode::OpCode::BITXOR:   {  os<<"XOR ";    PRT_REG;    break; }
                                         case OpNode::OpCode::GT    :   {  os<<"GT " ;    PRT_REG;    break; }
                                         case OpNode::OpCode::GE    :   {  os<<"GE " ;    PRT_REG;    break; }
+                                        case OpNode::OpCode::LT    :   {  os<<"LT " ;    PRT_REG;    break; }
+                                        case OpNode::OpCode::LE    :   {  os<<"LE " ;    PRT_REG;    break; }
                                         case OpNode::OpCode::EQ    :   {  os<<"EQ " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::NE    :   {  os<<"NE ";    PRT_REG;     break; }
-                                        case OpNode::OpCode::LT    :   {  string temp = src1_regName;
-                                                                          src1_regName= src2_regName; 
-                                                                          src2_regName= temp        ; 
-                                                                          os<<"GT " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::LE    :   {  string temp = src1_regName;
-                                                                          src1_regName= src2_regName; 
-                                                                          src2_regName= temp        ; 
-                                                                          os<<"GE " ;    PRT_REG;    break; }
+                                        case OpNode::OpCode::NE    :   {  os<<"NE " ;    PRT_REG;    break; }
                                         case OpNode::OpCode::SHL   :   {  ShiftLogic(true, src1_regName, src2_regName, dst_regName, os);    break; } 
                                         case OpNode::OpCode::SHR   :   {  ShiftLogic(false, src1_regName, src2_regName, dst_regName, os);           break; }
                                         case OpNode::OpCode::AND   :   {  ANDLogic  (src1_regName, src2_regName, dst_regName, os);    break; } 
@@ -503,15 +493,9 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                     case OpNode::OpCode::NE   : (if_cond_int) ? os<<"NE " : os<<"FNE "; break;
                                     case OpNode::OpCode::GT   : (if_cond_int) ? os<<"GT " : os<<"FGT "; break; 
                                     case OpNode::OpCode::GE   : (if_cond_int) ? os<<"GE " : os<<"FGE "; break;
-                                    case OpNode::OpCode::LT   : (if_cond_int) ? os<<"GE " : os<<"FGE "; break; 
-                                    case OpNode::OpCode::LE   : (if_cond_int) ? os<<"GT " : os<<"FGT "; break;
+                                    case OpNode::OpCode::LT   : (if_cond_int) ? os<<"LT " : os<<"FLT "; break; 
+                                    case OpNode::OpCode::LE   : (if_cond_int) ? os<<"LE " : os<<"FLE "; break;
                                     default                   :  break ;    
-                                }
-                                if(interCode->getsubCode() == OpNode::OpCode::LT  || interCode->getsubCode() == OpNode::OpCode::LE)
-                                {
-                                    string temp  = src1_regName;
-                                    src1_regName = src2_regName;
-                                    src2_regName = temp;
                                 }
                                 os<<src1_regName<<" "<<src2_regName<<" "<<(true_lab->getLabel())<<endl;
                                 if(false_lab)
@@ -546,20 +530,20 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
          case LEAVE  :  { 
                             os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
                             os<<"LDI "<<RSP <<" "<<RRET_ADD<<endl;
-                            os << "JMPI " <<RRET_ADD;
+                            os << "JMPI " << RRET_ADD << endl;
                             // os<<(char*)opndsList[0];
                             break;
                         }
          case PRINT  :  {
-                        ExprNode *dst        = opndsList[0];
-                        Type   *type_dst     = (dst ) ?  (dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type()): NULL ;
-                        if(IS_FLOAT(type_dst))
-                            os<<"PRTF "<<opndsList[0]->getRefName();
-                        else if(IS_INT(type_dst))
-                            os<<"PRTI "<<opndsList[0]->getRefName();
-                        else if(IS_STRING(type_dst))
-                            os<<"PRTS "<<opndsList[0]->getRefName();
-                        os<<endl;
+                            ExprNode *dst        = opndsList[0];
+                            Type   *type_dst     = (dst ) ?  (dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type()): NULL ;
+                            if(IS_FLOAT(type_dst))
+                                os<<"PRTF "<<opndsList[0]->getRegisterName();
+                            else if(IS_STRING(type_dst))
+                                os<<"PRTS "<<opndsList[0]->getRefName();
+                            else 
+                                os<<"PRTI "<<opndsList[0]->getRegisterName();
+                            os<<endl;
                             break;
                         }
                      

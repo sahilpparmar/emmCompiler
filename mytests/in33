@@ -12,11 +12,13 @@ int foo (int a) {
 }
 
 a(i)-> {
-    print("\nFirst Param:", i);
-    bar(i);
+    print("\\nFirst Param:", i);
+    i = bar(i);
+    print("\\nResult(bar) :", i);
 }
 
 b(i)-> {
-    print("\nFirst Param:", i);
-    foo(i);
+    print("\\nFirst Param:", i);
+    i = foo(i);
+    print("\\nResult(foo) :", i);
 }

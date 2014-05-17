@@ -240,7 +240,10 @@ main(int argc, char *argv[], char *envp[]) {
 
     DEBUG("=================Lexical and Syntax Parsing==================\n");
     yyparse();
-    // TODO: Terminate compilation if errCount() > 0
+    if (errCount() > 0) {
+        errMsg(itoa(errCount()) + " syntax error(s) reported.\nCompilation terminated.");
+        return 1;
+    }
 
     stm.leaveToScope(SymTabEntry::Kind::GLOBAL_KIND);
     GlobalEntry *ge = (GlobalEntry*)(stm.currentScope());
@@ -252,7 +255,10 @@ main(int argc, char *argv[], char *envp[]) {
 
         DEBUG("========================Type Checking========================\n");
         ge->typeCheck();
-        // TODO: Terminate compilation if errCount() > 0
+        if (errCount() > 0) {
+            errMsg(itoa(errCount()) + " error(s) reported.\nCompilation terminated.");
+            return 1;
+        }
 
         DEBUG("======================Memory Allocation======================\n");
         ge->memAlloc(); 
@@ -263,26 +269,30 @@ main(int argc, char *argv[], char *envp[]) {
            in->print(cout);
         }
 
-        DEBUG("====================== Basic Code Optimization ======================\n");
-        if (debugLevel > 0) {
-            if (in) {
-                in->optimize();
-                in->print(cout);
+        if (optLevel) {
+            DEBUG("====================== Basic Code Optimization ======================\n");
+            if (debugLevel > 0) {
+                if (in) {
+                    in->optimize();
+                    in->print(cout);
+                }
             }
+            cout << endl;
         }
-        
-        cout << endl;
+            
         DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksContainer *bbC = new BasicBlocksContainer();
         bbC->createBlockStruct (in);
         if (debugLevel > 0) {
            bbC->print(cout);
         }
-        
-        DEBUG("=========================Optimization========================\n");
-        bbC->optimize();
-        if (debugLevel > 0) {
-           bbC->print(cout);
+            
+        if (optLevel) {
+            DEBUG("=========================Optimization========================\n");
+            bbC->optimize();
+            if (debugLevel > 0) {
+               bbC->print(cout);
+            }
         }
         
         DEBUG("===================Final Code generation=====================\n");
