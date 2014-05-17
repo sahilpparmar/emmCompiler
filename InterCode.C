@@ -508,7 +508,9 @@ void BasicBlock::constantPropogation (int *isOptimized) {
                      case OpNode::OpCode::BITNOT:
                      case OpNode::OpCode::UMINUS:
                      case OpNode::OpCode::ASSIGN:
-                                            {
+                                            {   
+                                                //TODO: please fix this magic code
+                                                oprnd[1]->type()->name();
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
                                                     flag     =  true;
@@ -717,6 +719,8 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
     bool isLastLeave        = false;
     BasicBlock* bb          = NULL; 
     
+    BBcls->ordervec.push_back("global");
+
     for (; it != icvec->end(); ++it) {
             InterCode::OPNTYPE op = (*it)->getOPNType();
             void** opd            = (*it)->get3Operands();
@@ -789,6 +793,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                         block = BBcls->getBlockWithLabel(str);
                     }
                 }
+                BBcls->ordervec.push_back(str);
             
             } else if (op == InterCode::OPNTYPE::LEAVE ) {
                 block->addCode (*it); 
@@ -801,6 +806,24 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 isPrevJmp   = false;
                 isLastLeave = false;
             }
+    }
+    
+    //Reorder bbvector in each basicblockclassj according to ordervec
+    map<string, BasicBlocksClass*>::iterator it2 = getContainer()->begin();
+    for (; it2 != getContainer()->end(); ++it2 ) {
+       
+        vector <BasicBlock*> newBBVec;
+
+        BasicBlocksClass* BBCls        = (*it2).second;
+        vector<string>::iterator iter2 = BBCls->ordervec.begin(); 
+        for (; iter2 != BBCls->ordervec.end(); ++iter2) {
+            string str    = *iter2;
+            BasicBlock *b = (BBCls->getLabelMap()->find(str))->second;
+            
+            if(b) 
+              newBBVec.push_back(b);
+        }
+        BBCls->setVector (newBBVec);
     }
 
 }
@@ -1017,3 +1040,54 @@ void BasicBlocksClass::liveVariableAnalysis() {
     }
 
 }
+
+//void removeExpr (BasicBlock *BB, vector<pair<string, int>> exprMap, map<string, vector<int>> op1Map, map <string, vector<int>> op2Map) {
+//        
+//        //copy parents exprmap into curr block 
+//        vector<pair<string, int>> curr_exprMap (exprMap);
+//        
+//        vector <InterCode*>::reverse_iterator it = BB->getICodeVector()->begin();
+//        
+//        for (; it != BB->getICodeVector()->end(); ++it) {
+//               ExprNode** opnds = (ExprNode**)(*it)->get3Operands();
+//               
+//               switch ((*it)->getOPNType()) {
+//                       case InterCode::OPNTYPE::EXPR : {
+//                                    
+//                                    switch ((*it)->getsubCode()) {
+//                                           case default: {
+//                                                 if (op[0] && op[1] && op[2]) {
+//                                                     ostringstream os; 
+//                                                     os << op[0]->getRefName() << " = " << op[1]->getRefName();
+//                                                     os << " " << OpNode::opInfo[(int )subCode_].name_ << " ";
+//                                                     os << op[2]->getRefName();
+//                                                     
+//                                                     curr_exprMap.push_back(pair<string, int> (os.str(), 1)); 
+//                                                 }
+//                                                         
+//
+//
+//                                           }
+//                                           break;
+//                                            
+//                                           default : break;
+//                                    }
+//                        }
+//                        break;
+//
+//                        default : break;
+//               }
+//       }
+//}
+//
+//void BasicBlocksClass::commonSubExprElimination() {
+//
+//    vector <BasicBlock*>::iterator it;
+//    
+//    for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+//        BasicBlock *BB = (BasicBlock *)(*it);
+//        if (BB->getPrevBlockLabels()->size() == 0)
+//            removeExpr (BB);
+//    }
+//
+//}

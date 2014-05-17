@@ -259,8 +259,15 @@ class BasicBlocksClass {
         vector <BasicBlock*> bbVector;
         map <string, BasicBlock*> label_block_map; 
     public:
+        
+        vector<string> ordervec;
+        
         map <string, BasicBlock*>* getLabelMap() {
             return &label_block_map;
+        }
+       
+        void setVector (vector <BasicBlock *> &vec) {
+            bbVector = vec;
         }
         
         vector<BasicBlock*>* getVector() {
@@ -295,13 +302,14 @@ class BasicBlocksClass {
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
                      (*it)->constantFolding (&isOptimized);
                      (*it)->constantPropogation (&isOptimized);
-                     (*it)->redundantGotoRemoval(&isOptimized);
-                     (*it)->zeroRemoval(&isOptimized);
+                     //(*it)->redundantGotoRemoval(&isOptimized);
+                     //(*it)->zeroRemoval(&isOptimized);
                  }
             } while (isOptimized);
         }
         
         void liveVariableAnalysis();
+        void commonSubExprElimination();
         
         void print(ostream &os) {
              vector <BasicBlock*>::iterator it = bbVector.begin();
@@ -339,9 +347,23 @@ class BasicBlocksContainer {
              for (; it != bbContainer.end(); ++it) {
                  (*it).second->blockOptimize();
                 
+             }
+             
+             if (debugLevel > 0) {
+                cout << "\n\n=====Constant propogation and folding optimization=======";
+                print(cout);
+             }
+            
+             
+             for (it = bbContainer.begin() ; it != bbContainer.end(); ++it) {
                  //no need of live var analysis for global 
                  if ((*it).first.compare("global") != 0) 
                     (*it).second->liveVariableAnalysis();
+             }
+
+             if (debugLevel > 0) {
+                cout << "\n\n=========Dead Code Elmination Optimization==================";
+                print(cout);
              }
        }
         
