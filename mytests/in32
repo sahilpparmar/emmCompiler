@@ -1,4 +1,5 @@
-event a(int aa, int bb);
+event a(double aa, int bb);
+event b(int aa, unsigned int bb);
 int sum=10;
 bool ii;
 a(i,j)-> {
@@ -7,4 +8,7 @@ a(i,j)-> {
         sum = i+j;
     else
         sum = i-j;
+}
+
+b(i,j)-> {
 }

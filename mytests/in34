@@ -1,0 +1,17 @@
+event a(int aa, int bb);
+
+int fac (int a) {
+    if (a <= 1) return 1;
+    return a * fac(a-1);
+}
+
+a(i, j)-> {
+    print("\\nFirst Param :", i);
+    i = fac(i);
+    print("\\nResult(fac) :", i);
+
+    print("\\nSecond Param :", j);
+    j = fac(j);
+    print("\\nResult(fac) :", j);
+}
+

@@ -269,31 +269,34 @@ main(int argc, char *argv[], char *envp[]) {
            in->print(cout);
         }
 
-        DEBUG("====================== Basic Code Optimization ======================\n");
-        if (debugLevel > 0) {
-            if (in) {
-                in->optimize();
-                in->print(cout);
+        if (optLevel) {
+            DEBUG("====================== Basic Code Optimization ======================\n");
+            if (debugLevel > 0) {
+                if (in) {
+                    in->optimize();
+                    in->print(cout);
+                }
             }
+            cout << endl;
         }
-        
-        cout << endl;
+            
         DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksContainer *bbC = new BasicBlocksContainer();
         bbC->createBlockStruct (in);
         if (debugLevel > 0) {
            bbC->print(cout);
         }
-        
-        DEBUG("=========================Optimization========================\n");
-          cout << "in blk1 container ";
-        bbC->optimize();
-        if (debugLevel > 0) {
-          cout << "in blk container ";
-           bbC->print(cout);
+            
+        if (optLevel) {
+            DEBUG("=========================Optimization========================\n");
+            bbC->optimize();
+            if (debugLevel > 0) {
+               bbC->print(cout);
+            }
         }
         
         DEBUG("===================Final Code generation=====================\n");
+        ge->eventHandler(cout);
         AbstractMachineCode::genAMC(bbC, cout);
 /*        
         
@@ -318,7 +321,7 @@ main(int argc, char *argv[], char *envp[]) {
         //AbstractMachineCode::genAMC(bb, cout);
 
 
-        cout << "Compilation Successful" << endl;
+        DEBUG("Compilation Successful\n");
     }
 #endif
 

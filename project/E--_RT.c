@@ -33,11 +33,15 @@ unsigned *mem;
 #define UGE(x, y) ((unsigned)x >= (unsigned)y)
 #define GT(x, y) (x > y)
 #define GE(x, y) (x >= y)
+#define LT(x, y) (x < y)
+#define LE(x, y) (x <= y)
 #define EQ(x, y) (x == y)
 #define NE(x, y) (x != y)
 
 #define FGT(x, y) (x > y)
-#define FGE(x, y) (x >= y)
+#define FGE(x, y) (x <= y)
+#define FLT(x, y) (x < y)
+#define FLE(x, y) (x >= y)
 #define FEQ(x, y) (x == y)
 #define FNE(x, y) (x != y)
 
@@ -197,9 +201,10 @@ inline int ini() {
       char c[4];
       int i;
    } z;
-   int r1 = getc(stdin), r2 = getc(stdin), r3 = getc(stdin), r4 = getc(stdin);
-   if (r4 < 0) rtexit("Input error");
-   z.c[0] = r1; z.c[1] = r2; z.c[2] = r3; z.c[3] = r4;
+   scanf("%d", &z.i);
+   //int r1 = getc(stdin), r2 = getc(stdin), r3 = getc(stdin), r4 = getc(stdin);
+   //if (r4 < 0) rtexit("Input error");
+   //z.c[0] = r1; z.c[1] = r2; z.c[2] = r3; z.c[3] = r4;
    return z.i;
 }
 inline int inf() {
@@ -207,9 +212,10 @@ inline int inf() {
       char c[4];
       float f;
    } z;
-   int r1 = getc(stdin), r2 = getc(stdin), r3 = getc(stdin), r4 = getc(stdin);
-   if (r4 < 0) rtexit("Input error");
-   z.c[0] = r1; z.c[1] = r2; z.c[2] = r3; z.c[3] = r4;
+   scanf("%f", &z.f);
+   //int r1 = getc(stdin), r2 = getc(stdin), r3 = getc(stdin), r4 = getc(stdin);
+   //if (r4 < 0) rtexit("Input error");
+   //z.c[0] = r1; z.c[1] = r2; z.c[2] = r3; z.c[3] = r4;
    return z.f;
 }
 

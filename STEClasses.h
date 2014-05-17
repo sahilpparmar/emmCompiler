@@ -37,6 +37,7 @@ class GlobalEntry: public SymTabEntry {
         void print(ostream&, int indent=0) const;
         void memAlloc();
         InterCodesClass* codeGen();     
+        void eventHandler(ostream &os);
     private:
         vector<RuleNode*> rules_;
 };

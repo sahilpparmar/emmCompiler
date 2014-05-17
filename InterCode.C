@@ -329,169 +329,175 @@ void InterCodesClass::removeContLabelGoto(int *isOptimized) {
 void BasicBlock::constantFolding (int *isOptimized) {
     int result = 0, val_1 = 0, val_2 = 0, i;
     double resultf = 0.0, valf_1 = 0.0, valf_2 = 0.0;
-    
+
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
     bool flag                           = false;
     bool isfloat;
 
-    cout << "\t Inside Folding" << dupICodeVector->size();
+    //    cout << "\t Inside Folding" << dupICodeVector->size();
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
-        
-        cout << "\t " << i;
+
+        //cout << "\t " << i;
         //tempICodeVector->push_back(dupICodeVector->at(i)); 
         ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
         isfloat = false;
-     
+
         if (operands[0] && operands[1] && operands[2]) {
             ExprNode* new1 = operands[1]; 
             ExprNode* new2 = operands[2]; 
-            cout << "\t if part";
+            //cout << "\t if part";
 
-             // Check if op[1] and op[2] are valuenodes and intercode type is expression
-            
+            // Check if op[1] and op[2] are valuenodes and intercode type is expression
+
             if ((new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) && (new2->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE)) {
-                
-                    if ((new1->value()->type()->tag() == Type::TypeTag::INT || new1->value()->type()->tag() == Type::TypeTag::UINT) &&
-                        (new2->value()->type()->tag() == Type::TypeTag::INT || new2->value()->type()->tag() == Type::TypeTag::UINT)) {
-                        
-                             isfloat = false;
-                             val_1   = stoi(new1->getRefName());
-                             val_2   = stoi(new2->getRefName());
-                     
-                    } else if (new1->value()->type()->tag() == Type::TypeTag::DOUBLE || new2->value()->type()->tag() == Type::TypeTag::DOUBLE) {
-                             isfloat = true;
-                             valf_1  = stof(new1->getRefName());
-                             valf_2  = stof(new2->getRefName());
-                    }
-                    
-                    if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR) {
-                         
-                              //cout << "DEBUG: " << OpNode::opInfo[(int )dupICodeVector->at(i)->getsubCode()].name_;
-                              switch(dupICodeVector->at(i)->getsubCode()) {
-                                      case OpNode::OpCode::PLUS :
-                                                          if(isfloat) resultf = valf_1 + valf_2;
-                                                          else result = val_1 + val_2;
-                                                          flag = true;
-                                                          break; 
-                                      case OpNode::OpCode::MINUS :
-                                                          if(isfloat) resultf = valf_1 - valf_2;
-                                                          else result = val_1 - val_2;
-                                                          flag = true;
-                                                          break; 
-                                      case OpNode::OpCode::MULT :
-                                                          if(isfloat) resultf = valf_1 * valf_2;
-                                                          else result = val_1 * val_2;
-                                                          flag = true;
-                                                          break; 
-                                      case OpNode::OpCode::DIV :
-                                                          if(isfloat) resultf = valf_1 / valf_2;
-                                                          else result = val_1 / val_2;
-                                                          flag = true;
-                                                          break; 
-                                      case OpNode::OpCode::MOD :
-                                                          if(!isfloat) { result = val_1 % val_2; flag = true; }
-                                                          break; 
-                                      case OpNode::OpCode::BITOR :
-                                                          if(!isfloat) { result = val_1 | val_2; flag = true; }
-                                                          break;
-                                      case OpNode::OpCode::BITAND :
-                                                          if(!isfloat) { result = val_1 & val_2; flag = true; }
-                                                          break;
-                                      case OpNode::OpCode::BITXOR :
-                                                          if(!isfloat) { result = val_1 ^ val_2; flag = true; }
-                                                          break;
-                                      case OpNode::OpCode::SHL :
-                                                          if(!isfloat) { result = val_1 << val_2; flag = true; }
-                                                          break;
-                                      case OpNode::OpCode::SHR :
-                                                          if(!isfloat) { result = val_1 >> val_2; flag = true; }
-                                                          break;
-                                      default : 
-                                              cout << "\nUnhandled OpCode \n";
-                                              break;
-                              }
-                              //cout << result << "\n";
-                              ValueNode *temp; 
-                              if (isfloat) {
-                                  temp = new ValueNode(new Value(resultf));
-                              } else {
-                                  temp =  new ValueNode(new Value(result, Type::INT));
-                              }
-                              
-                              tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
-                                                          OpNode::OpCode::ASSIGN, operands[0], temp));
-                     
-                    
-                    } else if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::IFREL) {
-                               
-                               bool cond = false;
-                               switch(dupICodeVector->at(i)->getsubCode()) {
-                                       case OpNode::OpCode::EQ: 
-                                                           if(!isfloat) cond = (val_1 == val_2);
-                                                           else cond = (valf_1 == valf_2);
-                                                           break;
-                                       case OpNode::OpCode::NE:
-                                                           if(!isfloat) cond = (val_1 != val_2);
-                                                           else cond = (valf_1 != valf_2);
-                                                           flag = true; 
-                                                           break;
-                                       case OpNode::OpCode::GE:
-                                                           if(!isfloat) cond = (val_1 >= val_2);
-                                                           else cond = (valf_1 >= valf_2);
-                                                           flag = true; 
-                                                           break;
-                                       case OpNode::OpCode::LE:
-                                                           if(!isfloat) cond = (val_1 <= val_2);
-                                                           else cond = (valf_1 <= valf_2);
-                                                           flag = true; 
-                                                           break;
-                                       case OpNode::OpCode::GT:
-                                                           if(!isfloat) cond = (val_1 > val_2);
-                                                           else cond = (valf_1 > valf_2);
-                                                           flag = true; 
-                                                           break;
-                                       case OpNode::OpCode::LT:
-                                                           if(!isfloat) cond = (val_1 < val_2);
-                                                           else cond = (valf_1 < valf_2);
-                                                           flag = true; 
-                                                           break;
-                                       default : cout << "unknown opcode"; 
-                                                 break;
-                               }
-                               //If condition is true then directly goto to op[0] 
-                               //TODO: please fix the following GOTO 
-                               if (cond) {
-                                     tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::GOTO, 
-                                                                 OpNode::OpCode::INVALID, operands[0]));
-                               } else {
-                                     tempICodeVector->push_back(dupICodeVector->at(i));
-                               }
 
-                    } else {
-                             tempICodeVector->push_back(dupICodeVector->at(i));
+                if ((new1->value()->type()->tag() == Type::TypeTag::INT || new1->value()->type()->tag() == Type::TypeTag::UINT) &&
+                        (new2->value()->type()->tag() == Type::TypeTag::INT || new2->value()->type()->tag() == Type::TypeTag::UINT)) {
+
+                    isfloat = false;
+                    val_1   = stoi(new1->getRefName());
+                    val_2   = stoi(new2->getRefName());
+
+                } else if (new1->value()->type()->tag() == Type::TypeTag::DOUBLE || new2->value()->type()->tag() == Type::TypeTag::DOUBLE) {
+                    isfloat = true;
+                    valf_1  = stof(new1->getRefName());
+                    valf_2  = stof(new2->getRefName());
+                }
+
+                if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR) {
+
+                    //cout << "DEBUG: " << OpNode::opInfo[(int )dupICodeVector->at(i)->getsubCode()].name_;
+                    switch(dupICodeVector->at(i)->getsubCode()) {
+                        case OpNode::OpCode::PLUS :
+                            if(isfloat) resultf = valf_1 + valf_2;
+                            else result = val_1 + val_2;
+                            flag = true;
+                            break; 
+                        case OpNode::OpCode::MINUS :
+                            if(isfloat) resultf = valf_1 - valf_2;
+                            else result = val_1 - val_2;
+                            flag = true;
+                            break; 
+                        case OpNode::OpCode::MULT :
+                            if(isfloat) resultf = valf_1 * valf_2;
+                            else result = val_1 * val_2;
+                            flag = true;
+                            break; 
+                        case OpNode::OpCode::DIV :
+                            if(isfloat) resultf = valf_1 / valf_2;
+                            else result = val_1 / val_2;
+                            flag = true;
+                            break; 
+                        case OpNode::OpCode::MOD :
+                            if(!isfloat) { result = val_1 % val_2; flag = true; }
+                            break; 
+                        case OpNode::OpCode::BITOR :
+                            if(!isfloat) { result = val_1 | val_2; flag = true; }
+                            break;
+                        case OpNode::OpCode::BITAND :
+                            if(!isfloat) { result = val_1 & val_2; flag = true; }
+                            break;
+                        case OpNode::OpCode::BITXOR :
+                            if(!isfloat) { result = val_1 ^ val_2; flag = true; }
+                            break;
+                        case OpNode::OpCode::SHL :
+                            if(!isfloat) { result = val_1 << val_2; flag = true; }
+                            break;
+                        case OpNode::OpCode::SHR :
+                            if(!isfloat) { result = val_1 >> val_2; flag = true; }
+                            break;
+                        default : 
+                            cout << "\nUnhandled OpCode \n";
+                            break;
                     }
+                    //cout << result << "\n";
+                    ValueNode *temp; 
+                    if (isfloat) {
+                        temp = new ValueNode(new Value(resultf));
+                    } else {
+                        temp =  new ValueNode(new Value(result, Type::INT));
+                    }
+
+                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                OpNode::OpCode::ASSIGN, operands[0], temp));
+
+
+                } else if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::IFREL) {
+
+                    bool cond = false;
+                    switch(dupICodeVector->at(i)->getsubCode()) {
+                        case OpNode::OpCode::EQ: 
+                            if(!isfloat) cond = (val_1 == val_2);
+                            else cond = (valf_1 == valf_2);
+                            break;
+                        case OpNode::OpCode::NE:
+                            if(!isfloat) cond = (val_1 != val_2);
+                            else cond = (valf_1 != valf_2);
+                            flag = true; 
+                            break;
+                        case OpNode::OpCode::GE:
+                            if(!isfloat) cond = (val_1 >= val_2);
+                            else cond = (valf_1 >= valf_2);
+                            flag = true; 
+                            break;
+                        case OpNode::OpCode::LE:
+                            if(!isfloat) cond = (val_1 <= val_2);
+                            else cond = (valf_1 <= valf_2);
+                            flag = true; 
+                            break;
+                        case OpNode::OpCode::GT:
+                            if(!isfloat) cond = (val_1 > val_2);
+                            else cond = (valf_1 > valf_2);
+                            flag = true; 
+                            break;
+                        case OpNode::OpCode::LT:
+                            if(!isfloat) cond = (val_1 < val_2);
+                            else cond = (valf_1 < valf_2);
+                            flag = true; 
+                            break;
+                        default : cout << "unknown opcode"; 
+                                  break;
+                    }
+                    //If condition is true then directly goto to op[0] 
+                    //TODO: please fix the following GOTO 
+                    if (cond) {
+                        tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::GOTO, 
+                                    OpNode::OpCode::INVALID, operands[0]));
+                    } else {
+                        tempICodeVector->push_back(dupICodeVector->at(i));
+                    }
+
+                } else {
+                    tempICodeVector->push_back(dupICodeVector->at(i));
+                }
             } else {
-               tempICodeVector->push_back(dupICodeVector->at(i));
+                tempICodeVector->push_back(dupICodeVector->at(i));
             } 
-          } else if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR && 
-                    dupICodeVector->at(i)->getsubCode() == OpNode::OpCode::BITNOT) {
-                //special case where third operand is null 
-                ExprNode* new1 = operands[1]; 
-                
+        } else if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR && 
+                dupICodeVector->at(i)->getsubCode() == OpNode::OpCode::BITNOT) {
+            //special case where third operand is null 
+            ExprNode* new1 = operands[1]; 
+
+            if (new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) {
                 if ((new1->value()->type()->tag() == Type::TypeTag::INT || new1->value()->type()->tag() == Type::TypeTag::UINT)) {
-                    
+
                     flag            = true;
                     int val         = stoi(new1->getRefName());
                     ValueNode *temp =  new ValueNode(new Value(~val, Type::INT));
                     tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, OpNode::OpCode::ASSIGN, operands[0], temp));
-                 
+
                 } else {
                     tempICodeVector->push_back(dupICodeVector->at(i));
                 }
-        
+            } else {
+
+                tempICodeVector->push_back(dupICodeVector->at(i));
+            }
+
+
         } else {
-            cout << "\t else part";
+            //            cout << "\t else part";
             tempICodeVector->push_back(dupICodeVector->at(i));
         }
     }
@@ -591,6 +597,7 @@ void BasicBlock::constantPropogation (int *isOptimized) {
                      case OpNode::OpCode::UMINUS:
                      case OpNode::OpCode::ASSIGN:
                                             {
+                                                if(oprnd[1])
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
                                                     flag     =  true;
