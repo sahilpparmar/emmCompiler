@@ -884,9 +884,8 @@ InterCodesClass* PrimitivePatNode::codeGen()
     cls->addCode(LabelClass::assignLabel(funcName));
     cls->addCode(InterCode::OPNTYPE::ENTER, gRuleFuncSym);
 
-    std::vector<VariableEntry*>::iterator var_it = params_->begin();
-    for (; var_it != params_->end(); ++var_it) {
-        VariableEntry* var_entry = *var_it; 
+    for (int ii = params_->size() - 1; ii >= 0; ii--) {
+        VariableEntry* var_entry = (*params_)[ii]; 
         cls->addCode(var_entry->codeGen());
     }
 

@@ -12,6 +12,8 @@ static int int_reg_count    = 20;
 vector     <string>  reg_list;
 static int fl_reg_used_cnt  = 0 ;
 static int int_reg_used_cnt = 0 ;
+static int in;
+static int fl;
 
 stack<ExprNode*>formal_param_list;
 
@@ -118,8 +120,8 @@ void push_registers(string retAdd, ostream &os)
 {
     char newRegName[5];
 //   cout<<"\n registers to be pushed"<<(int_reg_used_cnt + fl_reg_used_cnt)<<"\n";
-    int in = int_reg_count-1;
-    int fl = float_reg_count-1;
+     in = int_reg_count-1;
+     fl = float_reg_count-1;
 //    os<<"STI "<<RRET_ADD<<" "<<RSP<<endl;
 //    os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
     
@@ -142,6 +144,7 @@ void push_registers(string retAdd, ostream &os)
     }
     
     string dst_regName     = allocateNewRegName(false);
+    int_reg_used_cnt--;
     os<<"MOVL "<<retAdd<<" "<<dst_regName<<endl;
     os<<"STI  "<<dst_regName<<" "<<RSP <<endl;
     os<<"SUB "<<RSP<<" 4 "<<RSP << endl;
@@ -161,12 +164,14 @@ void push_registers(string retAdd, ostream &os)
 void pop_registers(ostream &os)
 {
     char newRegName[5];
-    int in = int_reg_count-int_reg_used_cnt;
-    int fl = float_reg_count-fl_reg_used_cnt;
+   // int in = int_reg_count-int_reg_used_cnt+1;
+   // int fl = float_reg_count-fl_reg_used_cnt+1;
+
+//    cout<<"\n reg to be popped: "<<int_reg_used_cnt; 
     
     for(int i=0; i<fl_reg_used_cnt; i++)
     {
-        sprintf(newRegName, "F%.3d", fl);
+        sprintf(newRegName, "F%.3d", ++fl);
         string temp(newRegName);
         os<<"ADD "<<RSP<<" 4 "<<RSP<<endl;
         os<<"LDF "<<RSP<<" "<< temp<<endl;
@@ -175,7 +180,7 @@ void pop_registers(ostream &os)
     
     for(int i=0; i<int_reg_used_cnt; i++)
     {
-        sprintf(newRegName, "R%.3d", in);
+        sprintf(newRegName, "R%.3d", ++in);
         string temp(newRegName);
         os<<"ADD "<<RSP<<" 4 "<<RSP<<endl;
         os<<"LDI "<<RSP<<" "<< temp<<endl;
@@ -187,8 +192,8 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
     if (!bbCls)
         return;
 
-    os << "begin:" << endl;
-    os << "MOVI " << RSP << " " << 10000 << "    // RSP Initialized" << endl;
+    os << "begin: ";
+    os << "MOVI " << " " << 10000 << RSP << endl;
     os << "JMP global" << endl << endl;
 
     map <string, BasicBlocksClass*>::iterator it = bbCls->getContainer()->begin();
@@ -199,7 +204,7 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
 
         for (; iter1 != basicBlock->end(); iter1++) {
             vector <InterCode*> ::iterator iter2  = (*iter1)->getICodeVector()->begin();
-            os << (*iter1)->getBlockLabel() << ":" << endl;
+            os << (*iter1)->getBlockLabel() << ": ";
             for(; iter2 != (*iter1)->getICodeVector()->end(); iter2++) {
                 convert_IC_AMC(*iter2, os);
                 os<<endl;
@@ -210,7 +215,7 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
             os << endl;
         }
     }
-    os << endl << S_END << ":" << endl;
+    os << endl << S_END << ": ";
     os << "PRTS " << "\"DONE\"" << endl << endl;
 }
 
@@ -229,18 +234,19 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                             string retAddrReg = ic1->getLabel();
                             push_registers(retAddrReg, os); 
                             os<<"JMP  "<<func_name<<endl;
-                            os<<retAddrReg<<":  ";
-                            int_reg_count--; 
+                            os<<retAddrReg<<": ";
+                    //        int_reg_count--; 
                             if(opndsList[1])
                             {
                                 ExprNode *src1    = opndsList[1];
                                 string retValueReg = src1->getRegisterName();
                                 if(IS_FLOAT(src1->type()))
-                                    os<<"MOVF "<<RRV_F;
+                                    os<<"MOVF "<<RRV_F<<" ";
                                 else
-                                    os<<"MOVI "<<RRV_I;
+                                    os<<"MOVI "<<RRV_I<<" ";
                                 os<<retValueReg<<endl;
-
+                                int_reg_used_cnt--; 
+                              //  int_reg_count--; 
                             }
                             pop_registers(os);
                             reg_list.resize(0);
@@ -271,13 +277,6 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                             {
                                 str  = param->getRegisterName();
                                 reg_list.push_back(str);
-                                // if(IS_FLOAT(param->type()))
-                                //         os<<"STF "<<str<<" "<<RSP;
-                                // else if(IS_INT(param->type()))
-                                //         os<<"STI "<<str<<" "<<RSP;
-                                // os<<endl;
-                                // os<<"SUB "<<RSP<<" 4 "<<RSP;
-                                // os<<endl;
                             }
                             break;
                         }
@@ -295,8 +294,6 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                 dst_regName = ret_val->getRegisterName();
                                 os<<"MOVI "<<dst_regName<<" "<<RRV_I;
                             }
-
-
                             break;
                         }
         case EXPR:      {
@@ -416,7 +413,6 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                             else
                                                 os<<"MOVF "<<src1_regName<<" "<<dst_regName;
                                         }
-
                                     }
 
                                     else if(interCode->getsubCode() == OpNode::OpCode::UMINUS)
@@ -442,11 +438,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                             else
                                                 os<<"MOVI "<<src1_regName<<" "<<dst_regName;
                                         }
-
-                                    }
-
-                                    else if(interCode->getsubCode() == OpNode::OpCode::UMINUS)
-                                    {
+                                } else if(interCode->getsubCode() == OpNode::OpCode::UMINUS) {
                                         if(src1)
                                         {
                                             src1_regName = src1->getRegisterName();
@@ -509,8 +501,8 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                     case OpNode::OpCode::NE   : (if_cond_int) ? os<<"NE " : os<<"FNE "; break;
                                     case OpNode::OpCode::GT   : (if_cond_int) ? os<<"GT " : os<<"FGT "; break; 
                                     case OpNode::OpCode::GE   : (if_cond_int) ? os<<"GE " : os<<"FGE "; break;
-                                    case OpNode::OpCode::LT   : (if_cond_int) ? os<<"GT " : os<<"FGT "; break; 
-                                    case OpNode::OpCode::LE   : (if_cond_int) ? os<<"GE " : os<<"FGE "; break;
+                                    case OpNode::OpCode::LT   : (if_cond_int) ? os<<"GE " : os<<"FGE "; break; 
+                                    case OpNode::OpCode::LE   : (if_cond_int) ? os<<"GT " : os<<"FGT "; break;
                                     default                   :  break ;    
                                 }
                                 if(interCode->getsubCode() == OpNode::OpCode::LT  || interCode->getsubCode() == OpNode::OpCode::LE)
@@ -552,7 +544,7 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
          case LEAVE  :  { 
                             os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
                             os<<"LDI "<<RSP <<" "<<RRET_ADD<<endl;
-                            os << "JMP " <<RRET_ADD;
+                            os << "JMPI " <<RRET_ADD;
                             // os<<(char*)opndsList[0];
                             break;
                         }

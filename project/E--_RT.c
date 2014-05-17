@@ -197,9 +197,10 @@ inline int ini() {
       char c[4];
       int i;
    } z;
-   int r1 = getc(stdin), r2 = getc(stdin), r3 = getc(stdin), r4 = getc(stdin);
-   if (r4 < 0) rtexit("Input error");
-   z.c[0] = r1; z.c[1] = r2; z.c[2] = r3; z.c[3] = r4;
+   scanf("%d", &z.i);
+   //int r1 = getc(stdin), r2 = getc(stdin), r3 = getc(stdin), r4 = getc(stdin);
+   //if (r4 < 0) rtexit("Input error");
+   //z.c[0] = r1; z.c[1] = r2; z.c[2] = r3; z.c[3] = r4;
    return z.i;
 }
 inline int inf() {
@@ -207,9 +208,10 @@ inline int inf() {
       char c[4];
       float f;
    } z;
-   int r1 = getc(stdin), r2 = getc(stdin), r3 = getc(stdin), r4 = getc(stdin);
-   if (r4 < 0) rtexit("Input error");
-   z.c[0] = r1; z.c[1] = r2; z.c[2] = r3; z.c[3] = r4;
+   scanf("%f", &z.f);
+   //int r1 = getc(stdin), r2 = getc(stdin), r3 = getc(stdin), r4 = getc(stdin);
+   //if (r4 < 0) rtexit("Input error");
+   //z.c[0] = r1; z.c[1] = r2; z.c[2] = r3; z.c[3] = r4;
    return z.f;
 }
 

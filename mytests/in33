@@ -1,0 +1,22 @@
+event a( int bb);
+event b(int aa);
+
+int bar(int aa) {
+    return aa + 1;
+}
+
+int foo (int a) { 
+    
+        a = 3+bar(a);
+    return a;
+}
+
+a(i)-> {
+    print("\nFirst Param:", i);
+    bar(i);
+}
+
+b(i)-> {
+    print("\nFirst Param:", i);
+    foo(i);
+}

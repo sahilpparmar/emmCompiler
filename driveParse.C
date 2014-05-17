@@ -311,7 +311,7 @@ main(int argc, char *argv[], char *envp[]) {
         //AbstractMachineCode::genAMC(bb, cout);
 
 
-        cout << "Compilation Successful" << endl;
+        DEBUG("Compilation Successful\n");
     }
 #endif
 

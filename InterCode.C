@@ -507,6 +507,7 @@ void BasicBlock::constantPropogation (int *isOptimized) {
                      case OpNode::OpCode::UMINUS:
                      case OpNode::OpCode::ASSIGN:
                                             {
+                                                if(oprnd[1])
                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
                                                     flag     =  true;
