@@ -1,4 +1,4 @@
-#include "AbstractMachineCode.h"
+#include "FinalMachineCodeGen.h"
 #include "InterCode.h"
 #include  <stack>
 
@@ -172,7 +172,7 @@ void pop_registers(ostream &os) {
     }
 }
 
-void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
+void FinalMachineCodeGen::finalCodeGen (BasicBlocksContainer *bbCls, ostream & os) {
     if (!bbCls)
         return;
 
@@ -192,7 +192,7 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
             vector <InterCode*> ::iterator iter2  = (*iter1)->getICodeVector()->begin();
             os << (*iter1)->getBlockLabel() << ": ";
             for(; iter2 != (*iter1)->getICodeVector()->end(); iter2++) {
-                 convert_IC_AMC(*iter2, os);
+                 convert_IC_MC(*iter2, os);
             }
         }
 
@@ -207,7 +207,7 @@ void AbstractMachineCode::genAMC (BasicBlocksContainer *bbCls, ostream & os) {
     os << "PRTS " << "\"DONE\"" << endl << endl;
 }
 
-void AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os) {
+void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
     string  dst_regName ;
     string  src1_regName;
     string  src2_regName;

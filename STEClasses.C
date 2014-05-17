@@ -2,7 +2,7 @@
 #include "Value.h"
 #include "ParserUtil.h"
 #include "InterCode.h"
-#include "AbstractMachineCode.h"
+#include "FinalMachineCodeGen.h"
 
 #define PRINT_OFFSET(s, i) DEBUG((string)"Variable: " + (string)s + (string)", Offset: " + (string)itoa(i));
 
