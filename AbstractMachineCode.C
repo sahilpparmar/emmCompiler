@@ -23,7 +23,7 @@ string allocateNewRegName(bool floatStatus)
     for(int i = 0 ; i < 5; i++)
         newRegName[i] = '\0';
     (floatStatus) ? sprintf(newRegName, "F%.3d", float_reg_count++) : sprintf(newRegName, "R%.3d", int_reg_count++);
-    (floatStatus) ? fl_reg_used_cnt : int_reg_used_cnt++ ;
+    (floatStatus) ? fl_reg_used_cnt++ : int_reg_used_cnt++ ;
     string temp(newRegName);
     return temp;
 }
@@ -152,11 +152,7 @@ void push_registers(string retAdd, ostream &os)
     vector <string> ::iterator iter1  = reg_list.begin();
     for(; iter1 != reg_list.end(); iter1++)
     {
-        if((*iter1).at(0) == 'F')
-            os<<"STF  ";
-        else
-            os<<"STI  ";
-        os<<(*iter1)<<" "<<RSP<<endl;
+        os<<(*iter1)<<endl;
         os<<"SUB "<<RSP<<" 4 "<<RSP<<endl;
     }
 }
@@ -175,7 +171,7 @@ void pop_registers(ostream &os)
         string temp(newRegName);
         os<<"ADD "<<RSP<<" 4 "<<RSP<<endl;
         os<<"LDF "<<RSP<<" "<< temp<<endl;
-        fl++;
+   //     fl++;
     }
     
     for(int i=0; i<int_reg_used_cnt; i++)
@@ -184,7 +180,7 @@ void pop_registers(ostream &os)
         string temp(newRegName);
         os<<"ADD "<<RSP<<" 4 "<<RSP<<endl;
         os<<"LDI "<<RSP<<" "<< temp<<endl;
-        in++;
+ //       in++;
     }
 }
 
@@ -272,10 +268,30 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                         } 
         case APARAM:    {
                             ExprNode *param       = opndsList[0];
+                            Type     *ret_type = (param) ? (param->coercedType() ? (Type*)param ->coercedType() : param->type()): NULL ;
                             string    str;
+                            string regName;
                             if(param)
                             {
-                                str  = param->getRegisterName();
+                                if(param->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE)
+                                {
+                                    if(IS_FLOAT(ret_type))
+                                     {
+                                         regName = allocateNewRegName(true);
+                                         str = "STF "+regName+" "+RSP;
+                                         fl_reg_used_cnt--;
+                                     }
+                                    else
+                                        str = "STI "+param->getRefName()+" "+RSP;
+                                }
+                                else
+                                {
+                                    if(IS_FLOAT(ret_type))
+                                        str = "STF ##"+param->getRegisterName()+" "+RSP;
+                                    else
+                                        str = "STI "+param->getRegisterName()+" "+RSP;
+
+                                }
                                 reg_list.push_back(str);
                             }
                             break;
@@ -426,6 +442,8 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                                             src1_regName = src1->getRegisterName();
                                             if(IS_FLOAT(type_src1)) 
                                                 src1_regName = convertToInt(src1, os);
+                                            else if(IS_STRING(type_src1))
+                                                os<<"MOVS "<<src1_regName<<" "<<dst_regName;
                                             else
                                                 os<<"MOVI "<<src1_regName<<" "<<dst_regName;
                                         }
@@ -503,7 +521,11 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                             }
                             else if(opndsList[1])
                             {
-                                src1_regName = expr1->getRegisterName();
+                                if(cond->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE)
+                                        src1_regName = expr1->getRefName(); 
+                                else
+                                        src1_regName = expr1->getRegisterName();
+                                
                                 if(Type::isBool(type_src1->tag()))
                                 {
                                     if(interCode->getsubCode() == OpNode::OpCode::NOT)
@@ -515,6 +537,10 @@ void   AbstractMachineCode::convert_IC_AMC(InterCode *interCode, ostream &os)
                             }
                             else
                             {
+                                if(cond->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE)
+                                        src1_regName = cond->getRefName(); 
+                                else
+                                        src1_regName = cond->getRegisterName();
                                 os<<"JMPC NE ";
                                 os<<src1_regName<<" 0 "<<(true_lab->getLabel())<<endl;
                                 if(false_lab)
