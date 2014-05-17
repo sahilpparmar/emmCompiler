@@ -269,33 +269,61 @@ main(int argc, char *argv[], char *envp[]) {
            in->print(cout);
         }
 
+        if (optLevel) {
+            DEBUG("====================== Basic Code Optimization ======================\n");
+            if (debugLevel > 0) {
+                if (in) {
+                    in->optimize();
+                    in->print(cout);
+                }
+            }
+            cout << endl;
+        }
+            
         DEBUG("====================Basic Block creation=====================\n");
         BasicBlocksContainer *bbC = new BasicBlocksContainer();
         bbC->createBlockStruct (in);
         if (debugLevel > 0) {
            bbC->print(cout);
         }
-        
-        DEBUG("=========================Optimization========================\n");
-        bbC->optimize();
-        if (debugLevel > 0) {
-           bbC->print(cout);
+            
+        if (optLevel) {
+            DEBUG("=========================Optimization========================\n");
+            bbC->optimize();
+            if (debugLevel > 0) {
+               bbC->print(cout);
+            }
         }
         
         DEBUG("===================Final Code generation=====================\n");
+        ge->eventHandler(cout);
         AbstractMachineCode::genAMC(bbC, cout);
 /*        
-        cout << endl <<"======================Code Optimization (Optimized 3 Addr Code)======================\n";
-        CodeOpt* codeOpt = new CodeOpt();
-        InterCodesClass* out = codeOpt->codeOptimization(in);
-        if (out)
-            out->print(cout);
+        
+        DEBUG("====================Basic Block creation=====================\n");
+        BasicBlocksClass *bb = new BasicBlocksClass();
+        bb->createBlocks(in);
+        bb->print(cout);
 
-        AbstractMachineCode::genAMC(bb, cout);
-*/
+        cout<<"====================== Block Code Optimization ======================\n";
+        bb->blockOptimize();
+        bb->print(cout);
+        //bb->check();
+*/        
+        //TODO: Segfault in mytests/in29
+        //bb->constantOptimize();
+         
+        //TODO: Remove unwanted couts before uncommenting below code
+        //bb->print(cout);
 
-        cout << "Compilation Successful" << endl;
+        //TODO: Enable below once all correctly printed
+        //cout<<"=====================Abstract Code============================\n";
+        //AbstractMachineCode::genAMC(bb, cout);
+
+
+        DEBUG("Compilation Successful\n");
     }
 #endif
 
 }
+

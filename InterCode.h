@@ -21,6 +21,8 @@
 #include <utility>
 #include <set>
 
+#define TAB_SPACE 8
+
 using namespace std;
 
 class InterCode {
@@ -77,7 +79,8 @@ class InterCode {
                         subCode_ = OpNode::OpCode::GE;
                         break;
                 default:
-                        cout<<"Cannot negate the subcode_";
+                        subCode_ = OpNode::OpCode::INVALID;
+                        //cout<<"Cannot negate the subcode_";
                         break;
             }
         }
@@ -109,6 +112,18 @@ class InterCodesClass {
 
         void setICodeVector(vector <InterCode*> *tempVector) {
                 InterCodeVector = *tempVector;
+        }
+        
+        void ifThenElseOpt(int *isOptimized);
+        void removeContLabelGoto(int *isOptimized);
+
+        void optimize () {
+            int isOptimized = 0; 
+            do {
+                    isOptimized = 0;
+                    ifThenElseOpt(&isOptimized);
+                    removeContLabelGoto(&isOptimized);
+            } while (isOptimized);
         }
         
     protected:
@@ -195,37 +210,42 @@ class BasicBlock {
             if (cs) InterCodeVector.push_back (cs);
         }
        
+        vector <string>* getPrevBlockLabels() {
+            return &PrevBlockLabels;
+        }
 
         void print(ostream &os) {
-            
+            /*
             os << "\n\nPrevBlocks: ";
-            vector<string>::iterator iter = PrevBlockLabels.begin();
             for ( ; iter != PrevBlockLabels.end(); ++iter) {
                 os << *iter << ",";
             }
-            os << endl; 
-            os << "Block Start: " << blocklabel << endl;
+            os << endl; */
+            os << blocklabel << ":" << endl;
             vector <InterCode*>::iterator it = InterCodeVector.begin();
+            vector<string>::iterator iter = PrevBlockLabels.begin();
+            
 
             for (; it != InterCodeVector.end(); ++it) {
                 (*it)->print(os);
                 os << endl;
             }
         
-            os << "Block end: " << blocklabel << endl ;
-            os << "NextBlocks:";  
+            //os << "Block end: " << blocklabel << endl ;
+            prtSpace(os, TAB_SPACE);
+            os << "next: (";  
             iter = NextBlockLabels.begin();
             for ( ; iter != NextBlockLabels.end(); ++iter) {
-                os << *iter << ",";
+                os << " " << *iter;
             }
+            os << " )\n";
         }
         
         void constantFolding(int *isOptimized);
         void constantPropogation(int *isOptimized);
-        
-        vector <string>* getPrevBlockLabels() {
-            return &PrevBlockLabels;
-        }
+        void redundantGotoRemoval(int *isOptimized);
+        void zeroRemoval(int *isOptimized);
+
         set <string> EndLiveVars, StartLiveVars;
     private : 
         string blocklabel; 
@@ -267,7 +287,7 @@ class BasicBlocksClass {
         
         void createBlocks (InterCodesClass* ic);
         
-        void constantOptimize () {
+        void blockOptimize () {
            vector <BasicBlock*>::iterator it; 
             int isOptimized = 0; 
             do {
@@ -275,16 +295,18 @@ class BasicBlocksClass {
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
                      (*it)->constantFolding (&isOptimized);
                      (*it)->constantPropogation (&isOptimized);
+                     (*it)->redundantGotoRemoval(&isOptimized);
+                     (*it)->zeroRemoval(&isOptimized);
                  }
             } while (isOptimized);
         }
         
-        void populateLiveVars();
+        void liveVariableAnalysis();
         
         void print(ostream &os) {
              vector <BasicBlock*>::iterator it = bbVector.begin();
              for (; it != bbVector.end(); ++it) {
-                 (*it)->print(os);
+                    (*it)->print(os);
              }
         }
 
@@ -315,18 +337,18 @@ class BasicBlocksContainer {
        void optimize() {
              map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
              for (; it != bbContainer.end(); ++it) {
-                 (*it).second->constantOptimize();
+                 (*it).second->blockOptimize();
                 
                  //no need of live var analysis for global 
                  if ((*it).first.compare("global") != 0) 
-                    (*it).second->populateLiveVars();
+                    (*it).second->liveVariableAnalysis();
              }
        }
         
        void print(ostream &os) {
             map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
-            for (; it != bbContainer.end(); ++it) {
-                os << "\n====Basic Blocks Container: " << (*it).first << "=====" << endl;
+            for (; it != bbContainer.end(); it++) {
+                os << "\n#####" << (*it).first << "#####" << endl;
                 (*it).second->print(os);
                 os << endl;
             }
