@@ -1,15 +1,15 @@
-void foo(int b) {
+int b = 5;
+
+void foo() {
     int a = 5;
+    int c = 5;
 
-    if (a > 0)
+    if (a > 0) {
         b = 3;
+        c = c + b;
+    }
     
-    b = b/a;
+    c = b/a;
+    print (c);
 }
 
-int bar() {
-
-    int c = 33;
-    foo(c);
-    return c;
-}

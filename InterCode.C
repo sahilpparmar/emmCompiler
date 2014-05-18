@@ -922,7 +922,8 @@ void inline check_remove (set<string> &st, string str) {
 
 }
 
-void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksClass *bbCls, bool remove) {
+void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited, 
+                BasicBlocksClass *bbCls, bool remove, int *updated, bool isParentSame) {
 
         string bb_label = BB->getBlockLabel(); 
         
@@ -935,7 +936,11 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited, BasicBl
         //start from bottom.
         //define vector of variables which are being used and if definition is encountered then remove it
         set <string> variablesUsed;
-           
+        
+        //store livevars in vector to check later if values have changed.
+        //If not we can return updated as false, to break recursion
+        set <string> OriginalLiveVars (BB->StartLiveVars);
+
         //initialize start live vars of block as equal to end vars
         //and when corresponding def is encountered in this block, remove them from start live vars
         BB->StartLiveVars = BB->EndLiveVars;
@@ -996,6 +1001,12 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited, BasicBl
                        }
                        break;
                        
+                       case InterCode::OPNTYPE::PRINT: {
+                                      if (opnds[0]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) 
+                                           variablesUsed.insert(opnds[0]->getRefName());
+                       }
+                       break;
+                       
                        case InterCode::OPNTYPE::CALL: {
                                     if (opnds[1]) {
                                           if (remove) {
@@ -1052,14 +1063,41 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited, BasicBl
         for (set<string>::iterator iter = variablesUsed.begin(); iter != variablesUsed.end(); ++iter) {
            BB->StartLiveVars.insert(*iter);
         }
+        
+        if (OriginalLiveVars.size() != BB->StartLiveVars.size()) {
+           *updated = 1;
+            return;
+        }
+       
+        if(BB->StartLiveVars.size() == 0 && isParentSame) {
+            if(OriginalLiveVars.size() == 0)
+                *updated = 0;
+                return;
+        }
+
+
+        for(set<string>::iterator iter = BB->StartLiveVars.begin(); iter != BB->StartLiveVars.end(); ++iter) {
+            if(OriginalLiveVars.find(*iter) == OriginalLiveVars.end()) {
+                *updated = 0;
+                 return;
+            }
+        }
+        
+        *updated = 1;
+        return;
 }
 
-void recurseOnBlocks (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksClass *bbCls) {
+void recurseOnBlocks (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksClass *bbCls, bool isparentSame) {
 
         if(BB == NULL)
             return;
         
-        iterateOnSingleBlock(BB, ifVisited, bbCls, false);
+        int updated = 0; 
+        iterateOnSingleBlock(BB, ifVisited, bbCls, false, &updated, isparentSame);
+        
+        //if (updated == 0)
+          //  return;
+        
         //go over all its previous blocks
         vector<string>::iterator it = BB->getPrevBlockLabels()->begin();
         for (; it != BB->getPrevBlockLabels()->end(); ++it) {
@@ -1071,9 +1109,13 @@ void recurseOnBlocks (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksC
                         it != BB->StartLiveVars.end(); ++it) {
                 newBB->EndLiveVars.insert(*it);
             }
-
+            
+            bool isParent = false;
+            if (BB->getBlockLabel().compare((*it)) == 0)
+                isParent = true;
+            
             //recursive calls to all previous blocks 
-            recurseOnBlocks (newBB, ifVisited, bbCls); 
+            recurseOnBlocks (newBB, ifVisited, bbCls, isParent); 
         }
 
 }
@@ -1099,14 +1141,14 @@ void BasicBlocksClass::liveVariableAnalysis() {
         
         //if block is unvisited
         if (ifVisited.find(bb_label)->second == 0) {
-            recurseOnBlocks (BB, ifVisited, this); 
+            recurseOnBlocks (BB, ifVisited, this, false); 
         }
     }
 
     //Dead code removal
     for (it = bbVector.begin(); it != bbVector.end(); ++it) {
-
-        iterateOnSingleBlock((BasicBlock *)(*it), ifVisited, this, true);
+        int u = 0;
+        iterateOnSingleBlock((BasicBlock *)(*it), ifVisited, this, true, &u, false);
     }
 
     //DEBUG
