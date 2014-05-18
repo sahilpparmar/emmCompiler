@@ -8,7 +8,6 @@
 #include "SymTabMgr.h"
 #include "STEClasses.h"
 #include "InterCode.h"
-#include "CodeOpt.h"
 #include "SymTab.h"
 #include "Value.h"
 #include "FinalMachineCodeGen.h"
