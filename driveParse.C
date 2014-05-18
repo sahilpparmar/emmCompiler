@@ -271,7 +271,7 @@ main(int argc, char *argv[], char *envp[]) {
 
         if (optLevel) {
             DEBUG("====================== Basic Code Optimization ======================\n");
-            in->optimize();
+            in->ioptimize();
             if (debugLevel > 0) {
                     in->print(cout);
             }
@@ -283,6 +283,15 @@ main(int argc, char *argv[], char *envp[]) {
         if (debugLevel > 0) {
            bbC->print(cout);
         }
+        /*
+        set <string>* bbCtrs = bbC->getUsedContainers();        
+        set <string>::iterator it;
+        cout << "\n Called Blocks :";
+        for (it = bbCtrs->begin(); it != bbCtrs->end(); ++it) {
+            //no need of live var analysis for global 
+                cout << (*it) << "\t";
+        }
+        */
             
         if (optLevel) {
             DEBUG("=========================Optimization========================\n");
