@@ -2,6 +2,7 @@
 #include "InterCode.h"
 #include  <stack>
 
+#define     IS_UNKNOWN(type) Type::isUnknown(type->tag())
 #define     IS_FLOAT(type)   Type::isFloat(type->tag())
 #define     IS_INT(type)     Type::isInt  (type->tag())
 #define     IS_STRING(type)  Type::isString  (type->tag())
@@ -46,6 +47,21 @@ string convertToFloat(ExprNode *expr, ostream &os)
     return new_reg;
 }
 
+void relational(string dst_regName, ostream &os)
+{
+    LabelClass *true_lab  = new LabelClass();     
+    InterCode  *ic1 = true_lab->assignLabel();    
+    LabelClass *false_lab = new LabelClass();     
+    InterCode  *ic2 = false_lab->assignLabel();   
+                                                                      
+                    os<<ic1->getLabel()<<endl;
+                    os<<"MOVI 0 "<<dst_regName<<endl;
+                    os<<"JMP "<<ic2->getLabel()<<endl;
+                    os<<ic1->getLabel()<<": ";
+                    os<<"MOVI 1 "<<dst_regName<<endl;
+                    os<<ic2->getLabel()<<": ";
+}
+
 void NOTLogic(string src1_regName, string dst_regName, ostream &os)
 {
     LabelClass *true_lab  = new LabelClass(); 
@@ -71,7 +87,7 @@ void ShiftLogic(bool isSHL, string src1_regName, string src2_regName, string dst
      os<<"MOVI "<<src1_regName<<" "<<RSH_Val<<endl;
      os<<"MOVI "<<src2_regName<<" "<<RSH_Cnt<<endl;
      os<<ic2->getLabel()<<": ";
-     os<<"JMPC GT 0 "<<RSH_Cnt<<" "<<ic1->getLabel()<<endl;
+     os<<"JMPC GT 1 "<<RSH_Cnt<<" "<<ic1->getLabel()<<endl;
      if (isSHL)
          os<<"MUL "<<RSH_Val<<" 2 "<<RSH_Val<<endl;
      else
@@ -227,6 +243,7 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                             os << "JMP  " << func_name << endl;
                             if (int_reg_used_cnt || fl_reg_used_cnt)
                                 os << retAddrReg << ": ";
+                            pop_registers(os);
                             if(opndsList[1])
                             {
                                 ExprNode *src1    = opndsList[1];
@@ -238,26 +255,19 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                                 os<<retValueReg<<endl;
                                 int_reg_used_cnt--; 
                             }
-                            pop_registers(os);
                             reg_list.resize(0);
 
                             break;
                         }
         case FPARAM:    {
                             ExprNode *src1       = opndsList[0];
-                            if(src1)
-                            {
-                                dst_regName = src1->getRegisterName();
-                            }
-                            os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
-                            if(IS_FLOAT(src1->type()))
-                            {
-                                os<<"LDF "<<RSP<<" "<<dst_regName;
-                            } 
-                            else if(IS_INT(src1->type()))
-                            {
-                                os<<"LDI "<<RSP<<" "<<dst_regName;
-                            }
+                            dst_regName = src1->getRegisterName();
+
+                            os << "ADD "<<RSP<<" 4 "<<RSP << endl;
+                            if (IS_FLOAT(src1->type()))
+                                os << "LDF "<<RSP<<" "<<dst_regName;
+                            else 
+                                os << "LDI "<<RSP<<" "<<dst_regName;
                             os << C_FPARAM << endl;
                             break; 
                         } 
@@ -282,7 +292,17 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                                 else
                                 {
                                     if(IS_FLOAT(ret_type))
-                                        str = "STF "+param->getRegisterName()+" "+RSP;
+                                       {
+                                           string temp;
+                                           regName = param->getRegisterName();
+                                           if(regName.at(0) == 'R')
+                                              {
+                                                  temp =  convertToFloat(param, os);
+                                                  str = "STF "+temp+" "+RSP;
+                                              }
+                                            else
+                                                  str = "STF "+param->getRegisterName()+" "+RSP;
+                                        }
                                     else
                                         str = "STI "+param->getRegisterName()+" "+RSP;
 
@@ -311,18 +331,18 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                             break;
                         }
         case EXPR:      {
-                            ExprNode *dst        = opndsList[0];
-                            Type   *type_dst  = (dst ) ?  (dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type()): NULL ;
+                            ExprNode *dst = opndsList[0];
+                            Type   *type_dst  = dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type();
                             if (opndsList[0] && opndsList[1] && opndsList[2]) {
-                                ExprNode *src1       = opndsList[1];
-                                ExprNode *src2       = opndsList[2];
+                                ExprNode *src1 = opndsList[1];
+                                ExprNode *src2 = opndsList[2];
 
-                                Type   *type_src1 = (src1) ?  (src1->coercedType() ? (Type*)src1->coercedType() : src1->type()): NULL ;
-                                Type   *type_src2 = (src2) ?  (src2->coercedType() ? (Type*)src2->coercedType() : src2->type()): NULL ;
+                                Type *type_src1 = src1->coercedType() ? (Type*)src1->coercedType() : src1->type();
+                                Type *type_src2 = src2->coercedType() ? (Type*)src2->coercedType() : src2->type();
                                 if (IS_FLOAT(type_dst)) {
                                     if (src1) {
                                         src1_regName = src1->getRegisterName();
-                                        if (!IS_FLOAT(type_src1)) 
+                                        if (!IS_FLOAT(type_src1))
                                             src1_regName = convertToFloat(src1, os);
                                     }
                                     if (src2) {
@@ -361,20 +381,20 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                                         dst_regName = dst->getRegisterName();
                                     
                                     switch(interCode->getsubCode()) {
-                                        case OpNode::OpCode::PLUS  :   {  os<<"ADD ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::MINUS :   {  os<<"SUB ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::MULT  :   {  os<<"MUL ";    PRT_REG;    break; }    
-                                        case OpNode::OpCode::MOD   :   {  os<<"MOD ";    PRT_REG;    break; }    
-                                        case OpNode::OpCode::DIV   :   {  os<<"DIV ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::BITAND:   {  os<<"AND ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::BITOR :   {  os<<"OR " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::BITXOR:   {  os<<"XOR ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::GT    :   {  os<<"GT " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::GE    :   {  os<<"GE " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::LT    :   {  os<<"LT " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::LE    :   {  os<<"LE " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::EQ    :   {  os<<"EQ " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::NE    :   {  os<<"NE " ;    PRT_REG;    break; }
+                                        case OpNode::OpCode::PLUS  :   {  os<<"ADD ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::MINUS :   {  os<<"SUB ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::MULT  :   {  os<<"MUL ";    PRT_REG;          break; }    
+                                        case OpNode::OpCode::MOD   :   {  os<<"MOD ";    PRT_REG;          break; }    
+                                        case OpNode::OpCode::DIV   :   {  os<<"DIV ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::BITAND:   {  os<<"AND ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::BITOR :   {  os<<"OR " ;    PRT_REG;          break; }
+                                        case OpNode::OpCode::BITXOR:   {  os<<"XOR ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::GT    :   {  os<<"JMPC GT " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::GE    :   {  os<<"JMPC GE " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::LT    :   {  os<<"JMPC LT " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::LE    :   {  os<<"JMPC LE " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::EQ    :   {  os<<"JMPC EQ " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::NE    :   {  os<<"JMPC NE " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
                                         case OpNode::OpCode::SHL   :   {  ShiftLogic(true, src1_regName, src2_regName, dst_regName, os);    break; } 
                                         case OpNode::OpCode::SHR   :   {  ShiftLogic(false, src1_regName, src2_regName, dst_regName, os);           break; }
                                         case OpNode::OpCode::AND   :   {  ANDLogic  (src1_regName, src2_regName, dst_regName, os);    break; } 
@@ -520,15 +540,18 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                             break;
                         }
          case PRINT  :  {
-                            ExprNode *dst        = opndsList[0];
-                            Type   *type_dst     = (dst ) ?  (dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type()): NULL ;
-                            if(IS_FLOAT(type_dst))
-                                os<<"PRTF "<<opndsList[0]->getRegisterName();
-                            else if(IS_STRING(type_dst))
-                                os<<"PRTS "<<opndsList[0]->getRefName();
+                            ExprNode *param        = opndsList[0];
+                            Type   *type_dst     = (param ) ?  (param ->coercedType() ? (Type*)param ->coercedType() : param ->type()): NULL ;
+
+                            if (IS_FLOAT(type_dst))         os<<"PRTF ";
+                            else if (IS_STRING(type_dst))   os<<"PRTS ";
+                            else                            os<<"PRTI ";
+
+                            if (param->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE)
+                                os << opndsList[0]->getRefName();
                             else 
-                                os<<"PRTI "<<opndsList[0]->getRegisterName();
-                            os<<endl;
+                                os << opndsList[0]->getRegisterName();
+                            os << endl;
                             break;
                         }
                      

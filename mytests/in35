@@ -1,38 +1,63 @@
-int a = 5;
-int b = 10;
+int x;
+double zz;
 
-void f(int i, int j) {
-    int c = 2; 
+event a(int aa, int bb);
 
-    if (c < i)
-        b = 9 / 2;
+int foo (int a) {
+    double j = a;
+    double k = 4.5;
+    print("\\nIn foo()");
+    if (j >= k) return 90;
+    else return 100;
+}
+
+int bar (int a) {
+int b,c,d,e,g,h,i,j,l,m;
+bool bb = true, cc=true;
+double f,n;
+
+a = 1;
+print("\\na: ",a);
+b = 5 - 2;
+print("\\nb: ",b);
+
+c = 1 + 10 * 100;
+print("\\nc: ",c);
+d = a * b;
+print("\\nd: ",d);
+e = 1 - c;
+print("\\ne: ",e);
+f = b / 2;
+print("\\nf: ",f);
+g = 10 / 2;
+print("\\ng: ",g);
+h = 13 % 2;
+print("\\nh: ",h);
+i = 1 | 1 & 0;
+print("\\ni: ",i);
+j = 0 & 1;
+print("\\nj: ",j);
+print("\\na again: ", a);
+l = a << b;
+print("\\nl: ",l);
+m = 100 >>  2;
+print("\\nm: ",m);
+
+n = (a % b - c * d / 3 )/(c*c);
+print("\\nn: ",n);
+
+if(bb && cc)
+        a=1000;
     else
-        b = 9 * 2;
-
-    c = 1;
-}
-
-int bar() {
-//    if (a > 0)
-//        f(a, a + 2);
-
+        a=99;
     return a;
-
-    a = 10;
-    a = 5;
 }
 
-void main() {
-    bar();
+a(i, j)-> {
+    print("\\nFirst Param :", i);
+    i = foo(i);
+    print("\\nResult(foo) :", i);
+    i = bar(i);
+    print("\\nResult(bar) :", i);
 }
-
-int foo(int i) {
-    main();
-    return 1;
-}
-
-void foobar() {
-    int i = foo(5);
-}
-
 

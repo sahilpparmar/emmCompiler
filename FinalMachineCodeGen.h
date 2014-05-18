@@ -21,9 +21,9 @@
 
 // Comments inlined in final codegen
 #define C_APARAM    "           // Parameter Pushed on Stack"
-#define C_FPARAM    "           // Parameter Poped from Stack"
+#define C_FPARAM    "           // Parameter Popped from Stack"
 #define C_PUSH_RET  "           // Return Addr Pushed on Stack"
-#define C_POP_RET   "           // Return Addr Poped from Stack"
+#define C_POP_RET   "           // Return Addr Popped from Stack"
 #define C_INIT_RSP  "           // RSP Initialized"
 #define C_IN_EPARAM "           // READ Event Parameter Input"
 

@@ -634,7 +634,7 @@ const Type* PrintFunctionNode::typeCheck()
         vector<ExprNode*>::iterator p_iter = params_->begin();
         for (; p_iter != params_->end(); ++p_iter) {
             ExprNode* expr_node = *p_iter; 
-            expr_node->typeCheck(); 
+            expr_node->coercedType(expr_node->typeCheck());
         }
     }
     // 'print' function has return type VOID
@@ -813,7 +813,7 @@ const Type* RuleNode::typeCheck()
 static FunctionEntry *gRuleFuncSym = NULL;
 InterCodesClass* RuleNode::codeGen()
 {
-    // TODO: Currently only Primitive PatNodes are supported
+    // Currently only Primitive PatNodes are supported
     if (pat_->kind() == BasePatNode::PatNodeKind::PRIMITIVE) {
         InterCodesClass *cls = new InterCodesClass();
 
@@ -877,9 +877,7 @@ void PrimitivePatNode::print(ostream& out, int indent) const
 }
 
 const Type* PrimitivePatNode::typeCheck() 
-{   //TODO: Blindly copied from print, need to check for segfaults. code seems bit susceptible to segfaults
-    //TODO: type mismatch condition is not there in any input files. need to look into if correct.
-
+{
     vector<Type*>* argtype_l = ee_->type()->argTypes();
 
     if (params_) {
@@ -925,9 +923,11 @@ InterCodesClass* PrimitivePatNode::codeGen()
     cls->addCode(LabelClass::assignLabel(funcName));
     cls->addCode(InterCode::OPNTYPE::ENTER, gRuleFuncSym);
 
-    for (int ii = params_->size() - 1; ii >= 0; ii--) {
-        VariableEntry* var_entry = (*params_)[ii]; 
-        cls->addCode(var_entry->codeGen());
+    if (params_) {
+        for (int ii = params_->size() - 1; ii >= 0; ii--) {
+            VariableEntry* var_entry = (*params_)[ii]; 
+            cls->addCode(var_entry->codeGen());
+        }
     }
 
     return cls;
@@ -1304,7 +1304,6 @@ const Type* OpNode::typeCheck() {
             return tp;
         }
     } else if(iopcode == (int)OpNode::OpCode::ASSIGN) {
-
         targ2 = arg_[1]->typeCheck();
         assert(arg_[0] && arg_[1] && "Invalid args");
         
@@ -1312,7 +1311,7 @@ const Type* OpNode::typeCheck() {
           
               if(targ1->tag() == targ2->tag()) {
               } else if(targ1->isSubType(targ2->tag())) {
-                  arg_[0]->coercedType(new Type(targ2->tag()));
+                  arg_[1]->coercedType(new Type(targ2->tag()));
 
               } else {
                   errMsg("Assigned expression must be a subtype of target", this);

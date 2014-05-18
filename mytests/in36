@@ -1,0 +1,17 @@
+event a(double a, double b);
+event b();
+
+string s1 = "\\nParam 1: ";
+string s2 = "\\nParam 2: ";
+
+void aa(double a, double b) {
+    a = a + b;
+}
+
+a(i,j) -> {
+    i = i + j;
+};
+
+b() -> {
+    print("\\nEmpty Event");    
+};
