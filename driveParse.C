@@ -271,10 +271,9 @@ main(int argc, char *argv[], char *envp[]) {
 
         if (optLevel) {
             DEBUG("====================== Basic Code Optimization ======================\n");
-            // in->optimize();
+            in->optimize();
             if (debugLevel > 0) {
-                in->print(cout);
-                cout << endl;
+                    in->print(cout);
             }
         }
             
@@ -289,7 +288,8 @@ main(int argc, char *argv[], char *envp[]) {
             DEBUG("=========================Optimization========================\n");
             bbC->optimize();
             if (debugLevel > 0) {
-              bbC->print(cout);
+                DEBUG("========================= Final Optimized Code ========================\n");
+                bbC->print(cout);
             }
         }
         

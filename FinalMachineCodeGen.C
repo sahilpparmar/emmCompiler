@@ -2,6 +2,7 @@
 #include "InterCode.h"
 #include  <stack>
 
+#define     IS_UNKNOWN(type) Type::isUnknown(type->tag())
 #define     IS_FLOAT(type)   Type::isFloat(type->tag())
 #define     IS_INT(type)     Type::isInt  (type->tag())
 #define     IS_STRING(type)  Type::isString  (type->tag())
@@ -260,19 +261,13 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                         }
         case FPARAM:    {
                             ExprNode *src1       = opndsList[0];
-                            if(src1)
-                            {
-                                dst_regName = src1->getRegisterName();
-                            }
-                            os<<"ADD "<<RSP<<" 4 "<<RSP << endl;
-                            if(IS_FLOAT(src1->type()))
-                            {
-                                os<<"LDF "<<RSP<<" "<<dst_regName;
-                            } 
-                            else if(IS_INT(src1->type()))
-                            {
-                                os<<"LDI "<<RSP<<" "<<dst_regName;
-                            }
+                            dst_regName = src1->getRegisterName();
+
+                            os << "ADD "<<RSP<<" 4 "<<RSP << endl;
+                            if (IS_FLOAT(src1->type()))
+                                os << "LDF "<<RSP<<" "<<dst_regName;
+                            else 
+                                os << "LDI "<<RSP<<" "<<dst_regName;
                             os << C_FPARAM << endl;
                             break; 
                         } 
@@ -336,18 +331,18 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                             break;
                         }
         case EXPR:      {
-                            ExprNode *dst        = opndsList[0];
-                            Type   *type_dst  = (dst ) ?  (dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type()): NULL ;
+                            ExprNode *dst = opndsList[0];
+                            Type   *type_dst  = dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type();
                             if (opndsList[0] && opndsList[1] && opndsList[2]) {
-                                ExprNode *src1       = opndsList[1];
-                                ExprNode *src2       = opndsList[2];
+                                ExprNode *src1 = opndsList[1];
+                                ExprNode *src2 = opndsList[2];
 
-                                Type   *type_src1 = (src1) ?  (src1->coercedType() ? (Type*)src1->coercedType() : src1->type()): NULL ;
-                                Type   *type_src2 = (src2) ?  (src2->coercedType() ? (Type*)src2->coercedType() : src2->type()): NULL ;
+                                Type *type_src1 = src1->coercedType() ? (Type*)src1->coercedType() : src1->type();
+                                Type *type_src2 = src2->coercedType() ? (Type*)src2->coercedType() : src2->type();
                                 if (IS_FLOAT(type_dst)) {
                                     if (src1) {
                                         src1_regName = src1->getRegisterName();
-                                        if (!IS_FLOAT(type_src1)) 
+                                        if (!IS_FLOAT(type_src1))
                                             src1_regName = convertToFloat(src1, os);
                                     }
                                     if (src2) {
@@ -545,15 +540,18 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                             break;
                         }
          case PRINT  :  {
-                            ExprNode *dst        = opndsList[0];
-                            Type   *type_dst     = (dst ) ?  (dst ->coercedType() ? (Type*)dst ->coercedType() : dst ->type()): NULL ;
-                            if(IS_FLOAT(type_dst))
-                                os<<"PRTF "<<opndsList[0]->getRegisterName();
-                            else if(IS_STRING(type_dst))
-                                os<<"PRTS "<<opndsList[0]->getRefName();
+                            ExprNode *param        = opndsList[0];
+                            Type   *type_dst     = (param ) ?  (param ->coercedType() ? (Type*)param ->coercedType() : param ->type()): NULL ;
+
+                            if (IS_FLOAT(type_dst))         os<<"PRTF ";
+                            else if (IS_STRING(type_dst))   os<<"PRTS ";
+                            else                            os<<"PRTI ";
+
+                            if (param->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE)
+                                os << opndsList[0]->getRefName();
                             else 
-                                os<<"PRTI "<<opndsList[0]->getRegisterName();
-                            os<<endl;
+                                os << opndsList[0]->getRegisterName();
+                            os << endl;
                             break;
                         }
                      

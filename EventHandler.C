@@ -31,17 +31,19 @@ void GlobalEntry::eventHandler(ostream& os) {
         os << "STI" << R_PARAM << RSP << C_PUSH_RET << endl;
         os << "SUB" << RSP << " 4" << RSP << endl;
         
-        std::vector<Type*>::iterator type_it = argtype_l->begin();
-        for (; type_it != argtype_l->end(); ++type_it) {
+        if (argtype_l) {
+            std::vector<Type*>::iterator type_it = argtype_l->begin();
+            for (; type_it != argtype_l->end(); ++type_it) {
 
-            if ((*type_it)->tag() == Type::DOUBLE) {
-                os << "INF" << F_PARAM << C_IN_EPARAM << endl;
-                os << "STF" << F_PARAM << RSP << C_APARAM << endl;
-            } else {
-                os << "INI" << R_PARAM << C_IN_EPARAM << endl;
-                os << "STI" << R_PARAM << RSP << C_APARAM << endl;
+                if ((*type_it)->tag() == Type::DOUBLE) {
+                    os << "INF" << F_PARAM << C_IN_EPARAM << endl;
+                    os << "STF" << F_PARAM << RSP << C_APARAM << endl;
+                } else {
+                    os << "INI" << R_PARAM << C_IN_EPARAM << endl;
+                    os << "STI" << R_PARAM << RSP << C_APARAM << endl;
+                }
+                os << "SUB" << RSP << " 4" << RSP << endl;
             }
-            os << "SUB" << RSP << " 4" << RSP << endl;
         }
 
         os << "JMP " << E_PREFIX << event->name() << endl;
@@ -49,7 +51,7 @@ void GlobalEntry::eventHandler(ostream& os) {
     }
 
     os << S_START << ": ";
-    os << "PRTS " << "\"\\nEnter event name:\"" << endl;
+    os << "PRTS " << "\"\\nEnter event name ('0' for exit):\"" << endl;
     os << "IN" << R_PARAM << endl;
 
     // Generate code to select appropriate event
@@ -57,7 +59,7 @@ void GlobalEntry::eventHandler(ostream& os) {
         event = event_l[ii];
         os << "JMPC EQ" << R_PARAM << " " << TO_INT(event->name()) << " " << S_PREFIX << event->name() << endl;
     }
-    os << "JMPC EQ" << R_PARAM << " " << (int)'x' << " " << S_END << endl;
+    os << "JMPC EQ" << R_PARAM << " " << (int)'0' << " " << S_END << endl;
     os << "PRTS " << "\"Invalid Input\\n\"" << endl;
     os << "JMP " << S_START << endl << endl;
 

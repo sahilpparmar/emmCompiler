@@ -61,6 +61,7 @@ class Type {
     return isPrimitive(t); }
   static bool isData(TypeTag t) { return ((t >= VOID) && (t <= CLASS));}
   static bool isValid(TypeTag t) { return ((t >= VOID) && (t <= FUNCTION)); }
+  static bool isUnknown(TypeTag t) { return (t == UNKNOWN); }
   static bool isScalar(TypeTag t) { return ((t >= BOOL) && (t <= DOUBLE)); }
 
  /**************** Define data members of Type and then its methods */

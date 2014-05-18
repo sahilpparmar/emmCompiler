@@ -57,7 +57,7 @@ class InterCode {
                 return os.str();
             }
         }    
-        void xchgSubcode() { 
+        bool xchgSubcode() { 
             
             switch (subCode_) {
                 case OpNode::OpCode::EQ:
@@ -79,10 +79,12 @@ class InterCode {
                         subCode_ = OpNode::OpCode::GE;
                         break;
                 default:
-                        subCode_ = OpNode::OpCode::INVALID;
+                        return false;
+                        //subCode_ = OpNode::OpCode::INVALID;
                         //cout<<"Cannot negate the subcode_";
                         break;
             }
+            return true;
         }
         
     protected:
@@ -222,13 +224,17 @@ class BasicBlock {
         }
 
         void print(ostream &os) {
+            
             os << endl; 
-            os << blocklabel << "Prev: (";  
+            os << blocklabel << ":" << endl;
+            prtSpace(os, TAB_SPACE);
+            os << "Prev: (";  
+            
             vector<string>::iterator iter = PrevBlockLabels.begin();
             for ( ; iter != PrevBlockLabels.end(); ++iter) {
                 os << " " << *iter;
             }
-            os << " )\n";
+            os << " )\n\n";
             
             vector <InterCode*>::iterator it = InterCodeVector.begin();
 
@@ -236,8 +242,8 @@ class BasicBlock {
                 (*it)->print(os);
                 os << endl;
             }
-        
-            //os << "Block end: " << blocklabel << endl ;
+            
+            os << endl; 
             prtSpace(os, TAB_SPACE);
             os << "next: (";  
             iter = NextBlockLabels.begin();
@@ -301,11 +307,12 @@ class BasicBlocksClass {
         void createBlocks (InterCodesClass* ic);
         
         void blockOptimize () {
-           vector <BasicBlock*>::iterator it; 
+           vector <BasicBlock*>::iterator it;
             int isOptimized = 0; 
             do {
                  isOptimized = 0;
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
+                    //cout << (*it)->getBlockLabel();
                      (*it)->constantFolding (&isOptimized);
                      (*it)->constantPropogation (&isOptimized);
                      (*it)->redundantGotoRemoval(&isOptimized);
@@ -360,17 +367,18 @@ class BasicBlocksContainer {
                 print(cout);
              }
             
-             
+             /*
              for (it = bbContainer.begin() ; it != bbContainer.end(); ++it) {
                  //no need of live var analysis for global 
                  if ((*it).first.compare("global") != 0) 
                      (*it).second->liveVariableAnalysis();
              }
-
+                
              if (debugLevel > 0) {
                 cout << "\n\n=========Dead Code Elmination Optimization==================";
                 print(cout);
              }
+             */
        }
         
        void print(ostream &os) {
