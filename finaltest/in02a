@@ -1,0 +1,19 @@
+// recursion
+
+	int a = 2;
+	int b;
+	double f = 1.0;
+	string str = "Hello, compiler!";
+	
+	void foo() {
+		print "love is real \\n";
+	}
+	void test() {
+		foo();
+		while(1) {print "";};
+	}
+    event open (string a1 , int a2 , unsigned int a3);
+    open(file, flags, mode) -> {
+		;
+	};
+
