@@ -1,8 +1,9 @@
 int mul = 0;
 int foo (int a) {
-    mul = mul * 2;
-    if (a <= 10)
-        foo(a + 1);
-
+    while(true) {
+        mul = mul * 2;
+        a = a-1;
+        if (a <= 0) break;
+    }
     return mul;
 }

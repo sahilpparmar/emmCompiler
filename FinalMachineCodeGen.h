@@ -30,9 +30,9 @@
 enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
 string allocateNewRegName (bool isFloat = false);
 
-class AbstractMachineCode {
+class FinalMachineCodeGen {
     public:
-        AbstractMachineCode() {}
-        static void genAMC (BasicBlocksContainer *bbCls, ostream & os);
-        static void convert_IC_AMC (InterCode *interCode, ostream &os);
+        FinalMachineCodeGen() {}
+        static void finalCodeGen (BasicBlocksContainer *bbCls, ostream & os);
+        static void convert_IC_MC (InterCode *interCode, ostream &os);
 };

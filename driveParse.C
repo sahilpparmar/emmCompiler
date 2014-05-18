@@ -11,7 +11,7 @@
 #include "CodeOpt.h"
 #include "SymTab.h"
 #include "Value.h"
-#include "AbstractMachineCode.h"
+#include "FinalMachineCodeGen.h"
 
 using namespace std;
 
@@ -271,7 +271,7 @@ main(int argc, char *argv[], char *envp[]) {
 
         if (optLevel) {
             DEBUG("====================== Basic Code Optimization ======================\n");
-           // in->optimize();
+            // in->optimize();
             if (debugLevel > 0) {
                 in->print(cout);
                 cout << endl;
@@ -295,7 +295,7 @@ main(int argc, char *argv[], char *envp[]) {
         
         DEBUG("===================Final Code generation=====================\n");
         ge->eventHandler(cout);
-        AbstractMachineCode::genAMC(bbC, cout);
+        FinalMachineCodeGen::finalCodeGen(bbC, cout);
 
         DEBUG("Compilation Successful\n");
     }
