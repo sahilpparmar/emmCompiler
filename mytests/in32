@@ -1,14 +1,24 @@
-event a(double aa, int bb);
+event a(int bb);
 event b(int aa, unsigned int bb);
 int sum=10;
 bool ii;
-a(i,j)-> {
-    ii = i<j;
-    if((ii || !(i<6)) && (i<=j || j >=i))
-        sum = i+j;
-    else
-        sum = i-j;
-}
-
 b(i,j)-> {
+    if(i>j) {
+        print("i > j");
+    } else {
+        print("i <= j");
+    }
+}
+int foo(int a) 
+{ 
+    int b,d;
+    a=10; 
+    b=5-2; 
+    d=a*b;
+
+    return d;
+}
+a(i)-> {
+    i = foo(i);
+    print ("\\nProduct: ", i);
 }

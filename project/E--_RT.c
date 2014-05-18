@@ -47,7 +47,7 @@ unsigned *mem;
 
 #define PRTS(x) printf((char *)(x))
 #define PRTI(x) printf("%d", (x))
-#define PRTF(x) printf("%g", (x))
+#define PRTF(x) printf("%.f", (x))
 
 #define JMP(x) goto x
 #define JMPC(y,x) if (y) goto x
