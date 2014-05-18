@@ -66,3 +66,430 @@ L7:
         return a
         leave bar
 
+====================== Basic Code Optimization ======================
+global:
+        a = 5
+        b = 10
+f:
+        enter f
+        fparam i
+        fparam j
+        c = 2
+        __vreg0 = 8.5 + 1.1
+        __vreg1 = __vreg0 + c
+        e = __vreg1
+        if e < b goto L5:
+        goto L4:
+L5:
+        if e > c goto L3:
+        goto L4:
+L3:
+        __vreg2 = 9 / 2
+        b = __vreg2
+        goto L2:
+L4:
+        __vreg3 = 9 * 2
+        b = __vreg3
+L2:
+        __vreg4 = c + b
+        e = __vreg4
+        return c
+        leave f
+bar:
+        enter bar
+        if a > 0 goto L8:
+        goto L7:
+L8:
+        __vreg5 = a + 2
+        aparam __vreg5
+        aparam a
+        __vreg6 = call f
+L9:
+L7:
+        return a
+        leave bar
+
+
+====================Basic Block creation=====================
+
+#####bar#####
+        prev: ( )
+bar:
+        enter bar
+        if a > 0 goto L8:
+        goto L7:
+        next: ( L8 L7 )
+        prev: ( bar )
+L8:
+        __vreg5 = a + 2
+        aparam __vreg5
+        aparam a
+        __vreg6 = call f
+        next: ( L9 )
+        prev: ( L8 )
+L9:
+        next: ( L7 )
+        prev: ( bar L9 )
+L7:
+        return a
+        leave bar
+        next: ( )
+
+
+#####f#####
+        prev: ( )
+f:
+        enter f
+        fparam i
+        fparam j
+        c = 2
+        __vreg0 = 8.5 + 1.1
+        __vreg1 = __vreg0 + c
+        e = __vreg1
+        if e < b goto L5:
+        goto L4:
+        next: ( L5 L4 )
+        prev: ( f )
+L5:
+        if e > c goto L3:
+        goto L4:
+        next: ( L3 L4 )
+        prev: ( L5 )
+L3:
+        __vreg2 = 9 / 2
+        b = __vreg2
+        goto L2:
+        next: ( L2 )
+        prev: ( f L5 )
+L4:
+        __vreg3 = 9 * 2
+        b = __vreg3
+        next: ( L2 )
+        prev: ( L3 L4 )
+L2:
+        __vreg4 = c + b
+        e = __vreg4
+        return c
+        leave f
+        next: ( )
+
+
+#####global#####
+        prev: ( )
+global:
+        a = 5
+        b = 10
+        next: ( )
+        prev: ( )
+global:
+        a = 5
+        b = 10
+        next: ( )
+
+
+=========================Optimization========================
+
+
+=====Constant propogation and folding optimization=======
+#####bar#####
+        prev: ( )
+bar:
+        enter bar
+        if a > 0 goto L8:
+        goto L7:
+        next: ( L8 L7 )
+        prev: ( bar )
+L8:
+        __vreg5 = a + 2
+        aparam __vreg5
+        aparam a
+        __vreg6 = call f
+        next: ( L9 )
+        prev: ( L8 )
+L9:
+        next: ( L7 )
+        prev: ( bar L9 )
+L7:
+        return a
+        leave bar
+        next: ( )
+
+
+#####f#####
+        prev: ( )
+f:
+        enter f
+        fparam i
+        fparam j
+        c = 2
+        __vreg0 = 9.6
+        __vreg1 = 11.6
+        e = 11.6
+        if e < b goto L5:
+        goto L4:
+        next: ( L5 L4 )
+        prev: ( f )
+L5:
+        if e > c goto L3:
+        goto L4:
+        next: ( L3 L4 )
+        prev: ( L5 )
+L3:
+        __vreg2 = 4
+        b = 4
+        goto L2:
+        next: ( L2 )
+        prev: ( f L5 )
+L4:
+        __vreg3 = 18
+        b = 18
+        next: ( L2 )
+        prev: ( L3 L4 )
+L2:
+        __vreg4 = c + b
+        e = __vreg4
+        return c
+        leave f
+        next: ( )
+
+
+#####global#####
+        prev: ( )
+global:
+        a = 5
+        b = 10
+        next: ( )
+        prev: ( )
+global:
+        a = 5
+        b = 10
+        next: ( )
+
+
+
+ blockName: bar
+live vars at start: a,
+live vars at End: a,
+
+ blockName: L8
+live vars at start: a,
+live vars at End: 
+
+ blockName: L9
+live vars at start: 
+live vars at End: 
+
+ blockName: L7
+live vars at start: a,
+live vars at End: 
+
+ blockName: f
+live vars at start: b,
+live vars at End: c,e,
+
+ blockName: L5
+live vars at start: c,e,
+live vars at End: 
+
+ blockName: L3
+live vars at start: 
+live vars at End: 
+
+ blockName: L4
+live vars at start: 
+live vars at End: 
+
+ blockName: L2
+live vars at start: c,
+live vars at End: 
+
+=========Dead Code Elmination Optimization==================
+#####bar#####
+        prev: ( )
+bar:
+        enter bar
+        if a > 0 goto L8:
+        goto L7:
+        next: ( L8 L7 )
+        prev: ( bar )
+L8:
+        __vreg5 = a + 2
+        aparam __vreg5
+        aparam a
+        next: ( L9 )
+        prev: ( L8 )
+L9:
+        next: ( L7 )
+        prev: ( bar L9 )
+L7:
+        return a
+        leave bar
+        next: ( )
+
+
+#####f#####
+        prev: ( )
+f:
+        enter f
+        fparam i
+        fparam j
+        c = 2
+        e = 11.6
+        if e < b goto L5:
+        goto L4:
+        next: ( L5 L4 )
+        prev: ( f )
+L5:
+        if e > c goto L3:
+        goto L4:
+        next: ( L3 L4 )
+        prev: ( L5 )
+L3:
+        goto L2:
+        next: ( L2 )
+        prev: ( f L5 )
+L4:
+        next: ( L2 )
+        prev: ( L3 L4 )
+L2:
+        return c
+        leave f
+        next: ( )
+
+
+#####global#####
+        prev: ( )
+global:
+        a = 5
+        b = 10
+        next: ( )
+        prev: ( )
+global:
+        a = 5
+        b = 10
+        next: ( )
+
+
+#####bar#####
+        prev: ( )
+bar:
+        enter bar
+        if a > 0 goto L8:
+        goto L7:
+        next: ( L8 L7 )
+        prev: ( bar )
+L8:
+        __vreg5 = a + 2
+        aparam __vreg5
+        aparam a
+        next: ( L9 )
+        prev: ( L8 )
+L9:
+        next: ( L7 )
+        prev: ( bar L9 )
+L7:
+        return a
+        leave bar
+        next: ( )
+
+
+#####f#####
+        prev: ( )
+f:
+        enter f
+        fparam i
+        fparam j
+        c = 2
+        e = 11.6
+        if e < b goto L5:
+        goto L4:
+        next: ( L5 L4 )
+        prev: ( f )
+L5:
+        if e > c goto L3:
+        goto L4:
+        next: ( L3 L4 )
+        prev: ( L5 )
+L3:
+        goto L2:
+        next: ( L2 )
+        prev: ( f L5 )
+L4:
+        next: ( L2 )
+        prev: ( L3 L4 )
+L2:
+        return c
+        leave f
+        next: ( )
+
+
+#####global#####
+        prev: ( )
+global:
+        a = 5
+        b = 10
+        next: ( )
+        prev: ( )
+global:
+        a = 5
+        b = 10
+        next: ( )
+
+
+===================Final Code generation=====================
+JMP begin
+_S_START: PRTS "\nEnter event name:"
+IN R005
+JMPC EQ R005 120 _S_END
+PRTS "Invalid Input\n"
+JMP _S_START
+
+begin: MOVI  10000 R000           // RSP Initialized
+JMP global
+
+// Function/Event Module begins
+bar: JMPC GT R020 0 L8
+JMP L7
+L8: ADD R020 2 R021
+L9: L7: MOVI R020  R001
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+// Function/Event Module begins
+f: ADD  R000 4  R000
+LDI  R000 R022           // Parameter Poped from Stack
+ADD  R000 4  R000
+LDI  R000 R023           // Parameter Poped from Stack
+MOVI 2 R024
+MOVF 11.6 F010
+MOVIF R025 F011
+JMPC FLT F010 F011 L5
+JMP L4
+L5: MOVIF R024 F012
+JMPC FGT F010 F012 L3
+JMP L4
+L3: JMP L2
+L4: L2: MOVI R024  R001
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Poped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+global: MOVI 5 R020
+MOVI 10 R025
+global: MOVI 5 R020
+MOVI 10 R025
+JMP _S_START
+
+_S_END: PRTS "DONE"
+
+
+Compilation Successful

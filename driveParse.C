@@ -289,7 +289,7 @@ main(int argc, char *argv[], char *envp[]) {
             DEBUG("=========================Optimization========================\n");
             bbC->optimize();
             if (debugLevel > 0) {
-               bbC->print(cout);
+              bbC->print(cout);
             }
         }
         
