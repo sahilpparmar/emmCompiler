@@ -11,7 +11,7 @@
 #include "CodeOpt.h"
 #include "SymTab.h"
 #include "Value.h"
-#include "AbstractMachineCode.h"
+#include "FinalMachineCodeGen.h"
 
 using namespace std;
 
@@ -260,8 +260,8 @@ main(int argc, char *argv[], char *envp[]) {
             return 1;
         }
 
-        DEBUG("======================Memory Allocation======================\n");
-        ge->memAlloc(); 
+        //DEBUG("======================Memory Allocation======================\n");
+        //ge->memAlloc(); 
 
         DEBUG("======================3 Addr Generation======================\n");
         InterCodesClass* in = ge->codeGen();
@@ -275,7 +275,6 @@ main(int argc, char *argv[], char *envp[]) {
             if (debugLevel > 0) {
                     in->print(cout);
             }
-            cout << endl;
         }
             
         DEBUG("====================Basic Block creation=====================\n");
@@ -289,35 +288,13 @@ main(int argc, char *argv[], char *envp[]) {
             DEBUG("=========================Optimization========================\n");
             bbC->optimize();
             if (debugLevel > 0) {
-               bbC->print(cout);
+              bbC->print(cout);
             }
         }
         
         DEBUG("===================Final Code generation=====================\n");
         ge->eventHandler(cout);
-        AbstractMachineCode::genAMC(bbC, cout);
-/*        
-        
-        DEBUG("====================Basic Block creation=====================\n");
-        BasicBlocksClass *bb = new BasicBlocksClass();
-        bb->createBlocks(in);
-        bb->print(cout);
-
-        cout<<"====================== Block Code Optimization ======================\n";
-        bb->blockOptimize();
-        bb->print(cout);
-        //bb->check();
-*/        
-        //TODO: Segfault in mytests/in29
-        //bb->constantOptimize();
-         
-        //TODO: Remove unwanted couts before uncommenting below code
-        //bb->print(cout);
-
-        //TODO: Enable below once all correctly printed
-        //cout<<"=====================Abstract Code============================\n";
-        //AbstractMachineCode::genAMC(bb, cout);
-
+        FinalMachineCodeGen::finalCodeGen(bbC, cout);
 
         DEBUG("Compilation Successful\n");
     }

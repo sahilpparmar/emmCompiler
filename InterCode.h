@@ -225,18 +225,16 @@ class BasicBlock {
 
         void print(ostream &os) {
             
-            vector <InterCode*>::iterator it = InterCodeVector.begin();
+            os << endl; 
+            os << blocklabel << "Prev: (";  
             vector<string>::iterator iter = PrevBlockLabels.begin();
-            os << "\n\n";
-            prtSpace(os, TAB_SPACE);
-            os << "prev: (";
             for ( ; iter != PrevBlockLabels.end(); ++iter) {
                 os << " " << *iter;
             }
-            os << " )";
-            os << endl;
-            os << blocklabel << ":" << endl;
+            os << " )\n";
             
+            vector <InterCode*>::iterator it = InterCodeVector.begin();
+
             for (; it != InterCodeVector.end(); ++it) {
                 (*it)->print(os);
                 os << endl;
@@ -270,8 +268,15 @@ class BasicBlocksClass {
         vector <BasicBlock*> bbVector;
         map <string, BasicBlock*> label_block_map; 
     public:
+        
+        vector<string> ordervec;
+        
         map <string, BasicBlock*>* getLabelMap() {
             return &label_block_map;
+        }
+       
+        void setVector (vector <BasicBlock *> &vec) {
+            bbVector = vec;
         }
         
         vector<BasicBlock*>* getVector() {
@@ -299,12 +304,12 @@ class BasicBlocksClass {
         void createBlocks (InterCodesClass* ic);
         
         void blockOptimize () {
-           vector <BasicBlock*>::iterator it; int i = 0;
+           vector <BasicBlock*>::iterator it;
             int isOptimized = 0; 
             do {
                  isOptimized = 0;
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
-                    cout << (*it)->getBlockLabel();
+                    //cout << (*it)->getBlockLabel();
                      (*it)->constantFolding (&isOptimized);
                      (*it)->constantPropogation (&isOptimized);
                      (*it)->redundantGotoRemoval(&isOptimized);
@@ -314,6 +319,7 @@ class BasicBlocksClass {
         }
         
         void liveVariableAnalysis();
+        void commonSubExprElimination();
         
         void print(ostream &os) {
              vector <BasicBlock*>::iterator it = bbVector.begin();
@@ -351,9 +357,24 @@ class BasicBlocksContainer {
              for (; it != bbContainer.end(); ++it) {
                  (*it).second->blockOptimize();
                 
+             }
+             
+             if (debugLevel > 0) {
+                cout << "\n\n=====Constant propogation and folding optimization=======";
+                print(cout);
+             }
+            
+             /*
+             for (it = bbContainer.begin() ; it != bbContainer.end(); ++it) {
                  //no need of live var analysis for global 
-                 //if ((*it).first.compare("global") != 0) 
-                 //   (*it).second->liveVariableAnalysis();
+                 if ((*it).first.compare("global") != 0) 
+                     (*it).second->liveVariableAnalysis();
+             }
+                */
+
+             if (debugLevel > 0) {
+                cout << "\n\n=========Dead Code Elmination Optimization==================";
+                print(cout);
              }
        }
         

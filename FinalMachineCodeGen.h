@@ -19,12 +19,20 @@
 #define S_PREFIX    "_S_"
 #define E_PREFIX    "_event_"
 
+// Comments inlined in final codegen
+#define C_APARAM    "           // Parameter Pushed on Stack"
+#define C_FPARAM    "           // Parameter Poped from Stack"
+#define C_PUSH_RET  "           // Return Addr Pushed on Stack"
+#define C_POP_RET   "           // Return Addr Poped from Stack"
+#define C_INIT_RSP  "           // RSP Initialized"
+#define C_IN_EPARAM "           // READ Event Parameter Input"
+
 enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
 string allocateNewRegName (bool isFloat = false);
 
-class AbstractMachineCode {
+class FinalMachineCodeGen {
     public:
-        AbstractMachineCode() {}
-        static void genAMC (BasicBlocksContainer *bbCls, ostream & os);
-        static void convert_IC_AMC (InterCode *interCode, ostream &os);
+        FinalMachineCodeGen() {}
+        static void finalCodeGen (BasicBlocksContainer *bbCls, ostream & os);
+        static void convert_IC_MC (InterCode *interCode, ostream &os);
 };

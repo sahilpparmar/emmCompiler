@@ -1,7 +1,7 @@
 #include "Ast.h"
 #include "ParserUtil.h"
 #include "InterCode.h"
-#include "AbstractMachineCode.h"
+#include "FinalMachineCodeGen.h"
 
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) 
@@ -211,36 +211,53 @@ InterCodesClass* IfNode::codeGen()
 {
     assert(cond_ && "If Condition Expected");
     if (then_) {
-        InterCodesClass* cls = new InterCodesClass();    
-        InterCode* nxt = LabelClass::assignLabel();
+        InterCodesClass* cls = new InterCodesClass();
 
-        cond_->OnTrue(LabelClass::assignLabel()); 
-        then_->next (nxt);
+        if (cond_->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) {
+            bool isTrue = ((ValueNode*)cond_)->value()->bval();
+            
+            if (isTrue) {
+                // if(true) ...
+                cls->addCode(then_->codeGen());
+                
+            } else {
+                // if(false) ...
+                if (else_) {
+                    cls->addCode (else_->codeGen());
+                }
+            }
 
-        if (!else_) {
-            cond_->OnFalse (nxt);
         } else {
-            cond_->OnFalse(LabelClass::assignLabel());   
-            else_->next (nxt);
-        }
-        IsIfRelNeeded = true;
-        InterCodesClass* ic_cond;
-        if ((ic_cond = cond_->codeGen()) != NULL) {
-            cls->addCode(ic_cond);
-        } else {
-            cls->addCode(InterCode::OPNTYPE::IFREL, cond_);
-        }
-        IsIfRelNeeded = false;
+            InterCode* nxt = LabelClass::assignLabel();
 
-        cls->addCode(cond_->onTrue_);
-        cls->addCode(then_->codeGen());
+            cond_->OnTrue(LabelClass::assignLabel()); 
+            then_->next (nxt);
 
-        if (else_) {
-            cls->addCode (InterCode::OPNTYPE::GOTO, nxt); 
-            cls->addCode (cond_->onFalse_);
-            cls->addCode (else_->codeGen());
+            if (!else_) {
+                cond_->OnFalse (nxt);
+            } else {
+                cond_->OnFalse(LabelClass::assignLabel());   
+                else_->next (nxt);
+            }
+            IsIfRelNeeded = true;
+            InterCodesClass* ic_cond;
+            if ((ic_cond = cond_->codeGen()) != NULL) {
+                cls->addCode(ic_cond);
+            } else {
+                cls->addCode(InterCode::OPNTYPE::IFREL, cond_);
+            }
+            IsIfRelNeeded = false;
+
+            cls->addCode(cond_->onTrue_);
+            cls->addCode(then_->codeGen());
+
+            if (else_) {
+                cls->addCode (InterCode::OPNTYPE::GOTO, nxt); 
+                cls->addCode (cond_->onFalse_);
+                cls->addCode (else_->codeGen());
+            }
+            cls->addCode (nxt); 
         }
-        cls->addCode (nxt); 
 
         return cls;
     }
@@ -338,29 +355,52 @@ const Type* WhileNode::typeCheck()
 InterCodesClass* WhileNode::codeGen()
 {
     InterCodesClass *cls = new InterCodesClass();
-    InterCode* loop_l = LabelClass::assignLabel();
-    InterCode* body_l = LabelClass::assignLabel();
-    InterCode* end_l = LabelClass::assignLabel();
-    InterCodesClass* ic_cond;
 
-    body_->next(loop_l);
-    cls->addCode(loop_l);
+    if (cond_->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) {
+        bool isTrue = ((ValueNode*)cond_)->value()->bval();
 
-    cond_->OnTrue(body_l); 
-    cond_->OnFalse(end_l);
-    IsIfRelNeeded = true;
-    if ((ic_cond = cond_->codeGen()) != NULL) {
-        cls->addCode(ic_cond);
+        if (isTrue) {
+            // while(true) ...
+            InterCode* loop_l = LabelClass::assignLabel();
+            InterCode* end_l = LabelClass::assignLabel();
+
+            body_->next(loop_l);
+            cond_->OnFalse(end_l);
+
+            cls->addCode(loop_l);
+            cls->addCode(body_->codeGen());
+            cls->addCode(InterCode::OPNTYPE::GOTO, loop_l);
+            cls->addCode(end_l);
+
+        } else {
+            // while(false) ...
+            // Do nothing
+        }
+
     } else {
-        cls->addCode(InterCode::OPNTYPE::IFREL, cond_);
-    }
-    IsIfRelNeeded = false;
+        InterCode* loop_l = LabelClass::assignLabel();
+        InterCode* body_l = LabelClass::assignLabel();
+        InterCode* end_l = LabelClass::assignLabel();
+        InterCodesClass* ic_cond;
 
-    cls->addCode(body_l);
-    cls->addCode(body_->codeGen());
-    cls->addCode (InterCode::OPNTYPE::GOTO, loop_l);
-    cls->addCode(end_l);
-    
+        body_->next(loop_l);
+        cls->addCode(loop_l);
+
+        cond_->OnTrue(body_l); 
+        cond_->OnFalse(end_l);
+        IsIfRelNeeded = true;
+        if ((ic_cond = cond_->codeGen()) != NULL) {
+            cls->addCode(ic_cond);
+        } else {
+            cls->addCode(InterCode::OPNTYPE::IFREL, cond_);
+        }
+        IsIfRelNeeded = false;
+
+        cls->addCode(body_l);
+        cls->addCode(body_->codeGen());
+        cls->addCode(InterCode::OPNTYPE::GOTO, loop_l);
+        cls->addCode(end_l);
+    }
     return cls;
 }
 
