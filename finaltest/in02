@@ -35,7 +35,7 @@
 	}
 	void test() {
 		foo(0);
-		while(5>3) {print ("");};
+//		while(5>3) {print ("");};
                 print("in test...............");
 	}
     event open (int a2 , unsigned int a3);

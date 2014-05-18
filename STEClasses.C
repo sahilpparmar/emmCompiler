@@ -139,6 +139,7 @@ const Type* VariableEntry::typeCheck()
         if (!t1->isSubType(t2->tag(), t2)) {
             errMsg("Assignment between incompatible types", initVal_);
         }
+    cout<<"\n event type: "<<t1->tag();
     }
 
     return t1; 

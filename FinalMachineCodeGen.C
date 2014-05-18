@@ -46,6 +46,21 @@ string convertToFloat(ExprNode *expr, ostream &os)
     return new_reg;
 }
 
+void relational(string dst_regName, ostream &os)
+{
+    LabelClass *true_lab  = new LabelClass();     
+    InterCode  *ic1 = true_lab->assignLabel();    
+    LabelClass *false_lab = new LabelClass();     
+    InterCode  *ic2 = false_lab->assignLabel();   
+                                                                      
+                    os<<ic1->getLabel()<<endl;
+                    os<<"MOVI 0 "<<dst_regName<<endl;
+                    os<<"JMP "<<ic2->getLabel()<<endl;
+                    os<<ic1->getLabel()<<": ";
+                    os<<"MOVI 1 "<<dst_regName<<endl;
+                    os<<ic2->getLabel()<<": ";
+}
+
 void NOTLogic(string src1_regName, string dst_regName, ostream &os)
 {
     LabelClass *true_lab  = new LabelClass(); 
@@ -371,20 +386,20 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                                         dst_regName = dst->getRegisterName();
                                     
                                     switch(interCode->getsubCode()) {
-                                        case OpNode::OpCode::PLUS  :   {  os<<"ADD ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::MINUS :   {  os<<"SUB ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::MULT  :   {  os<<"MUL ";    PRT_REG;    break; }    
-                                        case OpNode::OpCode::MOD   :   {  os<<"MOD ";    PRT_REG;    break; }    
-                                        case OpNode::OpCode::DIV   :   {  os<<"DIV ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::BITAND:   {  os<<"AND ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::BITOR :   {  os<<"OR " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::BITXOR:   {  os<<"XOR ";    PRT_REG;    break; }
-                                        case OpNode::OpCode::GT    :   {  os<<"GT " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::GE    :   {  os<<"GE " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::LT    :   {  os<<"LT " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::LE    :   {  os<<"LE " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::EQ    :   {  os<<"EQ " ;    PRT_REG;    break; }
-                                        case OpNode::OpCode::NE    :   {  os<<"NE " ;    PRT_REG;    break; }
+                                        case OpNode::OpCode::PLUS  :   {  os<<"ADD ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::MINUS :   {  os<<"SUB ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::MULT  :   {  os<<"MUL ";    PRT_REG;          break; }    
+                                        case OpNode::OpCode::MOD   :   {  os<<"MOD ";    PRT_REG;          break; }    
+                                        case OpNode::OpCode::DIV   :   {  os<<"DIV ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::BITAND:   {  os<<"AND ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::BITOR :   {  os<<"OR " ;    PRT_REG;          break; }
+                                        case OpNode::OpCode::BITXOR:   {  os<<"XOR ";    PRT_REG;          break; }
+                                        case OpNode::OpCode::GT    :   {  os<<"JMPC GT " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::GE    :   {  os<<"JMPC GE " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::LT    :   {  os<<"JMPC LT " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::LE    :   {  os<<"JMPC LE " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::EQ    :   {  os<<"JMPC EQ " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
+                                        case OpNode::OpCode::NE    :   {  os<<"JMPC NE " <<src1_regName<<" "<<src2_regName<<" ";    relational( dst_regName, os);    break; }
                                         case OpNode::OpCode::SHL   :   {  ShiftLogic(true, src1_regName, src2_regName, dst_regName, os);    break; } 
                                         case OpNode::OpCode::SHR   :   {  ShiftLogic(false, src1_regName, src2_regName, dst_regName, os);           break; }
                                         case OpNode::OpCode::AND   :   {  ANDLogic  (src1_regName, src2_regName, dst_regName, os);    break; } 
