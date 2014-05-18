@@ -3,49 +3,48 @@ double zz;
 
 event a(int aa, int bb);
 
-int fac (int a) {
-    print("a from fac: ", a);
+int foo (int a) {
     double j = a;
-    print("j from fac: ", j);
-
     double k = 4.5;
-
+    print("\\nIn foo()");
     if (j >= k) return 90;
-    else
-        return 100;
+    else return 100;
 }
 
 int bar (int a) {
- a = 1;
-print("a: ",a);
-int b = 5 - 2;
-print("b: ",b);
-
-int c = 1 + 10 * 100;
-print("c: ",c);
-int d = a * b;
-print("d: ",d);
-int e = 1 - c;
-print("e: ",e);
-double f = b / 4;
-print("f: ",f);
-int g = 10 / 2;
-print("g: ",g);
-int h = 10 % 2;
-print("h: ",h);
-int i = 1 | 1 & 0;
-print("i: ",i);
-int j = 0 & 1;
-print("j: ",j);
-print("a again: ", a);
-int l = a << b;
-print("l: ",l);
-int m = 100 >>  2;
-print("m: ",m);
+int b,c,d,e,g,h,i,j,l,m;
 bool bb = true, cc=true;
+double f,n;
 
-double n = (a % b - c * d / 3 )/(c*c);
-print("n: ",n);
+a = 1;
+print("\\na: ",a);
+b = 5 - 2;
+print("\\nb: ",b);
+
+c = 1 + 10 * 100;
+print("\\nc: ",c);
+d = a * b;
+print("\\nd: ",d);
+e = 1 - c;
+print("\\ne: ",e);
+f = b / 2;
+print("\\nf: ",f);
+g = 10 / 2;
+print("\\ng: ",g);
+h = 13 % 2;
+print("\\nh: ",h);
+i = 1 | 1 & 0;
+print("\\ni: ",i);
+j = 0 & 1;
+print("\\nj: ",j);
+print("\\na again: ", a);
+l = a << b;
+print("\\nl: ",l);
+m = 100 >>  2;
+print("\\nm: ",m);
+
+n = (a % b - c * d / 3 )/(c*c);
+print("\\nn: ",n);
 
 if(bb && cc)
         a=1000;
@@ -56,9 +55,9 @@ if(bb && cc)
 
 a(i, j)-> {
     print("\\nFirst Param :", i);
-    i = fac(i);
-    print("\\nResult(fac) :", i);
+    i = foo(i);
+    print("\\nResult(foo) :", i);
     i = bar(i);
-    print("\\nResult(fac) :", i);
+    print("\\nResult(bar) :", i);
 }
 

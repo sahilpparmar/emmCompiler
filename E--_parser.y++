@@ -657,9 +657,18 @@ function_defn:      TOK_LBRACE function_body TOK_RBRACE semi_colon          {   
                   | TOK_LBRACE function_body TOK_RBRACE                     {   $$ = allocCompStmtNode(curStmtList3);        curStmtList3 = NULL;     prt("FunctionBody");  }
                   ;
 
-function_body:      function_body local_decl
-                  | function_body simple_stmt                               {   if (!curStmtList3) curStmtList3 = new list<StmtNode*>; curStmtList3->push_back($2); }
+function_body:      local_decl_l function_stmts
+                  | local_decl_l
+                  | function_stmts
                   |
+                  ;
+
+function_stmts:     function_stmts simple_stmt                              {   curStmtList3->push_back($2); }
+                  | simple_stmt                                             {   curStmtList3 = new list<StmtNode*>; curStmtList3->push_back($1); }
+                  ;
+
+local_decl_l:       local_decl_l local_decl
+                  | local_decl
                   ;
 
 local_decl:         type local_l semi_colon
