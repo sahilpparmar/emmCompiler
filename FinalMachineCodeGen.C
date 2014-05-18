@@ -71,7 +71,7 @@ void ShiftLogic(bool isSHL, string src1_regName, string src2_regName, string dst
      os<<"MOVI "<<src1_regName<<" "<<RSH_Val<<endl;
      os<<"MOVI "<<src2_regName<<" "<<RSH_Cnt<<endl;
      os<<ic2->getLabel()<<": ";
-     os<<"JMPC GT 0 "<<RSH_Cnt<<" "<<ic1->getLabel()<<endl;
+     os<<"JMPC GT 1 "<<RSH_Cnt<<" "<<ic1->getLabel()<<endl;
      if (isSHL)
          os<<"MUL "<<RSH_Val<<" 2 "<<RSH_Val<<endl;
      else
@@ -227,6 +227,7 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                             os << "JMP  " << func_name << endl;
                             if (int_reg_used_cnt || fl_reg_used_cnt)
                                 os << retAddrReg << ": ";
+                            pop_registers(os);
                             if(opndsList[1])
                             {
                                 ExprNode *src1    = opndsList[1];
@@ -238,7 +239,6 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                                 os<<retValueReg<<endl;
                                 int_reg_used_cnt--; 
                             }
-                            pop_registers(os);
                             reg_list.resize(0);
 
                             break;

@@ -5,7 +5,7 @@
  int d = 1;
 
   void f() {
-		print "f()!!!\\n";
+		print ("f()!!!\\n");
   };
 	void y(int a) {
 	int b;
@@ -16,7 +16,7 @@
   void g(int a3) {
   int a1=9;
   int a2=3;
-  int a3=99;
+   a3=99;
 int i=0;
         a1=1;
         a1=2;
@@ -58,11 +58,11 @@ i =i +1;
    }
   }
  };
-    event o (string a1 , int a2 , unsigned int a3);
+    event o ( int a2 , unsigned int a3);
     event z (int a1);
-    o(file, flags, mode)** -> {
+    o( flags, mode)** -> {
         g(10);
     };
-    o(file, flags, mode)**:z(a1) -> {
+    o(flags, mode)**:z(a1) -> {
         f();
     };
