@@ -226,12 +226,15 @@ class BasicBlock {
         void print(ostream &os) {
             
             os << endl; 
-            os << blocklabel << "Prev: (";  
+            os << blocklabel << ":" << endl;
+            prtSpace(os, TAB_SPACE);
+            os << "Prev: (";  
+            
             vector<string>::iterator iter = PrevBlockLabels.begin();
             for ( ; iter != PrevBlockLabels.end(); ++iter) {
                 os << " " << *iter;
             }
-            os << " )\n";
+            os << " )\n\n";
             
             vector <InterCode*>::iterator it = InterCodeVector.begin();
 
@@ -239,8 +242,8 @@ class BasicBlock {
                 (*it)->print(os);
                 os << endl;
             }
-        
-            //os << "Block end: " << blocklabel << endl ;
+            
+            os << endl; 
             prtSpace(os, TAB_SPACE);
             os << "next: (";  
             iter = NextBlockLabels.begin();

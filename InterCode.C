@@ -198,6 +198,8 @@ void InterCodesClass::createLabelDUChain()
         }
         else if (dupICodeVector->at(i)->getOPNType() == InterCode::LABEL)  {
 
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
             // cout << "\nLabel Name = " << goto_lab->getLabel();
             start_lab = dupICodeVector->at(i);
             insertMap(start_lab->getLabel(), dupICodeVector->at(i));
@@ -803,9 +805,8 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
     BasicBlocksClass *BBcls = insertInContainer ("global");
     BasicBlock* block       = BBcls->getBlockWithLabel("global");
     bool isPrevJmp          = false; 
+    bool isLastLeave        = false;
     BasicBlock* bb          = NULL; 
-
-    BBcls->ordervec.push_back("global");
 
     for (; it != icvec->end(); ++it) {
         InterCode::OPNTYPE op = (*it)->getOPNType();
@@ -826,6 +827,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
             bb->addPrevBlock (block->getBlockLabel());
 
             isPrevJmp   = true;
+            isLastLeave = false;
 
         } else if (op == InterCode::OPNTYPE::IFREL) {
             block->addCode (*it); 
@@ -847,6 +849,8 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
             }
 
             isPrevJmp   = true;
+            isLastLeave = false;
+
 
         } else if (op == InterCode::OPNTYPE::LABEL) {
             str = (*it)->getLabel();
@@ -861,21 +865,14 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 block = BBcls->getBlockWithLabel(str);
 
             } else {
-                /* when new label appeared and last statement was not leave */
+                /* this is normal block*/
 
-                if (((it + 1) != icvec->end()) && ((*(it + 1))->getOPNType() == InterCode::OPNTYPE::ENTER)) {
-                    BBcls = insertInContainer (str);
-                    block = BBcls->getBlockWithLabel(str);
-                } else {
-                    /* this is normal block*/
-
-                    if (isPrevJmp == false && (str.compare("global") != 0)) {
-                        block->addNextBlock(str); 
-                        bb =  BBcls->getBlockWithLabel(str); 
-                        bb->addPrevBlock (block->getBlockLabel());
-                    }
-                    block = BBcls->getBlockWithLabel(str);
+                if (isPrevJmp == false && (str.compare("global") != 0)) {
+                    block->addNextBlock(str); 
+                    bb =  BBcls->getBlockWithLabel(str); 
+                    bb->addPrevBlock (block->getBlockLabel());
                 }
+                block = BBcls->getBlockWithLabel(str);
             }
             BBcls->ordervec.push_back(str);
 
@@ -883,11 +880,14 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
             block->addCode (*it); 
             block       = NULL; 
             isPrevJmp   = true;
+            isLastLeave = true;
 
         } else {
             block->addCode (*it); 
             isPrevJmp   = false;
+            isLastLeave = false;
         }
+
     }
 
     //Reorder bbvector in each basicblockclassj according to ordervec
