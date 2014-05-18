@@ -261,14 +261,16 @@ void InterCodesClass::ifThenElseOpt(int *isOptimized) {
                 if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
                     start_lab = dupICodeVector->at(i+1);
                     if (true_lab->getLabel() == start_lab->getLabel())  {
-                        cond->OnTrue(false_lab);
-                        cond->OnFalse(true_lab);
-                        dupICodeVector->at(i)->xchgSubcode();
-                    }
+                        if (dupICodeVector->at(i)->xchgSubcode())   {
+                            cond->OnTrue(false_lab);
+                            cond->OnFalse(true_lab);
+                        }
+                    }    
                     else if (false_lab->getLabel() == start_lab->getLabel())  {
-                        cond->OnTrue(false_lab);
-                        cond->OnFalse(true_lab);
-                        dupICodeVector->at(i)->xchgSubcode();
+                        if (dupICodeVector->at(i)->xchgSubcode())   {
+                            cond->OnTrue(false_lab);
+                            cond->OnFalse(true_lab);
+                        }
                     }
                 }
             }
