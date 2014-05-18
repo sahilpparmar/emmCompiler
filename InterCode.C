@@ -198,6 +198,8 @@ void InterCodesClass::createLabelDUChain()
         }
         else if (dupICodeVector->at(i)->getOPNType() == InterCode::LABEL)  {
 
+            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
+
             // cout << "\nLabel Name = " << goto_lab->getLabel();
             start_lab = dupICodeVector->at(i);
             insertMap(start_lab->getLabel(), dupICodeVector->at(i));
@@ -801,9 +803,9 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
     BasicBlocksClass *BBcls = insertInContainer ("global");
     BasicBlock* block       = BBcls->getBlockWithLabel("global");
     bool isPrevJmp          = false; 
+    bool isLastLeave        = false;
     BasicBlock* bb          = NULL; 
     
-    BBcls->ordervec.push_back("global");
 
     for (; it != icvec->end(); ++it) {
             InterCode::OPNTYPE op = (*it)->getOPNType();
@@ -824,6 +826,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 bb->addPrevBlock (block->getBlockLabel());
                 
                 isPrevJmp   = true;
+                isLastLeave = false;
 
             } else if (op == InterCode::OPNTYPE::IFREL) {
                 block->addCode (*it); 
@@ -845,6 +848,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 }
                 
                 isPrevJmp   = true;
+                isLastLeave = false;
             
             } else if (op == InterCode::OPNTYPE::LABEL) {
                 str = (*it)->getLabel();
@@ -881,10 +885,12 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 block->addCode (*it); 
                 block       = NULL; 
                 isPrevJmp   = true;
+                isLastLeave = true;
             
             } else {
                 block->addCode (*it); 
                 isPrevJmp   = false;
+                isLastLeave = false;
             }
     }
     
