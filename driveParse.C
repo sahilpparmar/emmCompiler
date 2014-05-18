@@ -288,7 +288,8 @@ main(int argc, char *argv[], char *envp[]) {
             DEBUG("=========================Optimization========================\n");
             bbC->optimize();
             if (debugLevel > 0) {
-              bbC->print(cout);
+                DEBUG("========================= Final Optimized Code ========================\n");
+                bbC->print(cout);
             }
         }
         

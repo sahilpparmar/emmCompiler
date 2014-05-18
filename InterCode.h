@@ -373,12 +373,12 @@ class BasicBlocksContainer {
                  if ((*it).first.compare("global") != 0) 
                      (*it).second->liveVariableAnalysis();
              }
-                */
-
+                
              if (debugLevel > 0) {
                 cout << "\n\n=========Dead Code Elmination Optimization==================";
                 print(cout);
              }
+             */
        }
         
        void print(ostream &os) {
