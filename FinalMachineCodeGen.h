@@ -15,7 +15,8 @@
 #define F_PARAM   " F005"
 
 #define S_START     "_S_START"
-#define S_END       "_S_END"
+#define S_EVENT_END "_S_END"
+#define S_EXIT      "_S_EXIT"
 #define S_PREFIX    "_S_"
 #define E_PREFIX    "_event_"
 
@@ -26,6 +27,7 @@
 #define C_POP_RET   "           // Return Addr Popped from Stack"
 #define C_INIT_RSP  "           // RSP Initialized"
 #define C_IN_EPARAM "           // READ Event Parameter Input"
+#define C_DUMMY_INP "           // Dummy Instruction"
 
 enum OPNTYPE {CALL, FPARAM, APARAM, RETURN, EXPR, LABEL, GOTO, IFREL, ENTER, LEAVE, PRINT};
 string allocateNewRegName (bool isFloat = false);

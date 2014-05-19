@@ -54,12 +54,12 @@ void relational(string dst_regName, ostream &os)
     LabelClass *false_lab = new LabelClass();     
     InterCode  *ic2 = false_lab->assignLabel();   
                                                                       
-                    os<<ic1->getLabel()<<endl;
-                    os<<"MOVI 0 "<<dst_regName<<endl;
-                    os<<"JMP "<<ic2->getLabel()<<endl;
-                    os<<ic1->getLabel()<<": ";
-                    os<<"MOVI 1 "<<dst_regName<<endl;
-                    os<<ic2->getLabel()<<": ";
+    os<<ic1->getLabel()<<endl;
+    os<<"MOVI 0 "<<dst_regName<<endl;
+    os<<"JMP "<<ic2->getLabel()<<endl;
+    os<<ic1->getLabel()<<": ";
+    os<<"MOVI 1 "<<dst_regName<<endl;
+    os<<ic2->getLabel()<<": ";
 }
 
 void NOTLogic(string src1_regName, string dst_regName, ostream &os)
@@ -219,7 +219,7 @@ void FinalMachineCodeGen::finalCodeGen (BasicBlocksContainer *bbCls, ostream & o
             os << "// Function/Event Module Ends" << endl;
         os << endl;
     }
-    os << endl << S_END << ": ";
+    os << endl << S_EXIT << ": ";
     os << "PRTS " << "\"DONE\"" << endl << endl;
 }
 
