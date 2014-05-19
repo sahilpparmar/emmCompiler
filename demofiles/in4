@@ -1,0 +1,44 @@
+//Nested file and recursion
+
+event a(int aa, int bb);
+int aa = 2;
+
+void foo(int x, double z)
+{
+     z = x+1;
+     print("\\n z: ", z);
+}
+
+int factorial(int x)
+{
+    if(x==1)
+        return 1;
+    return x * factorial(x-1);
+}
+
+void fooo (int b)  {
+
+    int a = 10;
+    b=10;
+    while(b<=16)
+    {
+        print("\\n outer while: ", a);
+        while(a <= 15)
+        {
+            a=a+1;
+            if(a==12)
+                break;
+            if(a==13)
+                continue;
+            print("\\n inner while: ", a);
+        }
+        b=b+1;
+    }
+}
+a(i, j)-> {
+    print("\\nFirst Param :", i);
+    foo(i, j);
+    fooo(j);
+    i = factorial(j);
+    print("\\n factorial for j=", j , "is " , i);
+}
