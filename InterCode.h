@@ -121,7 +121,7 @@ class InterCodesClass {
         void createLabelDUChain();
         void insertMap(string str, InterCode* ic);
 
-        void optimize () {
+        void ioptimize () {
             int isOptimized = 0; 
             do {
                     isOptimized = 0;
@@ -312,7 +312,6 @@ class BasicBlocksClass {
             do {
                  isOptimized = 0;
                  for (it = bbVector.begin(); it != bbVector.end(); ++it) {
-                    //cout << (*it)->getBlockLabel();
                      (*it)->constantFolding (&isOptimized);
                      (*it)->constantPropogation (&isOptimized);
                      (*it)->redundantGotoRemoval(&isOptimized);
@@ -335,13 +334,34 @@ class BasicBlocksClass {
 
 class BasicBlocksContainer {
     private: 
+        set <string> bbUsedContainers;        
         map <string, BasicBlocksClass*> bbContainer; 
-        
     public:
        void createBlockStruct (InterCodesClass* ic);
+       void insertInUsedList (string str)   {
+            bbUsedContainers.insert(str);
+       }
+
+       set <string>* getUsedContainers() {
+           return &bbUsedContainers;
+       }        
+       
        map <string, BasicBlocksClass*>* getContainer() {
            return &bbContainer;
        }        
+       void removeBlocks()  {
+           map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+           cout << "\n \nRemoved Functions: ";
+           for (; it != bbContainer.end(); ++it) {
+               //no need of live var analysis for global 
+               if ((bbUsedContainers.count((*it).first) == 0) && (((*it).first).compare("global") != 0)) {
+                    cout << (*it).first << "\t";
+                    bbContainer.erase(it);
+               }
+           }
+           cout << "\n";
+       }
+
 
        BasicBlocksClass* insertInContainer (string name) {
 
@@ -356,7 +376,15 @@ class BasicBlocksContainer {
        }
     
        void optimize() {
+             /*
+             removeBlocks();
+             if (debugLevel > 0) {
+                cout << "\n\n=====Uncalled Functions Optimization=======";
+                print(cout);
+             }
+             */
              map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+            
              for (; it != bbContainer.end(); ++it) {
                  (*it).second->blockOptimize();
                 

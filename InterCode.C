@@ -803,6 +803,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
     BasicBlocksClass *BBcls = insertInContainer ("global");
     BasicBlock* block       = BBcls->getBlockWithLabel("global");
     bool isPrevJmp          = false; 
+    bool isIfJmp            = true;
     BasicBlock* bb          = NULL; 
 
 
@@ -813,6 +814,11 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
         if ((block == NULL || BBcls == NULL)) { 
             BBcls = insertInContainer ("global"); 
             block = BBcls->getBlockWithLabel("global");
+        }
+
+        if (op == InterCode::OPNTYPE::CALL ) {
+            str = ((InvocationNode*)opd[0])->symTabEntry()->name();
+            insertInUsedList (str);
         }
 
         if (op == InterCode::OPNTYPE::GOTO ) {
@@ -844,7 +850,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 bb =  BBcls->getBlockWithLabel(false_lab->getLabel()); 
                 bb->addPrevBlock (block->getBlockLabel());
             }
-
+            isIfJmp     = true;
             isPrevJmp   = true;
 
         } else if (op == InterCode::OPNTYPE::LABEL) {
@@ -861,17 +867,23 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
 
             } else {
                 /* when new label appeared and last statement was not leave */
+                
 
                 if (((it + 1) != icvec->end()) && ((*(it + 1))->getOPNType() == InterCode::OPNTYPE::ENTER)) {
                     BBcls = insertInContainer (str);
                     block = BBcls->getBlockWithLabel(str);
                 } else {
                     /* this is normal block*/
-
                     if (isPrevJmp == false && (str.compare("global") != 0)) {
                         block->addNextBlock(str); 
                         bb =  BBcls->getBlockWithLabel(str); 
                         bb->addPrevBlock (block->getBlockLabel());
+                    }
+                    if (isIfJmp == true && (str.compare("global") != 0)) {
+                        block->addNextBlock(str); 
+                        bb =  BBcls->getBlockWithLabel(str); 
+                        bb->addPrevBlock (block->getBlockLabel());
+                        isIfJmp     = false;
                     }
                     block = BBcls->getBlockWithLabel(str);
                 }
