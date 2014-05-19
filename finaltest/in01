@@ -29,20 +29,21 @@
 	}
 
 	void fa(int arg0, int arg1) {
+            double dd=4.5;
 		if (a >1.0 ) {
 			print (a);
 		}
-		if (f < 22) {
+		if (f < dd) {
 			b=b+4;
 			print (b);
 		}
-		if (f >= 22.2) {
+		if (f >= dd) {
 			print  ("blabla");
 		}
-		if (f <= 23.0) {
+		if (f <= dd) {
 			b=b+22;
 		}
-		if (f > 24) {
+		if (f > dd) {
 			b=b+4;
 		}
 	}

@@ -1,15 +1,26 @@
-int b = 5;
+event a(double aa, double bb);
 
-void foo() {
-    int a = 5;
-    int c = 5;
-
-    if (a > 0) {
-        b = 3;
-        c = c + b;
-    }
-    
-    c = b/a;
-    print (c);
+double fac (double b, double c) {
+    b=4.5;
+    c=7;
+    bool d = b > c;
+    print("b>c: ",d);
+    d = (b >= c);
+    print("b>=c: ",d);
+    d = b < c;
+    print("b<c: ",d);
+    d = (b <= c);
+    print("b<=c: ",d);
+    d = (b == c);
+    print("b==c: ",d);
+    d = (b != c);
+    print("b!=c: ",d);
+    return b;
 }
 
+
+a(i, j)-> {
+    print("\\nFirst Param :", i);
+    i = fac(i,j);
+    print("\\nResult(fac) :", i);
+}

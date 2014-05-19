@@ -1,4 +1,4 @@
-event a(double a, double b);
+event a(double xx, int yy);
 event b();
 
 string s1 = "\\nParam 1: ";
@@ -6,10 +6,13 @@ string s2 = "\\nParam 2: ";
 
 void aa(double a, double b) {
     a = a + b;
+    print("a",a);
 }
 
 a(i,j) -> {
     i = i + j;
+    print("\\n i",i);
+    aa(i, j);
 };
 
 b() -> {

@@ -15,42 +15,49 @@ int fac (int a) {
         return 100;
 }
 
-int bar (int a) {
+int bar (int a, bool xx) {
  a = 1;
-print("a: ",a);
+print("\\n a: ",a);
 int b = 5 - 2;
-print("b: ",b);
+print("\\n b: ",b);
 
 int c = 1 + 10 * 100;
-print("c: ",c);
+print("\\n c: ",c);
 int d = a * b;
-print("d: ",d);
+print("\\n d: ",d);
 int e = 1 - c;
-print("e: ",e);
+print("\\n e: ",e);
 double f = b / 4;
-print("f: ",f);
+print("\\n f: ",f);
 int g = 10 / 2;
-print("g: ",g);
+print("\\n g: ",g);
+b=g;
+print("\\n b again",b);
 int h = 10 % 2;
-print("h: ",h);
+print("\\n h: ",h);
 int i = 1 | 1 & 0;
-print("i: ",i);
+print("\\n i: ",i);
 int j = 0 & 1;
-print("j: ",j);
-print("a again: ", a);
+print("\\n j: ",j);
+print("\\n a again: ", a);
 int l = a << b;
-print("l: ",l);
+print("\\n l: ",l);
 int m = 100 >>  2;
-print("m: ",m);
-bool bb = true, cc=true;
-
+print("\\n m: ",m);
+bool bb, cc=true;
+bool zz;
 double n = (a % b - c * d / 3 )/(c*c);
-print("n: ",n);
+print("\\n n: ",n);
+
+bb = xx;
 
 if(bb && cc)
         a=1000;
-    else
+else
         a=99;
+
+zz = bb && (!cc) || (g == b) &&  (l>=m) || l<m;
+print("\\n zz", zz);        
     return a;
 }
 
@@ -58,7 +65,7 @@ a(i, j)-> {
     print("\\nFirst Param :", i);
     i = fac(i);
     print("\\nResult(fac) :", i);
-    i = bar(i);
+    i = bar(i, false);
     print("\\nResult(fac) :", i);
 }
 

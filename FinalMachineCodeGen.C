@@ -4,6 +4,7 @@
 
 #define     IS_UNKNOWN(type) Type::isUnknown(type->tag())
 #define     IS_FLOAT(type)   Type::isFloat(type->tag())
+
 #define     IS_INT(type)     Type::isInt  (type->tag())
 #define     IS_STRING(type)  Type::isString  (type->tag())
 #define     PRT_REG          os<<src1_regName<<" "<<src2_regName<<" "<<dst_regName<<endl;

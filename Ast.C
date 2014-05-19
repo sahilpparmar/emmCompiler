@@ -51,12 +51,15 @@ ExprNode* ExprNode:: getRefNode ()
 
         Type* t = const_cast<Type*>(typeCheck());
         refnode_->type(t);
+        //cout<<"\n type after cast: "<<refnode_->type()->tag();
         if (refnode_->type() == NULL)
         {
-            Type *t = const_cast<Type*>(typeCheck());
             refnode_->type(t);
+         //   cout<<"\n type in if: "<<refnode_->type()->tag();
+
         }
     }
+ //   cout<<"\n refnode type: "<<refnode_->type()->tag();
     return (ExprNode *)refnode_;
 }
 
@@ -79,10 +82,11 @@ RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
         int line, int column, string file): 
     ExprNode(ExprNode::ExprNodeType::REF_EXPR_NODE, 0, line, column, file)
 {
-    type((Type*)ste->type());
+  //  type((Type*)ste->type());
     ext_     = ext;
     sym_     = ste;
     refnode_ = this;
+  //  cout<<"\n from refex constr: "<<ste->type()->tag()<<" ext: "<<ext_;
     type((Type*)ste->type());
 }
 
@@ -100,7 +104,9 @@ const Type* RefExprNode::typeCheck()
 {
     const Type* typ = NULL; 
     if (symTabEntry())    
-        typ = sym_->type();
+      {  typ = sym_->type(); 
+ //     cout<<"\n from refex TC: "<<typ->tag();
+      }
 
     return typ;
 }
@@ -112,7 +118,9 @@ InterCodesClass* RefExprNode::codeGen()
 
 string RefExprNode::getRegisterName()
 {
-    return ((SymTabEntry*)sym_)->getRegisterName();
+    string temp = ((SymTabEntry*)sym_)->getRegisterName();
+  //  cout<<"\n from refex: "<<sym_->type()->tag();
+    return temp;
 }
 
 void   RefExprNode::setRegisterName(string reg_name)
@@ -895,9 +903,10 @@ const Type* PrimitivePatNode::typeCheck()
 
             for (; var_it != params_->end(); ++var_it) {
                 VariableEntry* var_entry = *var_it; 
-                var_entry->typeCheck(); 
-                
+               const Type *t2 = var_entry->typeCheck(); 
+              //  cout<<"\n t2 from prim: "<<t2->tag();                
                 var_entry->type(*type_it);
+               // cout<<"\n from prim typecheck: "<<var_entry->type()->tag();
                 type_it++;
             }
         }
@@ -925,7 +934,8 @@ InterCodesClass* PrimitivePatNode::codeGen()
 
     if (params_) {
         for (int ii = params_->size() - 1; ii >= 0; ii--) {
-            VariableEntry* var_entry = (*params_)[ii]; 
+            VariableEntry* var_entry = (*params_)[ii];
+           // cout<<"\n prim codegen: "<<var_entry->type()->tag();
             cls->addCode(var_entry->codeGen());
         }
     }
@@ -1096,6 +1106,7 @@ OpNode::OpNode(OpCode op, ExprNode* a1, ExprNode* a2, int ln, int col, string fi
     opCode_ = op;
     if (a1 != NULL) {
         arity_ = 1;
+      //  cout<<"\n from opnode constr a1: "<<a1->type()->tag();
         arg_.push_back(a1);
         if (a2 != NULL) {
             arity_++;
@@ -1159,7 +1170,8 @@ const Type* OpNode::typeCheck() {
     int iopcode = static_cast<int>(opCode_);
     const Type* targ1, *targ2;
     targ1 = arg_[0]->typeCheck();
-
+    arg_[0]->type((Type*)targ1);
+        //cout<<"\n typechecking args: "<<arg_[0]->type()->tag()<<"\n";
     if (iopcode == (int)OpNode::OpCode::UMINUS) {
         
         if (!(targ1->isIntegral(targ1->tag()) || targ1->isFloat(targ1->tag()) || targ1->isSigned(targ1->tag()))){
@@ -1170,6 +1182,9 @@ const Type* OpNode::typeCheck() {
     /*************** For MOD Operator: both i/p Integer ****************/
 
         targ2 = arg_[1]->typeCheck();
+       // cout<<"\n typechecking args before: "<<arg_[1]->type()->tag()<<"\n";
+        arg_[1]->type((Type*)targ2);
+       // cout<<"\n typechecking args: "<<arg_[1]->type()->tag()<<"\n";
         assert(arg_[0] && arg_[1] && "Invalid args");
 
         if(opCode_ == OpNode::OpCode::MOD) {
@@ -1194,7 +1209,6 @@ const Type* OpNode::typeCheck() {
             
         } else {
             Type *tp = NULL; 
-            
             if (!targ1->isNumeric(targ1->tag())) {
                 errMsg("Incompatible type for agrument 1 for operator `" + (string)opInfo[iopcode].name_ + "'", this);
             }
@@ -1202,18 +1216,15 @@ const Type* OpNode::typeCheck() {
             if (!targ2->isNumeric(targ2->tag())) {
                 errMsg("Incompatible type for agrument 2 for operator `" + (string)opInfo[iopcode].name_ + "'", this);
             }
-            
             if (targ1->tag() == targ2->tag()) {
-               { //cout<<"\n binary types same";
-                tp = new Type(targ1->tag()); }
+               { 
+                   tp = new Type(targ1->tag()); }
             
             } else if (targ1->isSubType(targ2->tag())) {
-                //cout<<"\n diff arith args";
                 arg_[1]->coercedType(new Type(targ2->tag()));
                 tp = new Type(targ1->tag());
             
             } else if (targ2->isSubType(targ1->tag())) {
-                //cout<<"\n diff arith args";
                 arg_[0]->coercedType(new Type(targ1->tag()));
                 tp = new Type(targ2->tag());
             }
@@ -1225,6 +1236,7 @@ const Type* OpNode::typeCheck() {
     /*************** For relational operator***********************************/
         
         targ2 = arg_[1]->typeCheck();
+        arg_[1]->type((Type*)targ2);
         assert(arg_[0] && arg_[1] && "Invalid args");
        
         if (!(targ1->isPrimitive(targ1->tag()))) { 
@@ -1237,17 +1249,14 @@ const Type* OpNode::typeCheck() {
         
             
         if(targ1->tag() == targ2->tag()) {
-            // cout<<"\n types same";
         
         } else if(targ1->isSubType(targ2->tag())) {
            
            arg_[1]->coercedType(new Type(targ2->tag()));
-           //cout<<"\n diff args";
 
         } else if(targ2->isSubType(targ1->tag())) {
            
            arg_[0]->coercedType(new Type(targ1->tag()));
-           //cout<<"\n diff args";
         }
         
         return (new Type(opInfo[iopcode].outType_)); 
@@ -1262,6 +1271,7 @@ const Type* OpNode::typeCheck() {
         if(!(iopcode == (int)OpNode::OpCode::NOT)) {
         
              targ2 = arg_[1]->typeCheck();
+             arg_[1]->type((Type*)targ2);
              assert(arg_[0] && arg_[1] && "Invalid args");
              if (!targ2->isBool(targ2->tag())) {
                  warnMsg("Incompatible type for agrument 2 for operator `" + (string)opInfo[iopcode].name_ + "'", this);
@@ -1279,6 +1289,7 @@ const Type* OpNode::typeCheck() {
     } else if((iopcode >= (int)OpNode::OpCode::BITAND && iopcode <= (int)OpNode::OpCode::SHR)) {
     /*************** For Bitwise operator ***********************************************/
         targ2 = arg_[1]->typeCheck();
+        arg_[1]->type((Type*)targ2);
         assert(arg_[0] && arg_[1] && "Invalid args");
         
         if(!(targ1->isIntegral(targ1->tag()))) {
@@ -1305,6 +1316,7 @@ const Type* OpNode::typeCheck() {
         }
     } else if(iopcode == (int)OpNode::OpCode::ASSIGN) {
         targ2 = arg_[1]->typeCheck();
+        arg_[1]->type((Type*)targ2);
         assert(arg_[0] && arg_[1] && "Invalid args");
         
         if(targ1->isNative(targ1->tag()) && targ2->isNative(targ2->tag())) {
@@ -1448,6 +1460,8 @@ InterCodesClass* OpNode::codeGen()
         case OpCode::SHR:
             cls->addCode (arg_[0]->codeGen());
             cls->addCode (arg_[1]->codeGen());
+        //    cout<<"\n code gen: "<<arg_[0]->type()->tag();
+        //    cout<<"\n code gen: "<<arg_[1]->type()->tag();
             cls->addCode (InterCode::OPNTYPE::EXPR, getRefNode(),
                     arg_[0]->getRefNode(), arg_[1]->getRefNode(), opCode_);
             break;
