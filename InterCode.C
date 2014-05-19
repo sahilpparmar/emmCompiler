@@ -922,7 +922,7 @@ void inline check_remove (set<string> &st, string str) {
 }
 
 void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited, 
-                BasicBlocksClass *bbCls, bool remove, int *updated, bool isParentSame) {
+                BasicBlocksClass *bbCls, bool remove, int *updated) {
 
         string bb_label = BB->getBlockLabel(); 
         
@@ -1063,39 +1063,34 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited,
            BB->StartLiveVars.insert(*iter);
         }
         
-        if (OriginalLiveVars.size() != BB->StartLiveVars.size()) {
+        if ((BB->StartLiveVars.size() > 0) && (OriginalLiveVars.size() != BB->StartLiveVars.size())) {
            *updated = 1;
             return;
         }
        
-        if(BB->StartLiveVars.size() == 0 && isParentSame) {
-            if(OriginalLiveVars.size() == 0)
-                *updated = 0;
-                return;
-        }
 
 
         for(set<string>::iterator iter = BB->StartLiveVars.begin(); iter != BB->StartLiveVars.end(); ++iter) {
             if(OriginalLiveVars.find(*iter) == OriginalLiveVars.end()) {
-                *updated = 0;
+                *updated = 1;
                  return;
             }
         }
         
-        *updated = 1;
+        *updated = 0;
         return;
 }
 
-void recurseOnBlocks (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksClass *bbCls, bool isparentSame) {
+void recurseOnBlocks (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksClass *bbCls) {
 
         if(BB == NULL)
             return;
         
         int updated = 0; 
-        iterateOnSingleBlock(BB, ifVisited, bbCls, false, &updated, isparentSame);
+        iterateOnSingleBlock(BB, ifVisited, bbCls, false, &updated);
         
-        //if (updated == 0)
-          //  return;
+        if (updated == 0)
+          return;
         
         //go over all its previous blocks
         vector<string>::iterator it = BB->getPrevBlockLabels()->begin();
@@ -1109,14 +1104,9 @@ void recurseOnBlocks (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksC
                 newBB->EndLiveVars.insert(*it);
             }
             
-            bool isParent = false;
-            if (BB->getBlockLabel().compare((*it)) == 0)
-                isParent = true;
-            
             //recursive calls to all previous blocks 
-            recurseOnBlocks (newBB, ifVisited, bbCls, isParent); 
+            recurseOnBlocks (newBB, ifVisited, bbCls);
         }
-
 }
 
 
@@ -1140,14 +1130,14 @@ void BasicBlocksClass::liveVariableAnalysis() {
         
         //if block is unvisited
         if (ifVisited.find(bb_label)->second == 0) {
-            recurseOnBlocks (BB, ifVisited, this, false); 
+            recurseOnBlocks (BB, ifVisited, this);
         }
     }
 
     //Dead code removal
     for (it = bbVector.begin(); it != bbVector.end(); ++it) {
         int u = 0;
-        iterateOnSingleBlock((BasicBlock *)(*it), ifVisited, this, true, &u, false);
+        iterateOnSingleBlock((BasicBlock *)(*it), ifVisited, this, true, &u);
     }
 
     //DEBUG
@@ -1218,4 +1208,3 @@ void BasicBlocksClass::liveVariableAnalysis() {
 //            removeExpr (BB);
 //    }
 //
-//}
