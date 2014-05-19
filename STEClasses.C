@@ -100,9 +100,12 @@ string VariableEntry::getRegisterName()
 {
     if(registerName_.length() != 0) return registerName_ ;
     Type *type_ = type();
-//    cout<<"\n tag is: "<<type_->tag();
-    if(!type_) type_ = type();
+   //cout<<"\n tag1 is: "<<type_->tag();
+    if(!type_)
+        type_ = type();
+ //  cout<<"\n tag2 is: "<<type_->tag();
     (type_ && type_->isFloat(type_->tag())) ? setRegisterName(allocateNewRegName(true)) : setRegisterName(allocateNewRegName(false)) ; 
+//   cout<<"\n tag3 is: "<<type_->tag();
     return registerName_;
 }
 
@@ -124,6 +127,7 @@ InterCodesClass* VariableEntry::codeGen()
     } else if (varKind() == PARAM_VAR) {
         cls               = new InterCodesClass(); 
         RefExprNode *node = new RefExprNode (name(), this);
+//        cout<<"\ var codegen: "<<node->type()->tag();
         cls->addCode(InterCode::OPNTYPE::FPARAM, node);
     }
     return cls;
@@ -132,6 +136,7 @@ InterCodesClass* VariableEntry::codeGen()
 const Type* VariableEntry::typeCheck()
 {
     const Type* t1 = type();
+//    cout<<"\n from var entry: "<<t1->tag();
     if (initVal()) {
         const Type* t2 = initVal_->typeCheck();
         assert(t2 && "Invalid rvalue type");

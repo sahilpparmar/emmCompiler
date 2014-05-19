@@ -1,0 +1,39 @@
+int a = 5;
+int b = 10;
+
+void f(int i, int j) {
+    int c = 2; 
+
+    if (c < i)
+        b = 9 / 2;
+    else
+        b = 9 * 2;
+
+    c = 1;
+}
+
+int bar() {
+    if (a > 0)
+        f(a, a + 2);
+
+    return a;
+
+    a = 10;
+    a = 5;
+}
+
+void main() {
+    bar();
+}
+
+int foo(int i) {
+    main();
+    return 1;
+}
+
+void foobar() {
+    int i = foo(5);
+}
+
+
+

@@ -136,7 +136,7 @@ void InterCode::print(ostream &os) {
                     break;
 
         default:
-            assert(0 && "Unsupported 3AddrCode");
+                    assert(0 && "Unsupported 3AddrCode");
     }
 }
 
@@ -148,7 +148,7 @@ void InterCodesClass::printMap() {
 }
 
 void InterCodesClass::insertMap(string name, InterCode* ic) {
-    
+
     vector <InterCode*>* tempVector;  
 
     if (labelUsageMap.find(name) == labelUsageMap.end()) {
@@ -198,8 +198,6 @@ void InterCodesClass::createLabelDUChain()
         }
         else if (dupICodeVector->at(i)->getOPNType() == InterCode::LABEL)  {
 
-            ExprNode** operands = (ExprNode**)dupICodeVector->at(i)->get3Operands();
-
             // cout << "\nLabel Name = " << goto_lab->getLabel();
             start_lab = dupICodeVector->at(i);
             insertMap(start_lab->getLabel(), dupICodeVector->at(i));
@@ -211,7 +209,7 @@ void InterCodesClass::createLabelDUChain()
 
             //goto_lab = (ExprNode *)operands[0];
             InvocationNode *temp = (InvocationNode *)operands[0]; 
-//            cout << "\nLabel Name = " << (InvocationNode *)goto_lab->symTabEntry()->name();
+            //            cout << "\nLabel Name = " << (InvocationNode *)goto_lab->symTabEntry()->name();
             insertMap(temp->symTabEntry()->name(), dupICodeVector->at(i));
 
         }
@@ -242,7 +240,7 @@ void InterCodesClass::createLabelDUChain()
  *****************************************************************************************************************************/
 
 void InterCodesClass::ifThenElseOpt(int *isOptimized) {
-    
+
     int i;
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     ExprNode* cond; 
@@ -263,14 +261,16 @@ void InterCodesClass::ifThenElseOpt(int *isOptimized) {
                 if (dupICodeVector->at(i+1)->getOPNType() == InterCode::LABEL)  {
                     start_lab = dupICodeVector->at(i+1);
                     if (true_lab->getLabel() == start_lab->getLabel())  {
-                        cond->OnTrue(false_lab);
-                        cond->OnFalse(true_lab);
-                        dupICodeVector->at(i)->xchgSubcode();
-                    }
+                        if (dupICodeVector->at(i)->xchgSubcode())   {
+                            cond->OnTrue(false_lab);
+                            cond->OnFalse(true_lab);
+                        }
+                    }    
                     else if (false_lab->getLabel() == start_lab->getLabel())  {
-                        cond->OnTrue(false_lab);
-                        cond->OnFalse(true_lab);
-                        dupICodeVector->at(i)->xchgSubcode();
+                        if (dupICodeVector->at(i)->xchgSubcode())   {
+                            cond->OnTrue(false_lab);
+                            cond->OnFalse(true_lab);
+                        }
                     }
                 }
             }
@@ -521,104 +521,104 @@ void BasicBlock::constantFolding (int *isOptimized) {
  *
  * **************************************************************************************************************/
 void BasicBlock::constantPropogation (int *isOptimized) {
-   
+
     //cout <<"\n ENTER " << this->getBlockLabel() << " Size = " << dupICodeVector->size() << "\n";
     map <string, ExprNode*> cvar_map;
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     vector<InterCode*>::iterator it     = dupICodeVector->begin();
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
     bool flag                           = false;
-    
+
     for (; it != dupICodeVector->end(); it++) {
-        
+
         ExprNode** op = (ExprNode**)(*it)->get3Operands();
-        
+
         if (op[0] == NULL || op[1] == NULL)
         {
             tempICodeVector->push_back(*it);
             continue;
         }
-        
+
         //Node of type EXPR and op[0] = op[1] , op[2] is NULL 
         if ((*it)->getOPNType() == InterCode::OPNTYPE::EXPR && 
-             (*it)->getsubCode() == OpNode::OpCode::ASSIGN && 
-             op[1]->exprNodeType() ==  ExprNode::ExprNodeType::VALUE_NODE) {
-            
+                (*it)->getsubCode() == OpNode::OpCode::ASSIGN && 
+                op[1]->exprNodeType() ==  ExprNode::ExprNodeType::VALUE_NODE) {
+
             //if variable already exists in map
             string str = op[0]->getRefName();
             //cout << "\n string: "<< str;
             if (cvar_map.find(str) != cvar_map.end()) {
                 cvar_map.erase(str);
             }
-            
+
             cvar_map.insert(pair<string, ExprNode*>(str, (ValueNode *)op[1]));
         }
-        
+
         switch ((*it)->getOPNType()) {
             case InterCode::OPNTYPE::EXPR :  {
-                ExprNode** oprnd = (ExprNode**)(*it)->get3Operands();
-                      
-                switch ((*it)->getsubCode()) {
+                                                 ExprNode** oprnd = (ExprNode**)(*it)->get3Operands();
 
-                    case OpNode::OpCode::PLUS:
-                    case OpNode::OpCode::MINUS:
-                    case OpNode::OpCode::MULT:
-                    case OpNode::OpCode::DIV:
-                    case OpNode::OpCode::MOD:
-                    case OpNode::OpCode::SHL:
-                    case OpNode::OpCode::SHR:
-                    case OpNode::OpCode::AND:
-                    case OpNode::OpCode::OR:
-                    case OpNode::OpCode::EQ: 
-                    case OpNode::OpCode::NE: 
-                    case OpNode::OpCode::GT:
-                    case OpNode::OpCode::LT:
-                    case OpNode::OpCode::GE:
-                    case OpNode::OpCode::LE: 
-                    case OpNode::OpCode::BITOR:
-                    case OpNode::OpCode::BITAND:
-                    case OpNode::OpCode::BITXOR:
-                                            {
-                                                //iterate over map. check and replace op[0] and op[1] value
-                                                if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
-                                                    oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
-                                                    flag     = true;
-                                                } 
-                                                
-                                                if (cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
-                                                    oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
-                                                    flag     = true;
-                                                } 
-                                            }
-                                            break;
-                     
-                     case OpNode::OpCode::BITNOT:
-                     case OpNode::OpCode::UMINUS:
-                     case OpNode::OpCode::ASSIGN:
-                                            {   
-                                                //TODO: please fix this magic code
-                                                oprnd[1]->type()->name();
-                                                if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
-                                                    oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
-                                                    flag     =  true;
-                                                }
-                                                cvar_map.insert(pair<string, ExprNode*>(oprnd[0]->getRefName(), (ValueNode *)op[1]));
-                                            }
-                                            break;
-                    default : break;
-                }
-                tempICodeVector->push_back(new InterCode (InterCode::OPNTYPE::EXPR, 
-                                           (*it)->getsubCode(), oprnd[0], oprnd[1], oprnd[2]));
-            }
-            break;
-            
+                                                 switch ((*it)->getsubCode()) {
+
+                                                     case OpNode::OpCode::PLUS:
+                                                     case OpNode::OpCode::MINUS:
+                                                     case OpNode::OpCode::MULT:
+                                                     case OpNode::OpCode::DIV:
+                                                     case OpNode::OpCode::MOD:
+                                                     case OpNode::OpCode::SHL:
+                                                     case OpNode::OpCode::SHR:
+                                                     case OpNode::OpCode::AND:
+                                                     case OpNode::OpCode::OR:
+                                                     case OpNode::OpCode::EQ: 
+                                                     case OpNode::OpCode::NE: 
+                                                     case OpNode::OpCode::GT:
+                                                     case OpNode::OpCode::LT:
+                                                     case OpNode::OpCode::GE:
+                                                     case OpNode::OpCode::LE: 
+                                                     case OpNode::OpCode::BITOR:
+                                                     case OpNode::OpCode::BITAND:
+                                                     case OpNode::OpCode::BITXOR:
+                                                         {
+                                                             //iterate over map. check and replace op[0] and op[1] value
+                                                             if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
+                                                                 oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                                 flag     = true;
+                                                             } 
+
+                                                             if (cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
+                                                                 oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
+                                                                 flag     = true;
+                                                             } 
+                                                         }
+                                                         break;
+
+                                                     case OpNode::OpCode::BITNOT:
+                                                     case OpNode::OpCode::UMINUS:
+                                                     case OpNode::OpCode::ASSIGN:
+                                                         {   
+                                                             //TODO: please fix this magic code
+                                                             oprnd[1]->type()->name();
+                                                             if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
+                                                                 oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                                 flag     =  true;
+                                                             }
+                                                             cvar_map.insert(pair<string, ExprNode*>(oprnd[0]->getRefName(), (ValueNode *)op[1]));
+                                                         }
+                                                         break;
+                                                     default : break;
+                                                 }
+                                                 tempICodeVector->push_back(new InterCode (InterCode::OPNTYPE::EXPR, 
+                                                             (*it)->getsubCode(), oprnd[0], oprnd[1], oprnd[2]));
+                                             }
+                                             break;
+
             default : 
-                      tempICodeVector->push_back(*it);
-                      break;
+                                             tempICodeVector->push_back(*it);
+                                             break;
         }/*end outer switch*/
-   
+
     }/*end for*/ 
-    
+
     //cout <<"\n Exit " << this->getBlockLabel() << " Size = " << tempICodeVector->size() << "\n";
 
     setICodeVector(tempICodeVector);
@@ -633,7 +633,7 @@ void BasicBlock::redundantGotoRemoval(int *isOptimized) {
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
     InterCode* gotoStart;
     bool flag                           = false;
-    
+
     //cout <<"\n ENTER " << this->getBlockLabel() << " Size = " << dupICodeVector->size() << "\n";
     for (i = 0; i < dupICodeVector->size(); i++) {
 
@@ -648,7 +648,7 @@ void BasicBlock::redundantGotoRemoval(int *isOptimized) {
     }/*end for*/ 
 
     setICodeVector(tempICodeVector);
-    
+
     if (flag)
         *isOptimized = 1;
 
@@ -672,7 +672,7 @@ void BasicBlock::zeroRemoval(int *isOptimized) {
         if (operands[0] && operands[1] && operands[2]) {
             new1 = operands[1]; 
             new2 = operands[2]; 
-                
+
             // Check if op[1] is valuenode and op[2] is not value and intercode type is expression
             if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR) {
 
@@ -680,25 +680,25 @@ void BasicBlock::zeroRemoval(int *isOptimized) {
                         (new1->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)) {
 
                     if (((new2->value()->type()->tag() == Type::TypeTag::INT || 
-                        new2->value()->type()->tag() == Type::TypeTag::UINT) && (new2->value()->ival() == 0)) 
+                                    new2->value()->type()->tag() == Type::TypeTag::UINT) && (new2->value()->ival() == 0)) 
                             ||  ((new2->value()->type()->tag() == Type::TypeTag::DOUBLE) && (new2->value()->dval() == 0.0))) {
 
 
                         switch(dupICodeVector->at(i)->getsubCode()) {
                             case OpNode::OpCode::PLUS  :
                             case OpNode::OpCode::MINUS :
-                                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
-                                                OpNode::OpCode::ASSIGN, operands[0], new1));
-                                    flag = true;
-                                    break;
+                                tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                            OpNode::OpCode::ASSIGN, operands[0], new1));
+                                flag = true;
+                                break;
                             case OpNode::OpCode::MULT  :
-                                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
-                                                OpNode::OpCode::ASSIGN, operands[0], new2));
-                                    flag = true;
-                                    break;
+                                tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                            OpNode::OpCode::ASSIGN, operands[0], new2));
+                                flag = true;
+                                break;
                             default :
-                                    tempICodeVector->push_back(dupICodeVector->at(i));
-                                    break;
+                                tempICodeVector->push_back(dupICodeVector->at(i));
+                                break;
                         }                                 
                     }
                     else
@@ -706,25 +706,25 @@ void BasicBlock::zeroRemoval(int *isOptimized) {
                 }
                 else if ((new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) && 
                         (new2->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)) {
-                    
+
                     if (((new1->value()->type()->tag() == Type::TypeTag::INT || 
-                        new1->value()->type()->tag() == Type::TypeTag::UINT) && (new1->value()->ival() == 0)) 
+                                    new1->value()->type()->tag() == Type::TypeTag::UINT) && (new1->value()->ival() == 0)) 
                             ||  ((new1->value()->type()->tag() == Type::TypeTag::DOUBLE) && (new1->value()->dval() == 0.0))) {
 
                         switch(dupICodeVector->at(i)->getsubCode()) {
                             case OpNode::OpCode::PLUS  :
-                                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
                                             OpNode::OpCode::ASSIGN, operands[0], new2));
-                                    flag = true;
-                                    break;
+                                flag = true;
+                                break;
                             case OpNode::OpCode::MULT  :
-                                    tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
-                                                OpNode::OpCode::ASSIGN, operands[0], new1));
-                                    flag = true;
-                                    break;
+                                tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
+                                            OpNode::OpCode::ASSIGN, operands[0], new1));
+                                flag = true;
+                                break;
                             default :
-                                    tempICodeVector->push_back(dupICodeVector->at(i));
-                                    break;
+                                tempICodeVector->push_back(dupICodeVector->at(i));
+                                break;
                         }                                 
                     }    
                     else
@@ -737,28 +737,28 @@ void BasicBlock::zeroRemoval(int *isOptimized) {
                 tempICodeVector->push_back(dupICodeVector->at(i));
         }
         else if ((operands[0]) && (operands[1])) { 
-                    /* TODO : Remove self (dead) assignment by not pushing */
-                    if ((dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR) && 
-                            (operands[0]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) && 
-                                (operands[1]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)) {
+            /* TODO : Remove self (dead) assignment by not pushing */
+            if ((dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::EXPR) && 
+                    (operands[0]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE) && 
+                    (operands[1]->exprNodeType() != ExprNode::ExprNodeType::VALUE_NODE)) {
 
-                        if (operands[0]->getRefName() == operands[1]->getRefName()) {
-                                flag = true;
-                            }
-                            else
-                                tempICodeVector->push_back(dupICodeVector->at(i));
-                    }
-                    else
-                        tempICodeVector->push_back(dupICodeVector->at(i));
+                if (operands[0]->getRefName() == operands[1]->getRefName()) {
+                    flag = true;
+                }
+                else
+                    tempICodeVector->push_back(dupICodeVector->at(i));
+            }
+            else
+                tempICodeVector->push_back(dupICodeVector->at(i));
         }
         else
             tempICodeVector->push_back(dupICodeVector->at(i));
     }
-    
+
     setICodeVector(tempICodeVector);
-    
+
     //cout << "\nReturned \n";
-    
+
     if (flag)
         *isOptimized = 1;
 }
@@ -780,7 +780,7 @@ void InterCodesClass::addCode (InterCodesClass* code) {
 }
 
 void InterCodesClass::addCode (InterCode::OPNTYPE op, void *a, 
-               void *b, void *c, OpNode::OpCode subopc) { 
+        void *b, void *c, OpNode::OpCode subopc) { 
 
     InterCodeVector.push_back(new InterCode (op, subopc, a, b, c));     
 }
@@ -795,109 +795,116 @@ void InterCodesClass::print (ostream &os) {
 
 
 void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
-    
+
     vector <InterCode*>* icvec = ic->getICodeVector();
     vector <InterCode*>::iterator it =  icvec->begin();
-    
+
     string str;
     BasicBlocksClass *BBcls = insertInContainer ("global");
     BasicBlock* block       = BBcls->getBlockWithLabel("global");
     bool isPrevJmp          = false; 
-    bool isLastLeave        = false;
+    bool isIfJmp            = true;
     BasicBlock* bb          = NULL; 
-    
+
 
     for (; it != icvec->end(); ++it) {
-            InterCode::OPNTYPE op = (*it)->getOPNType();
-            void** opd            = (*it)->get3Operands();
-            
-            if ((block == NULL || BBcls == NULL)) { 
-                BBcls = insertInContainer ("global"); 
-                block = BBcls->getBlockWithLabel("global");
-            }
-            
-            if (op == InterCode::OPNTYPE::GOTO ) {
-                block->addCode (*it); 
-                
-                str = ((InterCode *)opd[0])->getLabel(); 
-                block->addNextBlock(str);
-                
-                bb =  BBcls->getBlockWithLabel(str); 
+        InterCode::OPNTYPE op = (*it)->getOPNType();
+        void** opd            = (*it)->get3Operands();
+
+        if ((block == NULL || BBcls == NULL)) { 
+            BBcls = insertInContainer ("global"); 
+            block = BBcls->getBlockWithLabel("global");
+        }
+
+        if (op == InterCode::OPNTYPE::CALL ) {
+            str = ((InvocationNode*)opd[0])->symTabEntry()->name();
+            insertInUsedList (str);
+        }
+
+        if (op == InterCode::OPNTYPE::GOTO ) {
+            block->addCode (*it); 
+
+            str = ((InterCode *)opd[0])->getLabel(); 
+            block->addNextBlock(str);
+
+            bb =  BBcls->getBlockWithLabel(str); 
+            bb->addPrevBlock (block->getBlockLabel());
+
+            isPrevJmp   = true;
+
+        } else if (op == InterCode::OPNTYPE::IFREL) {
+            block->addCode (*it); 
+
+            ExprNode* cond       = (ExprNode*) opd[0];
+            InterCode* true_lab  = cond->OnTrue();
+            InterCode* false_lab = cond->OnFalse();
+
+            if(true_lab) {
+                block->addNextBlock(true_lab->getLabel());
+                bb =  BBcls->getBlockWithLabel(true_lab->getLabel()); 
                 bb->addPrevBlock (block->getBlockLabel());
-                
-                isPrevJmp   = true;
-                isLastLeave = false;
+            }
 
-            } else if (op == InterCode::OPNTYPE::IFREL) {
-                block->addCode (*it); 
-                
-                ExprNode* cond       = (ExprNode*) opd[0];
-                InterCode* true_lab  = cond->OnTrue();
-                InterCode* false_lab = cond->OnFalse();
+            if(false_lab) {
+                block->addNextBlock(false_lab->getLabel());
+                bb =  BBcls->getBlockWithLabel(false_lab->getLabel()); 
+                bb->addPrevBlock (block->getBlockLabel());
+            }
+            isIfJmp     = true;
+            isPrevJmp   = true;
 
-                if(true_lab) {
-                    block->addNextBlock(true_lab->getLabel());
-                    bb =  BBcls->getBlockWithLabel(true_lab->getLabel()); 
-                    bb->addPrevBlock (block->getBlockLabel());
-                }
+        } else if (op == InterCode::OPNTYPE::LABEL) {
+            str = (*it)->getLabel();
+
+            if (block == NULL) {
+                /* to determine if new container to create or to add it to global block*/ 
+
+                if (((it + 1) != icvec->end()) && ((*(it + 1))->getOPNType() != InterCode::OPNTYPE::ENTER))
+                    str = "global"; 
+
+                BBcls = insertInContainer (str);
+                block = BBcls->getBlockWithLabel(str);
+
+            } else {
+                /* when new label appeared and last statement was not leave */
                 
-                if(false_lab) {
-                    block->addNextBlock(false_lab->getLabel());
-                    bb =  BBcls->getBlockWithLabel(false_lab->getLabel()); 
-                    bb->addPrevBlock (block->getBlockLabel());
-                }
-                
-                isPrevJmp   = true;
-                isLastLeave = false;
-            
-            } else if (op == InterCode::OPNTYPE::LABEL) {
-                str = (*it)->getLabel();
-                
-                if (block == NULL) {
-                    /* to determine if new container to create or to add it to global block*/ 
-                    
-                    if (((it + 1) != icvec->end()) && ((*(it + 1))->getOPNType() != InterCode::OPNTYPE::ENTER))
-                        str = "global"; 
-                    
+
+                if (((it + 1) != icvec->end()) && ((*(it + 1))->getOPNType() == InterCode::OPNTYPE::ENTER)) {
                     BBcls = insertInContainer (str);
                     block = BBcls->getBlockWithLabel(str);
-                
                 } else {
-                    /* when new label appeared and last statement was not leave */
-                    
-                    if (((it + 1) != icvec->end()) && ((*(it + 1))->getOPNType() == InterCode::OPNTYPE::ENTER)) {
-                        BBcls = insertInContainer (str);
-                        block = BBcls->getBlockWithLabel(str);
-                    } else {
-                        /* this is normal block*/
-                         
-                        if (isPrevJmp == false && (str.compare("global") != 0)) {
-                           block->addNextBlock(str); 
-                           bb =  BBcls->getBlockWithLabel(str); 
-                           bb->addPrevBlock (block->getBlockLabel());
-                        }
-                        block = BBcls->getBlockWithLabel(str);
+                    /* this is normal block*/
+                    if (isPrevJmp == false && (str.compare("global") != 0)) {
+                        block->addNextBlock(str); 
+                        bb =  BBcls->getBlockWithLabel(str); 
+                        bb->addPrevBlock (block->getBlockLabel());
                     }
+                    if (isIfJmp == true && (str.compare("global") != 0)) {
+                        block->addNextBlock(str); 
+                        bb =  BBcls->getBlockWithLabel(str); 
+                        bb->addPrevBlock (block->getBlockLabel());
+                        isIfJmp     = false;
+                    }
+                    block = BBcls->getBlockWithLabel(str);
                 }
-                BBcls->ordervec.push_back(str);
-            
-            } else if (op == InterCode::OPNTYPE::LEAVE ) {
-                block->addCode (*it); 
-                block       = NULL; 
-                isPrevJmp   = true;
-                isLastLeave = true;
-            
-            } else {
-                block->addCode (*it); 
-                isPrevJmp   = false;
-                isLastLeave = false;
             }
+            BBcls->ordervec.push_back(str);
+
+        } else if (op == InterCode::OPNTYPE::LEAVE ) {
+            block->addCode (*it); 
+            block       = NULL; 
+            isPrevJmp   = true;
+
+        } else {
+            block->addCode (*it); 
+            isPrevJmp   = false;
+        }
     }
-    
+
     //Reorder bbvector in each basicblockclassj according to ordervec
     map<string, BasicBlocksClass*>::iterator it2 = getContainer()->begin();
     for (; it2 != getContainer()->end(); ++it2 ) {
-       
+
         vector <BasicBlock*> newBBVec;
 
         BasicBlocksClass* BBCls        = (*it2).second;
@@ -905,9 +912,9 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
         for (; iter2 != BBCls->ordervec.end(); ++iter2) {
             string str    = *iter2;
             BasicBlock *b = (BBCls->getLabelMap()->find(str))->second;
-            
+
             if(b) 
-              newBBVec.push_back(b);
+                newBBVec.push_back(b);
         }
         BBCls->setVector (newBBVec);
     }
@@ -920,6 +927,7 @@ void inline check_remove (set<string> &st, string str) {
         st.erase(it);
 
 }
+
 
 void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited, 
                 BasicBlocksClass *bbCls, bool remove, int *updated) {
@@ -1082,7 +1090,7 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited,
 }
 
 void recurseOnBlocks (BasicBlock *BB, map<string, bool> &ifVisited, BasicBlocksClass *bbCls) {
-
+        
         if(BB == NULL)
             return;
         
@@ -1116,7 +1124,7 @@ void BasicBlocksClass::liveVariableAnalysis() {
     map <string, bool> ifVisited;
     vector <BasicBlock*>::iterator it;
     string bb_label;
-    
+
     //all blocks are initially unvisited
     for (it = bbVector.begin(); it != bbVector.end(); ++it) {
         ifVisited.insert (pair<string, bool>((*it)->getBlockLabel(), 0));
@@ -1124,10 +1132,10 @@ void BasicBlocksClass::liveVariableAnalysis() {
 
     //iterate over all blocks
     for (it = bbVector.begin(); it != bbVector.end(); ++it) {
-      
+
         BasicBlock *BB = (BasicBlock *)(*it); 
         string bb_label = BB->getBlockLabel(); 
-        
+
         //if block is unvisited
         if (ifVisited.find(bb_label)->second == 0) {
             recurseOnBlocks (BB, ifVisited, this);
@@ -1145,12 +1153,12 @@ void BasicBlocksClass::liveVariableAnalysis() {
         for (it = bbVector.begin(); it != bbVector.end(); ++it) {
             BasicBlock *BB = (BasicBlock *)(*it);
             bb_label       = BB->getBlockLabel(); 
-            
+
             cout << "\n\n blockName: " << bb_label << endl;
             cout << "live vars at start: ";
             for (set<string>::iterator it = BB->StartLiveVars.begin(); it != BB->StartLiveVars.end(); ++it) 
                 cout << *it << ",";
-            
+
             cout << endl << "live vars at End: ";
             for (set<string>::iterator it = BB->EndLiveVars.begin(); it != BB->EndLiveVars.end(); ++it) 
                 cout << *it << ",";

@@ -1,5 +1,6 @@
 int x;
 
+event a(int aa, int bb);
 
 int bar(int aa) {
 
@@ -34,4 +35,12 @@ int foo (int a) {
         a = 3+bar(a)+bar(a)*2;
     return a;
 
+}
+
+a(i, j)-> {
+    print("\\nFirst Param :", i);
+    i = foo(i);
+    print("\\nResult(fac) :", i);
+    i = bar(i);
+    print("\\nResult(fac) :", i);
 }

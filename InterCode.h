@@ -57,7 +57,7 @@ class InterCode {
                 return os.str();
             }
         }    
-        void xchgSubcode() { 
+        bool xchgSubcode() { 
             
             switch (subCode_) {
                 case OpNode::OpCode::EQ:
@@ -79,10 +79,12 @@ class InterCode {
                         subCode_ = OpNode::OpCode::GE;
                         break;
                 default:
-                        subCode_ = OpNode::OpCode::INVALID;
+                        return false;
+                        //subCode_ = OpNode::OpCode::INVALID;
                         //cout<<"Cannot negate the subcode_";
                         break;
             }
+            return true;
         }
         
     protected:
@@ -119,7 +121,7 @@ class InterCodesClass {
         void createLabelDUChain();
         void insertMap(string str, InterCode* ic);
 
-        void optimize () {
+        void ioptimize () {
             int isOptimized = 0; 
             do {
                     isOptimized = 0;
@@ -222,6 +224,7 @@ class BasicBlock {
         }
 
         void print(ostream &os) {
+            
             os << endl; 
             os << blocklabel << ":" << endl;
             prtSpace(os, TAB_SPACE);
@@ -304,7 +307,7 @@ class BasicBlocksClass {
         void createBlocks (InterCodesClass* ic);
         
         void blockOptimize () {
-           vector <BasicBlock*>::iterator it; 
+           vector <BasicBlock*>::iterator it;
             int isOptimized = 0; 
             do {
                  isOptimized = 0;
@@ -331,13 +334,34 @@ class BasicBlocksClass {
 
 class BasicBlocksContainer {
     private: 
+        set <string> bbUsedContainers;        
         map <string, BasicBlocksClass*> bbContainer; 
-        
     public:
        void createBlockStruct (InterCodesClass* ic);
+       void insertInUsedList (string str)   {
+            bbUsedContainers.insert(str);
+       }
+
+       set <string>* getUsedContainers() {
+           return &bbUsedContainers;
+       }        
+       
        map <string, BasicBlocksClass*>* getContainer() {
            return &bbContainer;
        }        
+       void removeBlocks()  {
+           map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+           cout << "\n \nRemoved Functions: ";
+           for (; it != bbContainer.end(); ++it) {
+               //no need of live var analysis for global 
+               if ((bbUsedContainers.count((*it).first) == 0) && (((*it).first).compare("global") != 0)) {
+                    cout << (*it).first << "\t";
+                    bbContainer.erase(it);
+               }
+           }
+           cout << "\n";
+       }
+
 
        BasicBlocksClass* insertInContainer (string name) {
 
@@ -352,7 +376,15 @@ class BasicBlocksContainer {
        }
     
        void optimize() {
+             /*
+             removeBlocks();
+             if (debugLevel > 0) {
+                cout << "\n\n=====Uncalled Functions Optimization=======";
+                print(cout);
+             }
+             */
              map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+            
              for (; it != bbContainer.end(); ++it) {
                  (*it).second->blockOptimize();
                 
@@ -363,13 +395,12 @@ class BasicBlocksContainer {
                 print(cout);
              }
             
-             
              for (it = bbContainer.begin() ; it != bbContainer.end(); ++it) {
                  //no need of live var analysis for global 
                  if ((*it).first.compare("global") != 0) 
                      (*it).second->liveVariableAnalysis();
              }
-
+                
              if (debugLevel > 0) {
                 cout << "\n\n=========Dead Code Elmination Optimization==================";
                 print(cout);

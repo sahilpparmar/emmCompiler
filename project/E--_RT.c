@@ -39,15 +39,15 @@ unsigned *mem;
 #define NE(x, y) (x != y)
 
 #define FGT(x, y) (x > y)
-#define FGE(x, y) (x <= y)
+#define FGE(x, y) (x <=y)
 #define FLT(x, y) (x < y)
-#define FLE(x, y) (x >= y)
-#define FEQ(x, y) (x == y)
-#define FNE(x, y) (x != y)
+#define FLE(x, y) (x >=y)
+#define FEQ(x, y) (x ==y)
+#define FNE(x, y) (x !=y)
 
 #define PRTS(x) printf((char *)(x))
 #define PRTI(x) printf("%d", (x))
-#define PRTF(x) printf("%g", (x))
+#define PRTF(x) printf("%.f", (x))
 
 #define JMP(x) goto x
 #define JMPC(y,x) if (y) goto x

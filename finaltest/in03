@@ -1,20 +1,21 @@
 // recursion
 
-	int a = 2;
+	int a = 5;
 	int b;
 	double f = 1.0;
 	string str = "Hello, compiler!";
 	
 	int foo(int depth) {
-		print "you called foo!!!\\n";
+		print ("you called foo!!!\\n");
 		return 0;
 	}
 	void test() {
-		foo(0);
-		while(a>1) {print "";};
+		foo(a);
+		while(a>1) {a=a-1; print ("a: ", a);};
 	}
-    event o(string a1 , int a2 , unsigned int a3);
-    o(file, flags, mode) -> {
-		foo(0);
+    event o(int a2 , unsigned int a3);
+    o(flags, mode) -> {
+        test();
+//		foo(0);
 	};
 

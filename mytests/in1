@@ -4,7 +4,6 @@ int b = 10;
 int f(int i, int j) {
     int c = 2; 
     double e = 8.5 + 1.1 + c;
-
     if (e < b && e > c)
         b = 9 / 2;
     else

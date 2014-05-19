@@ -2,7 +2,7 @@
 
 	int a = 2;
 	int b;
-	int f = 1;
+	double f = 1.0;
 	string str = "Hello, compiler!";
 	
 	int foo(int a0, double f0, bool en) {
@@ -29,20 +29,21 @@
 	}
 
 	void fa(int arg0, int arg1) {
+            double dd=4.5;
 		if (a >1.0 ) {
 			print (a);
 		}
-		if (f < 22) {
+		if (f < dd) {
 			b=b+4;
 			print (b);
 		}
-		if (f >= 22) {
+		if (f >= dd) {
 			print  ("blabla");
 		}
-		if (f <= 23) {
+		if (f <= dd) {
 			b=b+22;
 		}
-		if (f > 24) {
+		if (f > dd) {
 			b=b+4;
 		}
 	}

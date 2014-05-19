@@ -74,6 +74,12 @@ static bool IsFuncSymEntry(SymTabEntry *sym) {
     return false;
 }
 
+static bool IsFuncBodyDefined(SymTabEntry *sym) {
+    if (IsFuncSymEntry(sym) && ((FunctionEntry*)sym)->body() != NULL)
+        return true;
+    return false;
+}
+
 static bool IsEventSymEntry(SymTabEntry *sym) {
     if (sym && sym->kind() == SymTabEntry::Kind::EVENT_KIND)
         return true;
@@ -122,8 +128,8 @@ static ClassFuncInvocationNode* allocClassFuncInvNode(char *objName, char* funcN
         classSym = stm.lookUp(objSym->type()->typeDesc()->name());
         funcSym = classSym->symTab()->lookUp(string(funcName));
         }
-    if (!(IsFuncSymEntry(funcSym) || IsEventSymEntry(funcSym))) {
-        errMsg((string)"\"" + (string)funcName + (string)"\" is not a function or module name");
+    if (!IsFuncSymEntry(funcSym)) {
+        errMsg((string)"\"" + (string)funcName + (string)"\" is not a function name");
     }
     return new ClassFuncInvocationNode(objSym, funcSym, param_l, yylinenum, yycolumnno, string(yyfilename));
 }
@@ -155,9 +161,12 @@ static EventEntry* allocEventEntry(char* name = NULL, vector<Type*>* param_l = N
 
     if (retEventEnt) {
         assert(name != NULL);
-        if (IsEventSymEntry(stm.lookUp(string(name)))) {
+        if (!(strlen(name) == 1 && ((name[0] >= 'a' && name[0] <= 'z') || (name[0] >= 'A' && name[0] <= 'Z')))) {
+            errMsg((string)"Invalid event name '" + name + "', should be one of {a-z, A-Z}");
+        } else if (IsEventSymEntry(stm.lookUp(string(name)))) {
             errMsg((string)"Redefinition of name " + name);
         }
+
         Type *te = new Type(param_l, Type::EVENT);
         retEventEnt->name(name);
         retEventEnt->type(te);
@@ -203,18 +212,22 @@ static RefExprNode* allocRefExprNode(char* str) {
 static InvocationNode* allocInvNode(char* str, vector<ExprNode*>* param_l) {
     assert(str != NULL);
     SymTabEntry *sym = stm.lookUp(string(str));
+    bool IsRecursiveCall = false;
 
     // Look for recursive function call to current function scope
     if (!sym) {
         sym = stm.currentScope(SymTabEntry::Kind::FUNCTION_KIND);
-        if (sym->name().compare(str)) sym = NULL;
+        if (sym == NULL || sym->name().compare(str)) sym = NULL;
+        else IsRecursiveCall = true;
     }
 
-    if (!(IsFuncSymEntry(sym) || IsEventSymEntry(sym))) {
-        errMsg((string)"\"" + (string)str + (string)"\" is not a function or module name");
+    if (!IsFuncSymEntry(sym)) {
+        errMsg((string)"\"" + (string)str + (string)"\" is not a function name");
 
         sym = new SymTabEntry(string(str), SymTabEntry::Kind::ERROR_KIND, 
                     yylinenum, yycolumnno, string(yyfilename), new Type(Type::VOID));
+    } else if (!IsRecursiveCall && !IsFuncBodyDefined(sym)) {
+        errMsg((string)"Missing function body for \"" + (string)str + (string)"\"");
     }
     return new InvocationNode(sym, param_l, yylinenum, yycolumnno, string(yyfilename));
 }
@@ -644,9 +657,18 @@ function_defn:      TOK_LBRACE function_body TOK_RBRACE semi_colon          {   
                   | TOK_LBRACE function_body TOK_RBRACE                     {   $$ = allocCompStmtNode(curStmtList3);        curStmtList3 = NULL;     prt("FunctionBody");  }
                   ;
 
-function_body:      function_body local_decl
-                  | function_body simple_stmt                               {   if (!curStmtList3) curStmtList3 = new list<StmtNode*>; curStmtList3->push_back($2); }
+function_body:      local_decl_l function_stmts
+                  | local_decl_l
+                  | function_stmts
                   |
+                  ;
+
+function_stmts:     function_stmts simple_stmt                              {   curStmtList3->push_back($2); }
+                  | simple_stmt                                             {   curStmtList3 = new list<StmtNode*>; curStmtList3->push_back($1); }
+                  ;
+
+local_decl_l:       local_decl_l local_decl
+                  | local_decl
                   ;
 
 local_decl:         type local_l semi_colon

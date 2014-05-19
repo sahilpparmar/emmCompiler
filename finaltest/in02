@@ -2,40 +2,44 @@
 
 	int a = 2;
 	int b;
-	double f = 1.0;
+	double f = 5.0;
 	string str = "Hello, compiler!";
 	
 	int foo(int depth) {
 		int local1;
 		int local2;
+		
+                while(local1>local2) {print ("");};
+                print("in foooo...............");
 
 		local1 = depth * 100;
-		print "(bef)foo - depth : ";
-		print depth;
-		print " -- ";
-		print "local1 : ";
-		print local1;
-		print "\\n";
+		print ("(bef)foo - depth : ");
+		print (depth);
+		print (" -- ");
+		print ("local1 : ");
+		print (local1);
+		print ("\\n");
 		if (depth < 8) {
 			local2 = foo(depth+1);
 		} else
 			local2 = 4;
-		print "(aft)foo - depth : ";
-		print depth;
-		print " -- ";
-		print "local1 : ";
-		print local1;
-		print " ";
-		print local2;
-		print "\\n";
+		print ("(aft)foo - depth : ");
+		print (depth);
+		print (" -- ");
+		print ("local1 : ");
+		print (local1);
+		print (" ");
+		print (local2);
+		print ("\\n");
 		return 23;
 	}
 	void test() {
 		foo(0);
-		while(true) {print "";};
+//		while(5>3) {print ("");};
+                print("in test...............");
 	}
-    event open (string a1 , int a2 , unsigned int a3);
-    open(file, flags, mode) -> {
-		;
+    event open (int a2 , unsigned int a3);
+    open(flags, mode) -> {
+	test()	;
 	};
 
