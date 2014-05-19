@@ -3,15 +3,13 @@
 
 =========================AST Builder=========================
  
-  event a(double xx, double yy);
+  event a(double a, double b);
   event b;
   string s1 = "\nParam 1: ";
   string s2 = "\nParam 2: ";
-  void aa(int x) {
-    int b;
-    int a = (b+b);
-  
-    print("a", a);
+  void aa(double a, double b) {
+    
+    a=(a+b);
   };
  
   (a(double i, double j))-->   {
@@ -25,17 +23,18 @@
 
 ========================Type Checking========================
 
+ event type: 4
+ event type: 4
 ======================3 Addr Generation======================
 global:
         s1 = "\nParam 1: "
         s2 = "\nParam 2: "
 aa:
         enter aa
-        fparam x
-        __vreg1 = b + b
+        fparam a
+        fparam b
+        __vreg1 = a + b
         a = __vreg1
-        print "a"
-        print a
         leave aa
 _event_a:
         enter _event_a
@@ -55,11 +54,10 @@ global:
         s2 = "\nParam 2: "
 aa:
         enter aa
-        fparam x
-        __vreg1 = b + b
+        fparam a
+        fparam b
+        __vreg1 = a + b
         a = __vreg1
-        print "a"
-        print a
         leave aa
 _event_a:
         enter _event_a
@@ -108,11 +106,10 @@ aa:
         Prev: ( )
 
         enter aa
-        fparam x
-        __vreg1 = b + b
+        fparam a
+        fparam b
+        __vreg1 = a + b
         a = __vreg1
-        print "a"
-        print a
         leave aa
 
         next: ( )
@@ -166,11 +163,10 @@ aa:
         Prev: ( )
 
         enter aa
-        fparam x
-        __vreg1 = b + b
+        fparam a
+        fparam b
+        __vreg1 = a + b
         a = __vreg1
-        print "a"
-        print a
         leave aa
 
         next: ( )
@@ -222,11 +218,10 @@ aa:
         Prev: ( )
 
         enter aa
-        fparam x
-        __vreg1 = b + b
+        fparam a
+        fparam b
+        __vreg1 = a + b
         a = __vreg1
-        print "a"
-        print a
         leave aa
 
         next: ( )
@@ -277,8 +272,11 @@ _event_a: ADD  R000 4  R000
 LDF  R000 F010           // Parameter Poped from Stack
 ADD  R000 4  R000
 LDF  R000 F011           // Parameter Poped from Stack
-FADD F011 F010 F012
-MOVF F012 F011
+MOVIF F011 F012
+MOVIF F010 F013
+FADD F012 F013 F014
+MOVFI F014 R020
+MOVI R020 F011
 ADD  R000 4  R000
 LDI  R000  R004           // Return Addr Poped from Stack
 JMPI  R004
@@ -293,18 +291,18 @@ JMPI  R004
 
 // Function/Event Module begins
 aa: ADD  R000 4  R000
-LDI  R000 R020           // Parameter Poped from Stack
-ADD R021 R021 R022
-MOVI R022 R023
-PRTS "a"
-PRTI R023
+LDF  R000 F015           // Parameter Poped from Stack
+ADD  R000 4  R000
+LDF  R000 F016           // Parameter Poped from Stack
+FADD F015 F016 F017
+MOVF F017 F015
 ADD  R000 4  R000
 LDI  R000  R004           // Return Addr Poped from Stack
 JMPI  R004
 // Function/Event Module Ends
 
-global: MOVS "\nParam 1: " R024
-MOVS "\nParam 2: " R025
+global: MOVS "\nParam 1: " R021
+MOVS "\nParam 2: " R022
 JMP _S_START
 
 _S_END: PRTS "DONE"

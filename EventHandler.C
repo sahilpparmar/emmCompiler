@@ -27,14 +27,15 @@ void GlobalEntry::eventHandler(ostream& os) {
         
         argtype_l = event->type()->argTypes();
 
-        os << "MOVL " << S_START << R_PARAM << endl;
+        os << "MOVL " << S_EVENT_END << R_PARAM << endl;
         os << "STI" << R_PARAM << RSP << C_PUSH_RET << endl;
         os << "SUB" << RSP << " 4" << RSP << endl;
         
         if (argtype_l) {
             std::vector<Type*>::iterator type_it = argtype_l->begin();
-            for (; type_it != argtype_l->end(); ++type_it) {
+            for (int i = 1; type_it != argtype_l->end(); ++type_it, ++i) {
 
+                os << "PRTS\"Enter Param " << i << ": \"" << endl;
                 if ((*type_it)->tag() == Type::DOUBLE) {
                     os << "INF" << F_PARAM << C_IN_EPARAM << endl;
                     os << "STF" << F_PARAM << RSP << C_APARAM << endl;
@@ -50,8 +51,10 @@ void GlobalEntry::eventHandler(ostream& os) {
         os << endl;
     }
 
+    os << S_EVENT_END << ": ";
+    os << "IN" << R_PARAM << C_DUMMY_INP << endl;
     os << S_START << ": ";
-    os << "PRTS " << "\"\\nEnter event name ('0' for exit):\"" << endl;
+    os << "PRTS " << "\"\\nEnter Event Name ('0' for exit):\"" << endl;
     os << "IN" << R_PARAM << endl;
 
     // Generate code to select appropriate event
@@ -59,9 +62,8 @@ void GlobalEntry::eventHandler(ostream& os) {
         event = event_l[ii];
         os << "JMPC EQ" << R_PARAM << " " << TO_INT(event->name()) << " " << S_PREFIX << event->name() << endl;
     }
-    os << "JMPC EQ" << R_PARAM << " " << (int)'0' << " " << S_END << endl;
-    os << "PRTS " << "\"Invalid Input\\n\"" << endl;
-    os << "JMP " << S_START << endl << endl;
-
+    os << "JMPC EQ" << R_PARAM << " " << (int)'0' << " " << S_EXIT << endl;
+    os << "PRTS " << "\"Invalid Event Name\\n\"" << endl;
+    os << "JMP " << S_EVENT_END << endl << endl;
 }
 
