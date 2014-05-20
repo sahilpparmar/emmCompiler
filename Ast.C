@@ -903,8 +903,6 @@ const Type* PrimitivePatNode::typeCheck()
 
             for (; var_it != params_->end(); ++var_it) {
                 VariableEntry* var_entry = *var_it; 
-               const Type *t2 = var_entry->typeCheck(); 
-              //  cout<<"\n t2 from prim: "<<t2->tag();                
                 var_entry->type(*type_it);
                // cout<<"\n from prim typecheck: "<<var_entry->type()->tag();
                 type_it++;
