@@ -513,6 +513,7 @@ void BasicBlock::constantFolding (int *isOptimized) {
                                          OpNode::OpCode::INVALID, operands[0]->OnFalse()));
                         } 
                     }
+                    //tempICodeVector->push_back(dupICodeVector->at(i));
                 } else {
                     tempICodeVector->push_back(dupICodeVector->at(i));
                 }
@@ -529,7 +530,7 @@ void BasicBlock::constantFolding (int *isOptimized) {
 
                              if (new1->exprNodeType() == ExprNode::ExprNodeType::VALUE_NODE) {
                                  if ((new1->value()->type()->tag() == Type::TypeTag::INT || new1->value()->type()->tag() == Type::TypeTag::UINT)) {
-
+                                    
                                      flag            = true;
                                      int val         = stoi(new1->getRefName());
                                      ValueNode *temp =  new ValueNode(new Value(~val, Type::INT));
@@ -537,6 +538,8 @@ void BasicBlock::constantFolding (int *isOptimized) {
                                  } else {
                                      tempICodeVector->push_back(dupICodeVector->at(i));
                                  }
+                            } else {
+                                     tempICodeVector->push_back(dupICodeVector->at(i));
                             }
                             break;
                     } 
@@ -693,50 +696,30 @@ void BasicBlock::constantPropogation (int *isOptimized) {
                                              break;
 
 
-
             case InterCode::OPNTYPE::IFREL : {
                                                 ExprNode** oprnd = (ExprNode**)(*it)->get3Operands();
-                                                
-                                                if (op[0] && !op[1] && !op[2]) {
+                                                   if (op[0] && op[1] == NULL && op[2] == NULL)  {
                                                       if (cvar_map.find(oprnd[0]->getRefName()) != cvar_map.end()) {
                                                           oprnd[0] = cvar_map.find(oprnd[0]->getRefName())->second; 
                                                           flag     =  true;
                                                       }
-                                                
-                                                } else {
-                                                      switch((*it)->getsubCode()) {
-                                                           case OpNode::OpCode::AND:
-                                                           case OpNode::OpCode::OR:
-                                                           case OpNode::OpCode::EQ: 
-                                                           case OpNode::OpCode::NE: 
-                                                           case OpNode::OpCode::GT:
-                                                           case OpNode::OpCode::LT:
-                                                           case OpNode::OpCode::GE:
-                                                           case OpNode::OpCode::LE: 
-                                                                                    { 
-                                                                                        if (oprnd[1] && cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
-                                                                                            oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
-                                                                                            flag     = true;
-                                                                                        } 
+                                                    } else {
+                                                            if (op[1])  {
+                                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
+                                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                                     flag     =  true;
+                                                                 }
+                                                            }
+                                                            if (op[2])  {
+                                                                 if (cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
+                                                                     oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
+                                                                     flag     =  true;
+                                                                 }
+                                                            }
+                                                   }
+                                                   tempICodeVector->push_back(new InterCode (InterCode::OPNTYPE::IFREL,
+                                                             (*it)->getsubCode(), oprnd[0], oprnd[1], oprnd[2]));
 
-                                                                                        if (oprnd[2] && cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
-                                                                                            oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
-                                                                                            flag     = true;
-                                                                                        } 
-                                                                                     }
-                                                                                     break;
-                                                           
-                                                           case OpNode::OpCode::NOT: {
-                                                                                        if (oprnd[1] && cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
-                                                                                            oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
-                                                                                            flag     = true;
-                                                                                        } 
-
-                                                                                     }
-                                                                                     break;
-                                                           default : break; 
-                                                      }
-                                              }
                                             }
                                             break;
 
