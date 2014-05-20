@@ -1,0 +1,636 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  event a;
+  event b;
+  event c;
+  int sum = 0;
+ 
+  (a())-->   {
+    sum=(((((((((1+2)+3)+4)+5)+6)+7)+8)+9)+10);
+    print("\nSum of first 10 numbers: ", sum);
+  };
+  ;;
+  (b())-->   {
+    sum=(((((((((1+3)+5)+7)+9)+11)+13)+15)+17)+19);
+    print("\nSum of first 10 odd numbers: ", sum);
+  };
+  ;;
+  (c())-->   {
+    sum=(((((((((2+4)+6)+8)+10)+12)+14)+16)+18)+20);
+    print("\nSum of first 10 odd numbers: ", sum);
+  };
+  ;;
+
+========================Type Checking========================
+
+======================3 Addr Generation======================
+global:
+        sum = 0
+_event_a:
+        enter _event_a
+        __vreg0 = 1 + 2
+        __vreg1 = __vreg0 + 3
+        __vreg2 = __vreg1 + 4
+        __vreg3 = __vreg2 + 5
+        __vreg4 = __vreg3 + 6
+        __vreg5 = __vreg4 + 7
+        __vreg6 = __vreg5 + 8
+        __vreg7 = __vreg6 + 9
+        __vreg8 = __vreg7 + 10
+        sum = __vreg8
+        print "\nSum of first 10 numbers: "
+        print sum
+        leave _event_a
+_event_b:
+        enter _event_b
+        __vreg9 = 1 + 3
+        __vreg10 = __vreg9 + 5
+        __vreg11 = __vreg10 + 7
+        __vreg12 = __vreg11 + 9
+        __vreg13 = __vreg12 + 11
+        __vreg14 = __vreg13 + 13
+        __vreg15 = __vreg14 + 15
+        __vreg16 = __vreg15 + 17
+        __vreg17 = __vreg16 + 19
+        sum = __vreg17
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_b
+_event_c:
+        enter _event_c
+        __vreg18 = 2 + 4
+        __vreg19 = __vreg18 + 6
+        __vreg20 = __vreg19 + 8
+        __vreg21 = __vreg20 + 10
+        __vreg22 = __vreg21 + 12
+        __vreg23 = __vreg22 + 14
+        __vreg24 = __vreg23 + 16
+        __vreg25 = __vreg24 + 18
+        __vreg26 = __vreg25 + 20
+        sum = __vreg26
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_c
+
+====================== Basic Code Optimization ======================
+global:
+        sum = 0
+_event_a:
+        enter _event_a
+        __vreg0 = 1 + 2
+        __vreg1 = __vreg0 + 3
+        __vreg2 = __vreg1 + 4
+        __vreg3 = __vreg2 + 5
+        __vreg4 = __vreg3 + 6
+        __vreg5 = __vreg4 + 7
+        __vreg6 = __vreg5 + 8
+        __vreg7 = __vreg6 + 9
+        __vreg8 = __vreg7 + 10
+        sum = __vreg8
+        print "\nSum of first 10 numbers: "
+        print sum
+        leave _event_a
+_event_b:
+        enter _event_b
+        __vreg9 = 1 + 3
+        __vreg10 = __vreg9 + 5
+        __vreg11 = __vreg10 + 7
+        __vreg12 = __vreg11 + 9
+        __vreg13 = __vreg12 + 11
+        __vreg14 = __vreg13 + 13
+        __vreg15 = __vreg14 + 15
+        __vreg16 = __vreg15 + 17
+        __vreg17 = __vreg16 + 19
+        sum = __vreg17
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_b
+_event_c:
+        enter _event_c
+        __vreg18 = 2 + 4
+        __vreg19 = __vreg18 + 6
+        __vreg20 = __vreg19 + 8
+        __vreg21 = __vreg20 + 10
+        __vreg22 = __vreg21 + 12
+        __vreg23 = __vreg22 + 14
+        __vreg24 = __vreg23 + 16
+        __vreg25 = __vreg24 + 18
+        __vreg26 = __vreg25 + 20
+        sum = __vreg26
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_c
+
+====================Basic Block creation=====================
+
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        __vreg0 = 1 + 2
+        __vreg1 = __vreg0 + 3
+        __vreg2 = __vreg1 + 4
+        __vreg3 = __vreg2 + 5
+        __vreg4 = __vreg3 + 6
+        __vreg5 = __vreg4 + 7
+        __vreg6 = __vreg5 + 8
+        __vreg7 = __vreg6 + 9
+        __vreg8 = __vreg7 + 10
+        sum = __vreg8
+        print "\nSum of first 10 numbers: "
+        print sum
+        leave _event_a
+
+        next: ( )
+
+
+#####_event_b#####
+
+_event_b:
+        Prev: ( )
+
+        enter _event_b
+        __vreg9 = 1 + 3
+        __vreg10 = __vreg9 + 5
+        __vreg11 = __vreg10 + 7
+        __vreg12 = __vreg11 + 9
+        __vreg13 = __vreg12 + 11
+        __vreg14 = __vreg13 + 13
+        __vreg15 = __vreg14 + 15
+        __vreg16 = __vreg15 + 17
+        __vreg17 = __vreg16 + 19
+        sum = __vreg17
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_b
+
+        next: ( )
+
+
+#####_event_c#####
+
+_event_c:
+        Prev: ( )
+
+        enter _event_c
+        __vreg18 = 2 + 4
+        __vreg19 = __vreg18 + 6
+        __vreg20 = __vreg19 + 8
+        __vreg21 = __vreg20 + 10
+        __vreg22 = __vreg21 + 12
+        __vreg23 = __vreg22 + 14
+        __vreg24 = __vreg23 + 16
+        __vreg25 = __vreg24 + 18
+        __vreg26 = __vreg25 + 20
+        sum = __vreg26
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_c
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        sum = 0
+
+        next: ( )
+
+
+=========================Optimization========================
+
+
+===== Uncalled Functions Removal Optimization =======
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        __vreg0 = 1 + 2
+        __vreg1 = __vreg0 + 3
+        __vreg2 = __vreg1 + 4
+        __vreg3 = __vreg2 + 5
+        __vreg4 = __vreg3 + 6
+        __vreg5 = __vreg4 + 7
+        __vreg6 = __vreg5 + 8
+        __vreg7 = __vreg6 + 9
+        __vreg8 = __vreg7 + 10
+        sum = __vreg8
+        print "\nSum of first 10 numbers: "
+        print sum
+        leave _event_a
+
+        next: ( )
+
+
+#####_event_b#####
+
+_event_b:
+        Prev: ( )
+
+        enter _event_b
+        __vreg9 = 1 + 3
+        __vreg10 = __vreg9 + 5
+        __vreg11 = __vreg10 + 7
+        __vreg12 = __vreg11 + 9
+        __vreg13 = __vreg12 + 11
+        __vreg14 = __vreg13 + 13
+        __vreg15 = __vreg14 + 15
+        __vreg16 = __vreg15 + 17
+        __vreg17 = __vreg16 + 19
+        sum = __vreg17
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_b
+
+        next: ( )
+
+
+#####_event_c#####
+
+_event_c:
+        Prev: ( )
+
+        enter _event_c
+        __vreg18 = 2 + 4
+        __vreg19 = __vreg18 + 6
+        __vreg20 = __vreg19 + 8
+        __vreg21 = __vreg20 + 10
+        __vreg22 = __vreg21 + 12
+        __vreg23 = __vreg22 + 14
+        __vreg24 = __vreg23 + 16
+        __vreg25 = __vreg24 + 18
+        __vreg26 = __vreg25 + 20
+        sum = __vreg26
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_c
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        sum = 0
+
+        next: ( )
+
+
+
+=====Constant propogation and folding optimization=======
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        __vreg0 = 3
+        __vreg1 = 6
+        __vreg2 = 10
+        __vreg3 = 15
+        __vreg4 = 21
+        __vreg5 = 28
+        __vreg6 = 36
+        __vreg7 = 45
+        __vreg8 = 55
+        sum = 55
+        print "\nSum of first 10 numbers: "
+        print sum
+        leave _event_a
+
+        next: ( )
+
+
+#####_event_b#####
+
+_event_b:
+        Prev: ( )
+
+        enter _event_b
+        __vreg9 = 4
+        __vreg10 = 9
+        __vreg11 = 16
+        __vreg12 = 25
+        __vreg13 = 36
+        __vreg14 = 49
+        __vreg15 = 64
+        __vreg16 = 81
+        __vreg17 = 100
+        sum = 100
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_b
+
+        next: ( )
+
+
+#####_event_c#####
+
+_event_c:
+        Prev: ( )
+
+        enter _event_c
+        __vreg18 = 6
+        __vreg19 = 12
+        __vreg20 = 20
+        __vreg21 = 30
+        __vreg22 = 42
+        __vreg23 = 56
+        __vreg24 = 72
+        __vreg25 = 90
+        __vreg26 = 110
+        sum = 110
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_c
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        sum = 0
+
+        next: ( )
+
+
+
+ blockName: _event_a
+live vars at start: 
+live vars at End: 
+
+ blockName: _event_b
+live vars at start: 
+live vars at End: 
+
+ blockName: _event_c
+live vars at start: 
+live vars at End: 
+
+=========Dead Code Elmination Optimization==================
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        __vreg0 = 3
+        __vreg1 = 6
+        __vreg2 = 10
+        __vreg3 = 15
+        __vreg4 = 21
+        __vreg5 = 28
+        __vreg6 = 36
+        __vreg7 = 45
+        __vreg8 = 55
+        sum = 55
+        print "\nSum of first 10 numbers: "
+        print sum
+        leave _event_a
+
+        next: ( )
+
+
+#####_event_b#####
+
+_event_b:
+        Prev: ( )
+
+        enter _event_b
+        __vreg9 = 4
+        __vreg10 = 9
+        __vreg11 = 16
+        __vreg12 = 25
+        __vreg13 = 36
+        __vreg14 = 49
+        __vreg15 = 64
+        __vreg16 = 81
+        __vreg17 = 100
+        sum = 100
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_b
+
+        next: ( )
+
+
+#####_event_c#####
+
+_event_c:
+        Prev: ( )
+
+        enter _event_c
+        __vreg18 = 6
+        __vreg19 = 12
+        __vreg20 = 20
+        __vreg21 = 30
+        __vreg22 = 42
+        __vreg23 = 56
+        __vreg24 = 72
+        __vreg25 = 90
+        __vreg26 = 110
+        sum = 110
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_c
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        sum = 0
+
+        next: ( )
+
+
+========================= Final Optimized Code ========================
+
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        __vreg0 = 3
+        __vreg1 = 6
+        __vreg2 = 10
+        __vreg3 = 15
+        __vreg4 = 21
+        __vreg5 = 28
+        __vreg6 = 36
+        __vreg7 = 45
+        __vreg8 = 55
+        sum = 55
+        print "\nSum of first 10 numbers: "
+        print sum
+        leave _event_a
+
+        next: ( )
+
+
+#####_event_b#####
+
+_event_b:
+        Prev: ( )
+
+        enter _event_b
+        __vreg9 = 4
+        __vreg10 = 9
+        __vreg11 = 16
+        __vreg12 = 25
+        __vreg13 = 36
+        __vreg14 = 49
+        __vreg15 = 64
+        __vreg16 = 81
+        __vreg17 = 100
+        sum = 100
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_b
+
+        next: ( )
+
+
+#####_event_c#####
+
+_event_c:
+        Prev: ( )
+
+        enter _event_c
+        __vreg18 = 6
+        __vreg19 = 12
+        __vreg20 = 20
+        __vreg21 = 30
+        __vreg22 = 42
+        __vreg23 = 56
+        __vreg24 = 72
+        __vreg25 = 90
+        __vreg26 = 110
+        sum = 110
+        print "\nSum of first 10 odd numbers: "
+        print sum
+        leave _event_c
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        sum = 0
+
+        next: ( )
+
+
+===================Final Code generation=====================
+JMP begin
+_S_a: MOVL _S_END R005
+STI R005 R000           // Return Addr Pushed on Stack
+SUB R000 4 R000
+JMP _event_a
+
+_S_b: MOVL _S_END R005
+STI R005 R000           // Return Addr Pushed on Stack
+SUB R000 4 R000
+JMP _event_b
+
+_S_c: MOVL _S_END R005
+STI R005 R000           // Return Addr Pushed on Stack
+SUB R000 4 R000
+JMP _event_c
+
+_S_END: IN R005           // Dummy Instruction
+_S_START: PRTS "\nEnter Event Name ('0' for exit): "
+IN R005
+JMPC EQ R005 97 _S_a
+JMPC EQ R005 98 _S_b
+JMPC EQ R005 99 _S_c
+JMPC EQ R005 48 _S_EXIT
+PRTS "Invalid Event Name\n"
+JMP _S_END
+
+begin: MOVI  10000 R000           // RSP Initialized
+JMP global
+
+// Function/Event Module begins
+_event_a: MOVI 3 R020
+MOVI 6 R021
+MOVI 10 R022
+MOVI 15 R023
+MOVI 21 R024
+MOVI 28 R025
+MOVI 36 R026
+MOVI 45 R027
+MOVI 55 R028
+MOVI 55 R029
+PRTS "\nSum of first 10 numbers: "
+PRTI R029
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+// Function/Event Module begins
+_event_b: MOVI 4 R030
+MOVI 9 R031
+MOVI 16 R032
+MOVI 25 R033
+MOVI 36 R034
+MOVI 49 R035
+MOVI 64 R036
+MOVI 81 R037
+MOVI 100 R038
+MOVI 100 R029
+PRTS "\nSum of first 10 odd numbers: "
+PRTI R029
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+// Function/Event Module begins
+_event_c: MOVI 6 R039
+MOVI 12 R040
+MOVI 20 R041
+MOVI 30 R042
+MOVI 42 R043
+MOVI 56 R044
+MOVI 72 R045
+MOVI 90 R046
+MOVI 110 R047
+MOVI 110 R029
+PRTS "\nSum of first 10 odd numbers: "
+PRTI R029
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+global: MOVI 0 R029
+JMP _S_START
+
+_S_EXIT: PRTS "Successfully Exited\n"
+
+
+Compilation Successful

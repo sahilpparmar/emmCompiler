@@ -1,0 +1,89 @@
+event a(int aa);
+
+void foo1(int i) {
+    print("\\nIn foo1");
+    print("\\nOut foo1");
+}
+void foo2(int i) {
+    print("\\nIn foo2");
+    print("\\nOut foo2");
+}
+void foo3(int i) {
+    print("\\nIn foo3");
+    print("\\nOut foo3");
+}
+void foo4(int i) {
+    print("\\nIn foo4");
+    print("\\nOut foo4");
+}
+void foo5(int i) {
+    print("\\nIn foo5");
+    print("\\nOut foo5");
+}
+void foo6(int i) {
+    print("\\nIn foo6");
+    print("\\nOut foo6");
+}
+void foo7(int i) {
+    print("\\nIn foo7");
+    print("\\nOut foo7");
+}
+void foo8(int i) {
+    print("\\nIn foo8");
+    print("\\nOut foo8");
+}
+void foo9(int i) {
+    print("\\nIn foo9");
+    print("\\nOut foo9");
+}
+void foo10(int i) {
+    print("\\nIn foo10");
+    print("\\nOut foo10");
+}
+void foo11(int i) {
+    print("\\nIn foo11");
+    print("\\nOut foo11");
+}
+void foo12(int i) {
+    print("\\nIn foo12");
+    print("\\nOut foo12");
+}
+void foo13(int i) {
+    print("\\nIn foo13");
+    print("\\nOut foo13");
+}
+void foo14(int i) {
+    print("\\nIn foo14");
+    print("\\nOut foo14");
+}
+void foo15(int i) {
+    print("\\nIn foo15");
+    print("\\nOut foo15");
+}
+void foo16(int i) {
+    print("\\nIn foo16");
+    print("\\nOut foo16");
+}
+void foo17(int i) {
+    print("\\nIn foo17");
+    print("\\nOut foo17");
+}
+void foo18(int i) {
+    print("\\nIn foo18");
+    print("\\nOut foo18");
+}
+void foo19(int i) {
+    print("\\nIn foo19");
+    print("\\nOut foo19");
+}
+void foo20(int i) {
+    print("\\nIn foo20");
+    print("\\nOut foo20");
+}
+
+a(i) -> {
+    print("\\nIn event");
+    foo1(i);
+    print("\\nOut event");
+}
+

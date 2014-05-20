@@ -471,35 +471,35 @@ void BasicBlock::constantFolding (int *isOptimized) {
 
                 } else if (dupICodeVector->at(i)->getOPNType() == InterCode::OPNTYPE::IFREL) {
 
-                    bool cond = false;
-                    switch(dupICodeVector->at(i)->getsubCode()) {
-                        case OpNode::OpCode::EQ: 
-                            if(!isfloat) cond = (val_1 == val_2);
-                            else cond = (valf_1 == valf_2);
-                            break;
-                        case OpNode::OpCode::NE:
-                            if(!isfloat) cond = (val_1 != val_2);
-                            else cond = (valf_1 != valf_2);
-                            break;
-                        case OpNode::OpCode::GE:
-                            if(!isfloat) cond = (val_1 >= val_2);
-                            else cond = (valf_1 >= valf_2);
-                            break;
-                        case OpNode::OpCode::LE:
-                            if(!isfloat) cond = (val_1 <= val_2);
-                            else cond = (valf_1 <= valf_2);
-                            break;
-                        case OpNode::OpCode::GT:
-                            if(!isfloat) cond = (val_1 > val_2);
-                            else cond = (valf_1 > valf_2);
-                            break;
-                        case OpNode::OpCode::LT:
-                            if(!isfloat) cond = (val_1 < val_2);
-                            else cond = (valf_1 < valf_2);
-                            break;
-                        default : 
-                                  break;
-                    }
+                    //bool cond = false;
+                    //switch(dupICodeVector->at(i)->getsubCode()) {
+                    //    case OpNode::OpCode::EQ: 
+                    //        if(!isfloat) cond = (val_1 == val_2);
+                    //        else cond = (valf_1 == valf_2);
+                    //        break;
+                    //    case OpNode::OpCode::NE:
+                    //        if(!isfloat) cond = (val_1 != val_2);
+                    //        else cond = (valf_1 != valf_2);
+                    //        break;
+                    //    case OpNode::OpCode::GE:
+                    //        if(!isfloat) cond = (val_1 >= val_2);
+                    //        else cond = (valf_1 >= valf_2);
+                    //        break;
+                    //    case OpNode::OpCode::LE:
+                    //        if(!isfloat) cond = (val_1 <= val_2);
+                    //        else cond = (valf_1 <= valf_2);
+                    //        break;
+                    //    case OpNode::OpCode::GT:
+                    //        if(!isfloat) cond = (val_1 > val_2);
+                    //        else cond = (valf_1 > valf_2);
+                    //        break;
+                    //    case OpNode::OpCode::LT:
+                    //        if(!isfloat) cond = (val_1 < val_2);
+                    //        else cond = (valf_1 < valf_2);
+                    //        break;
+                    //    default : 
+                    //              break;
+                    //}
                     //If condition is true then directly goto to op[0] 
                     //TODO: please fix the following GOTO 
                    // if (cond) {

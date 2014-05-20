@@ -1,0 +1,30 @@
+event a();
+
+void foo ()  {
+
+    int a = 10;
+    int b = 10;
+    while(true)
+    {
+        print("\\n outer while: ");
+        b=b+1;
+        if(b==15) {
+            print("\\nexit");
+            break;
+        }
+        while(a <= 15)
+        {
+            a=a+1;
+            print("\\n inner while: ");
+            if(a==13) {
+                print("\\ncontinue to outer while");
+                continue 2;
+                
+            }
+        }
+    }
+}
+
+a() -> {
+    foo();
+}

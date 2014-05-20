@@ -1,0 +1,53 @@
+#include "E--_RT.c"
+int main(int argc, char *argv[]) {
+	E_RT_init(argc, argv);
+JMP(begin);
+_S_a: MOVL(_S_END, R005);
+STI(R005, R000);
+R000=SUB(R000,4);
+JMP(_event_a);
+_S_END: IN(R005);
+_S_START: PRTS("\nEnter Event Name ('0' for exit): ");
+IN(R005);
+JMPC(EQ(R005, 97), _S_a);
+JMPC(EQ(R005, 48), _S_EXIT);
+PRTS("Invalid Event Name\n");
+JMP(_S_END);
+begin: MOVI(10000, R000);
+JMP(global);
+_event_a: MOVL(L12, R020);
+STI(R020, R000);
+R000=SUB(R000,4);
+JMP(foo);
+L12: R000=ADD(R000,4);
+LDI(R000, R004);
+JMPI(R004);
+foo: MOVI(10, R021);
+MOVI(10, R022);
+L2: PRTS("\n outer while: ");
+R023=ADD(R022,1);
+MOVI(R023, R022);
+JMPC(EQ(R022, 15), L5);
+JMP(L4);
+L5: PRTS("\nexit");
+JMP(L3);
+L4: JMP(L6);
+L6: JMPC(LE(R021, 15), L7);
+JMP(L8);
+L7: R024=ADD(R021,1);
+MOVI(R024, R021);
+PRTS("\n inner while: ");
+JMPC(EQ(R021, 13), L10);
+JMP(L9);
+L10: PRTS("\ncontinue to outer while");
+JMP(L2);
+L9: JMP(L6);
+L8: JMP(L2);
+L3: R000=ADD(R000,4);
+LDI(R000, R004);
+JMPI(R004);
+global: JMP(_S_START);
+_S_EXIT: PRTS("Successfully Exited\n");
+
+	E_RT_exit(); return 0;
+}

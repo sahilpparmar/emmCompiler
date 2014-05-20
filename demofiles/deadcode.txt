@@ -1,0 +1,559 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  event a;
+  int g1 = 1;
+  int g2 = 2;
+  void dead() {
+    int a = 2;
+    int b = 3;
+    int c = 4;
+    int d = 5;
+    int e = 6;
+    int f = 7;
+  
+    if (g1==0)     {
+      g1=(g1+b);
+      print("Hello ", g1);
+    };
+    else     {
+      g1=(g1+c);
+      print("World ", g1);
+    };
+  };
+ 
+  (a())-->   {
+    dead();
+    print("\nReturn from dead()");
+  };
+  ;;
+
+========================Type Checking========================
+
+======================3 Addr Generation======================
+global:
+        g1 = 1
+        g2 = 2
+dead:
+        enter dead
+        a = 2
+        b = 3
+        c = 4
+        d = 5
+        e = 6
+        f = 7
+        if g1 == 0 goto L3:
+        goto L4:
+L3:
+        __vreg0 = g1 + b
+        g1 = __vreg0
+        print "Hello "
+        print g1
+        goto L2:
+L4:
+        __vreg1 = g1 + c
+        g1 = __vreg1
+        print "World "
+        print g1
+L2:
+        leave dead
+_event_a:
+        enter _event_a
+        call dead
+L6:
+        print "\nReturn from dead()"
+        leave _event_a
+
+====================== Basic Code Optimization ======================
+global:
+        g1 = 1
+        g2 = 2
+dead:
+        enter dead
+        a = 2
+        b = 3
+        c = 4
+        d = 5
+        e = 6
+        f = 7
+        if g1 != 0 goto L4:
+L3:
+        __vreg0 = g1 + b
+        g1 = __vreg0
+        print "Hello "
+        print g1
+        goto L2:
+L4:
+        __vreg1 = g1 + c
+        g1 = __vreg1
+        print "World "
+        print g1
+L2:
+        leave dead
+_event_a:
+        enter _event_a
+        call dead
+L6:
+        print "\nReturn from dead()"
+        leave _event_a
+
+====================Basic Block creation=====================
+
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        call dead
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        print "\nReturn from dead()"
+        leave _event_a
+
+        next: ( )
+
+
+#####dead#####
+
+dead:
+        Prev: ( )
+
+        enter dead
+        a = 2
+        b = 3
+        c = 4
+        d = 5
+        e = 6
+        f = 7
+        if g1 != 0 goto L4:
+
+        next: ( L4 L3 )
+
+L3:
+        Prev: ( dead )
+
+        __vreg0 = g1 + b
+        g1 = __vreg0
+        print "Hello "
+        print g1
+        goto L2:
+
+        next: ( L2 )
+
+L4:
+        Prev: ( dead )
+
+        __vreg1 = g1 + c
+        g1 = __vreg1
+        print "World "
+        print g1
+
+        next: ( L2 )
+
+L2:
+        Prev: ( L3 L4 )
+
+        leave dead
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        g1 = 1
+        g2 = 2
+
+        next: ( )
+
+
+=========================Optimization========================
+
+
+===== Uncalled Functions Removal Optimization =======
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        call dead
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        print "\nReturn from dead()"
+        leave _event_a
+
+        next: ( )
+
+
+#####dead#####
+
+dead:
+        Prev: ( )
+
+        enter dead
+        a = 2
+        b = 3
+        c = 4
+        d = 5
+        e = 6
+        f = 7
+        if g1 != 0 goto L4:
+
+        next: ( L4 L3 )
+
+L3:
+        Prev: ( dead )
+
+        __vreg0 = g1 + b
+        g1 = __vreg0
+        print "Hello "
+        print g1
+        goto L2:
+
+        next: ( L2 )
+
+L4:
+        Prev: ( dead )
+
+        __vreg1 = g1 + c
+        g1 = __vreg1
+        print "World "
+        print g1
+
+        next: ( L2 )
+
+L2:
+        Prev: ( L3 L4 )
+
+        leave dead
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        g1 = 1
+        g2 = 2
+
+        next: ( )
+
+
+
+=====Constant propogation and folding optimization=======
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        call dead
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        print "\nReturn from dead()"
+        leave _event_a
+
+        next: ( )
+
+
+#####dead#####
+
+dead:
+        Prev: ( )
+
+        enter dead
+        a = 2
+        b = 3
+        c = 4
+        d = 5
+        e = 6
+        f = 7
+        if g1 != 0 goto L4:
+
+        next: ( L4 L3 )
+
+L3:
+        Prev: ( dead )
+
+        __vreg0 = g1 + b
+        g1 = __vreg0
+        print "Hello "
+        print g1
+        goto L2:
+
+        next: ( L2 )
+
+L4:
+        Prev: ( dead )
+
+        __vreg1 = g1 + c
+        g1 = __vreg1
+        print "World "
+        print g1
+
+        next: ( L2 )
+
+L2:
+        Prev: ( L3 L4 )
+
+        leave dead
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        g1 = 1
+        g2 = 2
+
+        next: ( )
+
+
+
+ blockName: _event_a
+live vars at start: 
+live vars at End: 
+
+ blockName: L6
+live vars at start: 
+live vars at End: 
+
+ blockName: dead
+live vars at start: g1,
+live vars at End: b,c,g1,
+
+ blockName: L3
+live vars at start: b,g1,
+live vars at End: 
+
+ blockName: L4
+live vars at start: c,g1,
+live vars at End: 
+
+ blockName: L2
+live vars at start: 
+live vars at End: 
+
+=========Dead Code Elmination Optimization==================
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        call dead
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        print "\nReturn from dead()"
+        leave _event_a
+
+        next: ( )
+
+
+#####dead#####
+
+dead:
+        Prev: ( )
+
+        enter dead
+        b = 3
+        c = 4
+        if g1 != 0 goto L4:
+
+        next: ( L4 L3 )
+
+L3:
+        Prev: ( dead )
+
+        __vreg0 = g1 + b
+        g1 = __vreg0
+        print "Hello "
+        print g1
+        goto L2:
+
+        next: ( L2 )
+
+L4:
+        Prev: ( dead )
+
+        __vreg1 = g1 + c
+        g1 = __vreg1
+        print "World "
+        print g1
+
+        next: ( L2 )
+
+L2:
+        Prev: ( L3 L4 )
+
+        leave dead
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        g1 = 1
+        g2 = 2
+
+        next: ( )
+
+
+========================= Final Optimized Code ========================
+
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        call dead
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        print "\nReturn from dead()"
+        leave _event_a
+
+        next: ( )
+
+
+#####dead#####
+
+dead:
+        Prev: ( )
+
+        enter dead
+        b = 3
+        c = 4
+        if g1 != 0 goto L4:
+
+        next: ( L4 L3 )
+
+L3:
+        Prev: ( dead )
+
+        __vreg0 = g1 + b
+        g1 = __vreg0
+        print "Hello "
+        print g1
+        goto L2:
+
+        next: ( L2 )
+
+L4:
+        Prev: ( dead )
+
+        __vreg1 = g1 + c
+        g1 = __vreg1
+        print "World "
+        print g1
+
+        next: ( L2 )
+
+L2:
+        Prev: ( L3 L4 )
+
+        leave dead
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        g1 = 1
+        g2 = 2
+
+        next: ( )
+
+
+===================Final Code generation=====================
+JMP begin
+_S_a: MOVL _S_END R005
+STI R005 R000           // Return Addr Pushed on Stack
+SUB R000 4 R000
+JMP _event_a
+
+_S_END: IN R005           // Dummy Instruction
+_S_START: PRTS "\nEnter Event Name ('0' for exit): "
+IN R005
+JMPC EQ R005 97 _S_a
+JMPC EQ R005 48 _S_EXIT
+PRTS "Invalid Event Name\n"
+JMP _S_END
+
+begin: MOVI  10000 R000           // RSP Initialized
+JMP global
+
+// Function/Event Module begins
+_event_a: MOVL L6 R020
+STI  R020  R000           // Return Addr Pushed on Stack
+SUB  R000 4  R000
+JMP  dead
+L6: PRTS "\nReturn from dead()"
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+// Function/Event Module begins
+dead: MOVI 3 R021
+MOVI 4 R022
+JMPC NE R023 0 L4
+L3: ADD R023 R021 R024
+MOVI R024 R023
+PRTS "Hello "
+PRTI R023
+JMP L2
+L4: ADD R023 R022 R025
+MOVI R025 R023
+PRTS "World "
+PRTI R023
+L2: ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+global: MOVI 1 R023
+MOVI 2 R026
+JMP _S_START
+
+_S_EXIT: PRTS "Successfully Exited\n"
+
+
+Compilation Successful

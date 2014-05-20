@@ -1,0 +1,20 @@
+//Nested file and recursion
+
+event a(int aa, int bb);
+int aa = 2;
+
+int factorial(int x)
+{
+    if(x==1)
+        return 1;
+    return x * factorial(x-1);
+}
+
+a(i, j)-> {
+    i = factorial(i);
+    print("\\nFactorial of 1st Param: ", i );
+
+    j = factorial(j);
+    print("\\nFactorial of 2nd Param: ", j );
+}
+

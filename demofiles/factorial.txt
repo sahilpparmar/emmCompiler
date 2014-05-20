@@ -1,0 +1,657 @@
+
+=================Lexical and Syntax Parsing==================
+
+=========================AST Builder=========================
+ 
+  event a(int aa, int bb);
+  int aa = 2;
+  int factorial(int x) {
+    
+    if (x==1)     return 1;
+    return x*factorial((x-1));
+  };
+ 
+  (a(int i, int j))-->   {
+    i=factorial(i);
+    print("\nFactorial of 1st Param: ", i);
+    j=factorial(j);
+    print("\nFactorial of 2nd Param: ", j);
+  };
+  ;;
+
+========================Type Checking========================
+
+======================3 Addr Generation======================
+global:
+        aa = 2
+factorial:
+        enter factorial
+        fparam x
+        if x == 1 goto L3:
+        goto L2:
+L3:
+        return 1
+L2:
+        __vreg1 = x - 1
+        aparam __vreg1
+        __vreg2 = call factorial
+L4:
+        __vreg3 = x * __vreg2
+        return __vreg3
+        leave factorial
+_event_a:
+        enter _event_a
+        fparam j
+        fparam i
+        aparam i
+        __vreg4 = call factorial
+L6:
+        i = __vreg4
+        print "\nFactorial of 1st Param: "
+        print i
+        aparam j
+        __vreg5 = call factorial
+L7:
+        j = __vreg5
+        print "\nFactorial of 2nd Param: "
+        print j
+        leave _event_a
+
+====================== Basic Code Optimization ======================
+global:
+        aa = 2
+factorial:
+        enter factorial
+        fparam x
+        if x != 1 goto L2:
+L3:
+        return 1
+L2:
+        __vreg1 = x - 1
+        aparam __vreg1
+        __vreg2 = call factorial
+L4:
+        __vreg3 = x * __vreg2
+        return __vreg3
+        leave factorial
+_event_a:
+        enter _event_a
+        fparam j
+        fparam i
+        aparam i
+        __vreg4 = call factorial
+L6:
+        i = __vreg4
+        print "\nFactorial of 1st Param: "
+        print i
+        aparam j
+        __vreg5 = call factorial
+L7:
+        j = __vreg5
+        print "\nFactorial of 2nd Param: "
+        print j
+        leave _event_a
+
+====================Basic Block creation=====================
+
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        fparam j
+        fparam i
+        aparam i
+        __vreg4 = call factorial
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        i = __vreg4
+        print "\nFactorial of 1st Param: "
+        print i
+        aparam j
+        __vreg5 = call factorial
+
+        next: ( L7 )
+
+L7:
+        Prev: ( L6 )
+
+        j = __vreg5
+        print "\nFactorial of 2nd Param: "
+        print j
+        leave _event_a
+
+        next: ( )
+
+
+#####factorial#####
+
+factorial:
+        Prev: ( )
+
+        enter factorial
+        fparam x
+        if x != 1 goto L2:
+
+        next: ( L2 L3 )
+
+L3:
+        Prev: ( factorial )
+
+        return 1
+
+        next: ( )
+
+L2:
+        Prev: ( factorial )
+
+        __vreg1 = x - 1
+        aparam __vreg1
+        __vreg2 = call factorial
+
+        next: ( L4 )
+
+L4:
+        Prev: ( L2 )
+
+        __vreg3 = x * __vreg2
+        return __vreg3
+        leave factorial
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        aa = 2
+
+        next: ( )
+
+
+=========================Optimization========================
+
+
+===== Uncalled Functions Removal Optimization =======
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        fparam j
+        fparam i
+        aparam i
+        __vreg4 = call factorial
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        i = __vreg4
+        print "\nFactorial of 1st Param: "
+        print i
+        aparam j
+        __vreg5 = call factorial
+
+        next: ( L7 )
+
+L7:
+        Prev: ( L6 )
+
+        j = __vreg5
+        print "\nFactorial of 2nd Param: "
+        print j
+        leave _event_a
+
+        next: ( )
+
+
+#####factorial#####
+
+factorial:
+        Prev: ( )
+
+        enter factorial
+        fparam x
+        if x != 1 goto L2:
+
+        next: ( L2 L3 )
+
+L3:
+        Prev: ( factorial )
+
+        return 1
+
+        next: ( )
+
+L2:
+        Prev: ( factorial )
+
+        __vreg1 = x - 1
+        aparam __vreg1
+        __vreg2 = call factorial
+
+        next: ( L4 )
+
+L4:
+        Prev: ( L2 )
+
+        __vreg3 = x * __vreg2
+        return __vreg3
+        leave factorial
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        aa = 2
+
+        next: ( )
+
+
+
+=====Constant propogation and folding optimization=======
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        fparam j
+        fparam i
+        aparam i
+        __vreg4 = call factorial
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        i = __vreg4
+        print "\nFactorial of 1st Param: "
+        print i
+        aparam j
+        __vreg5 = call factorial
+
+        next: ( L7 )
+
+L7:
+        Prev: ( L6 )
+
+        j = __vreg5
+        print "\nFactorial of 2nd Param: "
+        print j
+        leave _event_a
+
+        next: ( )
+
+
+#####factorial#####
+
+factorial:
+        Prev: ( )
+
+        enter factorial
+        fparam x
+        if x != 1 goto L2:
+
+        next: ( L2 L3 )
+
+L3:
+        Prev: ( factorial )
+
+        return 1
+
+        next: ( )
+
+L2:
+        Prev: ( factorial )
+
+        __vreg1 = x - 1
+        aparam __vreg1
+        __vreg2 = call factorial
+
+        next: ( L4 )
+
+L4:
+        Prev: ( L2 )
+
+        __vreg3 = x * __vreg2
+        return __vreg3
+        leave factorial
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        aa = 2
+
+        next: ( )
+
+
+
+ blockName: _event_a
+live vars at start: 
+live vars at End: __vreg4,j,
+
+ blockName: L6
+live vars at start: __vreg4,j,
+live vars at End: __vreg5,
+
+ blockName: L7
+live vars at start: __vreg5,
+live vars at End: 
+
+ blockName: factorial
+live vars at start: 
+live vars at End: x,
+
+ blockName: L3
+live vars at start: 
+live vars at End: 
+
+ blockName: L2
+live vars at start: x,
+live vars at End: __vreg2,x,
+
+ blockName: L4
+live vars at start: __vreg2,x,
+live vars at End: 
+
+=========Dead Code Elmination Optimization==================
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        fparam j
+        fparam i
+        aparam i
+        __vreg4 = call factorial
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        i = __vreg4
+        print "\nFactorial of 1st Param: "
+        print i
+        aparam j
+        __vreg5 = call factorial
+
+        next: ( L7 )
+
+L7:
+        Prev: ( L6 )
+
+        j = __vreg5
+        print "\nFactorial of 2nd Param: "
+        print j
+        leave _event_a
+
+        next: ( )
+
+
+#####factorial#####
+
+factorial:
+        Prev: ( )
+
+        enter factorial
+        fparam x
+        if x != 1 goto L2:
+
+        next: ( L2 L3 )
+
+L3:
+        Prev: ( factorial )
+
+        return 1
+
+        next: ( )
+
+L2:
+        Prev: ( factorial )
+
+        __vreg1 = x - 1
+        aparam __vreg1
+        __vreg2 = call factorial
+
+        next: ( L4 )
+
+L4:
+        Prev: ( L2 )
+
+        __vreg3 = x * __vreg2
+        return __vreg3
+        leave factorial
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        aa = 2
+
+        next: ( )
+
+
+========================= Final Optimized Code ========================
+
+#####_event_a#####
+
+_event_a:
+        Prev: ( )
+
+        enter _event_a
+        fparam j
+        fparam i
+        aparam i
+        __vreg4 = call factorial
+
+        next: ( L6 )
+
+L6:
+        Prev: ( _event_a )
+
+        i = __vreg4
+        print "\nFactorial of 1st Param: "
+        print i
+        aparam j
+        __vreg5 = call factorial
+
+        next: ( L7 )
+
+L7:
+        Prev: ( L6 )
+
+        j = __vreg5
+        print "\nFactorial of 2nd Param: "
+        print j
+        leave _event_a
+
+        next: ( )
+
+
+#####factorial#####
+
+factorial:
+        Prev: ( )
+
+        enter factorial
+        fparam x
+        if x != 1 goto L2:
+
+        next: ( L2 L3 )
+
+L3:
+        Prev: ( factorial )
+
+        return 1
+
+        next: ( )
+
+L2:
+        Prev: ( factorial )
+
+        __vreg1 = x - 1
+        aparam __vreg1
+        __vreg2 = call factorial
+
+        next: ( L4 )
+
+L4:
+        Prev: ( L2 )
+
+        __vreg3 = x * __vreg2
+        return __vreg3
+        leave factorial
+
+        next: ( )
+
+
+#####global#####
+
+global:
+        Prev: ( )
+
+        aa = 2
+
+        next: ( )
+
+
+===================Final Code generation=====================
+JMP begin
+_S_a: MOVL _S_END R005
+STI R005 R000           // Return Addr Pushed on Stack
+SUB R000 4 R000
+PRTS"Enter Param 1: "
+INI R005           // READ Event Parameter Input
+STI R005 R000           // Parameter Pushed on Stack
+SUB R000 4 R000
+PRTS"Enter Param 2: "
+INI R005           // READ Event Parameter Input
+STI R005 R000           // Parameter Pushed on Stack
+SUB R000 4 R000
+JMP _event_a
+
+_S_END: IN R005           // Dummy Instruction
+_S_START: PRTS "\nEnter Event Name ('0' for exit): "
+IN R005
+JMPC EQ R005 97 _S_a
+JMPC EQ R005 48 _S_EXIT
+PRTS "Invalid Event Name\n"
+JMP _S_END
+
+begin: MOVI  10000 R000           // RSP Initialized
+JMP global
+
+// Function/Event Module begins
+_event_a: ADD  R000 4  R000
+LDI  R000 R020           // Parameter Popped from Stack
+ADD  R000 4  R000
+LDI  R000 R021           // Parameter Popped from Stack
+STI  R021  R000
+SUB  R000 4  R000
+STI  R020  R000
+SUB  R000 4  R000
+MOVL L8 R022
+STI  R022  R000           // Return Addr Pushed on Stack
+SUB  R000 4  R000
+STI R021  R000           // Parameter Pushed on Stack
+SUB  R000 4  R000
+JMP  factorial
+L8: ADD  R000 4  R000
+LDI  R000 R020
+ADD  R000 4  R000
+LDI  R000 R021
+MOVI  R001 R023
+L6: MOVI R023 R021
+PRTS "\nFactorial of 1st Param: "
+PRTI R021
+STI  R023  R000
+SUB  R000 4  R000
+STI  R022  R000
+SUB  R000 4  R000
+MOVL L9 R024
+STI  R024  R000           // Return Addr Pushed on Stack
+SUB  R000 4  R000
+STI R020  R000           // Parameter Pushed on Stack
+SUB  R000 4  R000
+JMP  factorial
+L9: ADD  R000 4  R000
+LDI  R000 R022
+ADD  R000 4  R000
+LDI  R000 R023
+MOVI  R001 R025
+L7: MOVI R025 R020
+PRTS "\nFactorial of 2nd Param: "
+PRTI R020
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+// Function/Event Module begins
+factorial: ADD  R000 4  R000
+LDI  R000 R026           // Parameter Popped from Stack
+JMPC NE R026 1 L2
+L3: MOVI 1  R001
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+L2: SUB R026 1 R027
+STI  R027  R000
+SUB  R000 4  R000
+STI  R026  R000
+SUB  R000 4  R000
+MOVL L10 R028
+STI  R028  R000           // Return Addr Pushed on Stack
+SUB  R000 4  R000
+STI R027  R000           // Parameter Pushed on Stack
+SUB  R000 4  R000
+JMP  factorial
+L10: ADD  R000 4  R000
+LDI  R000 R026
+ADD  R000 4  R000
+LDI  R000 R027
+MOVI  R001 R029
+L4: MUL R026 R029 R030
+MOVI R030  R001
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+ADD  R000 4  R000
+LDI  R000  R004           // Return Addr Popped from Stack
+JMPI  R004
+// Function/Event Module Ends
+
+global: MOVI 2 R031
+JMP _S_START
+
+_S_EXIT: PRTS "Successfully Exited\n"
+
+
+Compilation Successful
