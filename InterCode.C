@@ -1023,6 +1023,8 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
     BasicBlock* block       = BBcls->getBlockWithLabel("global");
     bool isPrevJmp          = false; 
     bool isIfJmp            = true;
+    bool isPrevGoto         = false;
+    bool isPrevReturn       = false;
     BasicBlock* bb          = NULL; 
 
 
@@ -1030,11 +1032,17 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
         InterCode::OPNTYPE op = (*it)->getOPNType();
         void** opd            = (*it)->get3Operands();
 
+        if (isPrevGoto && op != InterCode::OPNTYPE::LABEL)
+            continue;
+        
+        if (isPrevReturn && !(op == InterCode::OPNTYPE::LABEL || op == InterCode::OPNTYPE::LEAVE))
+            continue;
+        
         if ((block == NULL || BBcls == NULL)) { 
             BBcls = insertInContainer ("global"); 
             block = BBcls->getBlockWithLabel("global");
         }
-
+        
         if (op == InterCode::OPNTYPE::CALL ) {
             str = ((InvocationNode*)opd[0])->symTabEntry()->name();
             insertInUsedList (str);
@@ -1050,7 +1058,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
             bb->addPrevBlock (block->getBlockLabel());
 
             isPrevJmp   = true;
-
+            isPrevGoto  = true;
         } else if (op == InterCode::OPNTYPE::IFREL) {
             block->addCode (*it); 
 
@@ -1073,7 +1081,9 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
             isPrevJmp   = true;
 
         } else if (op == InterCode::OPNTYPE::LABEL) {
-            str = (*it)->getLabel();
+            isPrevGoto   = false;
+            isPrevReturn = false;
+            str          = (*it)->getLabel();
 
             if (block == NULL) {
                 /* to determine if new container to create or to add it to global block*/ 
@@ -1113,7 +1123,12 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
             block->addCode (*it); 
             block       = NULL; 
             isPrevJmp   = true;
+            isPrevReturn = false;
 
+        } else if (op == InterCode::OPNTYPE::RETURN ) {
+            block->addCode (*it); 
+            isPrevReturn = true; 
+        
         } else {
             block->addCode (*it); 
             isPrevJmp   = false;
