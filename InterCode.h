@@ -346,20 +346,30 @@ class BasicBlocksContainer {
            return &bbUsedContainers;
        }        
        
+       void printUsedContainers() {
+           
+           set <string>::iterator it;
+           cout << "\n Called Blocks :";
+           for (it = bbUsedContainers.begin(); it != bbUsedContainers.end(); ++it) {
+               //no need of live var analysis for global 
+               cout << (*it) << "\t";
+           }
+           cout << endl;
+       }
+
+
        map <string, BasicBlocksClass*>* getContainer() {
            return &bbContainer;
        }        
+       
        void removeBlocks()  {
            map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
-           cout << "\n \nRemoved Functions: ";
            for (; it != bbContainer.end(); ++it) {
                //no need of live var analysis for global 
                if ((bbUsedContainers.count((*it).first) == 0) && (((*it).first).compare("global") != 0)) {
-                    cout << (*it).first << "\t";
                     bbContainer.erase(it);
                }
            }
-           cout << "\n";
        }
 
 
@@ -376,13 +386,14 @@ class BasicBlocksContainer {
        }
     
        void optimize() {
-             /*
+             
              removeBlocks();
              if (debugLevel > 0) {
-                cout << "\n\n=====Uncalled Functions Optimization=======";
+                cout << "\n\n===== Uncalled Functions Optimization =======";
+                printUsedContainers();
                 print(cout);
              }
-             */
+             
              map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
             
              for (; it != bbContainer.end(); ++it) {
