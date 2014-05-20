@@ -330,13 +330,11 @@ void InterCodesClass::removeContLabelGoto(int *isOptimized) {
 void BasicBlock::constantFolding (int *isOptimized) {
     int result = 0, val_1 = 0, val_2 = 0, i;
     double resultf = 0.0, valf_1 = 0.0, valf_2 = 0.0;
-    bool boolval;
 
     vector<InterCode*>* dupICodeVector  = getICodeVector();
     vector<InterCode*>* tempICodeVector = new vector<InterCode*> ();
     bool flag                           = false;
     bool isfloat;
-    bool isBool;
 
     //    cout << "\t Inside Folding" << dupICodeVector->size();
     for ( i = 0; i < (int )dupICodeVector->size(); i++) {
@@ -410,8 +408,6 @@ void BasicBlock::constantFolding (int *isOptimized) {
                         case OpNode::OpCode::SHR :
                             if(!isfloat) { result = val_1 >> val_2; flag = true; }
                             break;
-                        case OpNode::OpCode::NOT :
-                                boolval = !boolval; flag = true; 
                         default : 
                             cout << "\nUnhandled OpCode \n";
                             break;
@@ -419,9 +415,7 @@ void BasicBlock::constantFolding (int *isOptimized) {
                     //cout << result << "\n";
                     ValueNode *temp; 
                     
-                    if (isBool) {
-                        temp = new ValueNode(new Value(boolval, Type::BOOL)); 
-                    } else if (isfloat) {
+                    if (isfloat) {
                         temp = new ValueNode(new Value(resultf));
                     } else {
                         temp =  new ValueNode(new Value(result, Type::INT));
@@ -1009,12 +1003,15 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited,
                                                       if (remove) {
                                                             //check if its present in variables used and endliveVar else remove it
                                                             if (variablesUsed.find(opnds[0]->getRefName()) == variablesUsed.end() 
-                                                                && BB->EndLiveVars.find(opnds[0]->getRefName()) == BB->EndLiveVars.end()) {
-                                                                   
+                                                                && BB->EndLiveVars.find(opnds[0]->getRefName()) == BB->EndLiveVars.end() ) {
+                                                                
+                                                                VariableEntry* ventry = (VariableEntry*)(((RefExprNode *)(opnds[0]))->symTabEntry());
+                                                                if(ventry->varKind() != VariableEntry::VarKind::GLOBAL_VAR) {
                                                                     vector <InterCode*>::iterator it = rit.base();
                                                                     it--;
                                                                     BB->getICodeVector()->erase(it);
                                                                     break;
+                                                                }
                                                             }
                                                       } 
                                                       check_remove (variablesUsed, opnds[0]->getRefName()); 
@@ -1031,10 +1028,13 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited,
                                                                 if (variablesUsed.find(opnds[0]->getRefName()) == variablesUsed.end() 
                                                                     && BB->EndLiveVars.find(opnds[0]->getRefName()) == BB->EndLiveVars.end()) {
                                                                        
-                                                                        vector <InterCode*>::iterator it = rit.base();
-                                                                        it--;
-                                                                        BB->getICodeVector()->erase(it);
-                                                                        break;
+                                                                    VariableEntry* ventry = (VariableEntry*)(((RefExprNode *)(opnds[0]))->symTabEntry());
+                                                                    if(ventry->varKind() != VariableEntry::VarKind::GLOBAL_VAR) {
+                                                                            vector <InterCode*>::iterator it = rit.base();
+                                                                            it--;
+                                                                            BB->getICodeVector()->erase(it);
+                                                                            break;
+                                                                    } 
                                                                 }
                                                              } 
                                                              check_remove (variablesUsed, opnds[0]->getRefName()); 
@@ -1064,10 +1064,13 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited,
                                               if (variablesUsed.find(opnds[1]->getRefName()) == variablesUsed.end() 
                                                   && BB->EndLiveVars.find(opnds[1]->getRefName()) == BB->EndLiveVars.end()) {
                                                      
-                                                      vector <InterCode*>::iterator it = rit.base();
-                                                      it--;
-                                                      BB->getICodeVector()->erase(it);
-                                                      break;
+                                                      VariableEntry* ventry = (VariableEntry*)(((RefExprNode *)(opnds[0]))->symTabEntry());
+                                                      if(ventry->varKind() != VariableEntry::VarKind::GLOBAL_VAR) {
+                                                            vector <InterCode*>::iterator it = rit.base();
+                                                            it--;
+                                                            BB->getICodeVector()->erase(it);
+                                                            break;
+                                                      }
                                               }
                                           } 
                                           check_remove (variablesUsed, opnds[1]->getRefName()); 

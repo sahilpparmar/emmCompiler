@@ -407,6 +407,7 @@ class BasicBlocksContainer {
              }
             
              for (it = bbContainer.begin() ; it != bbContainer.end(); ++it) {
+
                  //no need of live var analysis for global 
                  if ((*it).first.compare("global") != 0) 
                      (*it).second->liveVariableAnalysis();
