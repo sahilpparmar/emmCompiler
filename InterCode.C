@@ -1063,12 +1063,10 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited,
                                               //check if its present in variables used and endliveVar else remove it
                                               if (variablesUsed.find(opnds[1]->getRefName()) == variablesUsed.end() 
                                                   && BB->EndLiveVars.find(opnds[1]->getRefName()) == BB->EndLiveVars.end()) {
-                                                     
+                                                
                                                       VariableEntry* ventry = (VariableEntry*)(((RefExprNode *)(opnds[0]))->symTabEntry());
                                                       if(ventry->varKind() != VariableEntry::VarKind::GLOBAL_VAR) {
-                                                            vector <InterCode*>::iterator it = rit.base();
-                                                            it--;
-                                                            BB->getICodeVector()->erase(it);
+                                                            opnds[1] = NULL;
                                                             break;
                                                       }
                                               }
@@ -1122,8 +1120,6 @@ void iterateOnSingleBlock (BasicBlock *BB, map<string, bool> &ifVisited,
             return;
         }
        
-
-
         for(set<string>::iterator iter = BB->StartLiveVars.begin(); iter != BB->StartLiveVars.end(); ++iter) {
             if(OriginalLiveVars.find(*iter) == OriginalLiveVars.end()) {
                 *updated = 1;
