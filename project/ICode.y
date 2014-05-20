@@ -24,7 +24,7 @@ extern char* newlbl();
 
 %token TOK_LEX_ERROR 
 %token TOK_INTNUM TOK_DOUBLENUM TOK_STRCONST TOK_IDENT TOK_IREG TOK_FREG 
-%token TOK_BINIOP TOK_BINFOP TOK_NEG TOK_FNEG TOK_CMPIOP TOK_CMPFOP 
+%token TOK_BINIOP TOK_BINFOP TOK_NEG TOK_FNEG TOK_CMPIOP TOK_CMPFOP TOK_BNOT
 %token TOK_MOVL TOK_MOVS TOK_MOVI TOK_MOVF TOK_MOVIF TOK_MOVFI
 %token TOK_STI TOK_STF TOK_LDI TOK_LDF
 %token TOK_JMP TOK_JMPI TOK_JMPC TOK_JMPCI
@@ -78,6 +78,9 @@ instruction:
 }
 | TOK_NEG ioperand ioperand {
    pout <<  $3 << "= NEG(" << $2 << ");\n";
+}
+| TOK_BNOT ioperand ioperand {
+   pout <<  $3 << "= BNOT(" << $2 << ");\n";
 }
 | TOK_PRTI ioperand {
    pout << "PRTI(" << $2 << ");\n";

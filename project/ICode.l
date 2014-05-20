@@ -154,6 +154,10 @@ NEWLINE		"\n"
   yylex_retval(TOK_FNEG, yylval.cVal);
 }
 
+"BNOT" {
+  yylex_retval(TOK_BNOT, yylval.cVal);
+}
+
 "UGT"|"UGE"|"GT"|"GE"|"LT"|"LE"|"NE"|"EQ" {
   yylval.cVal=copyStr();
   yylex_retval(TOK_CMPIOP, yylval.cVal);

@@ -189,6 +189,7 @@ void pop_registers(ostream &os) {
     }
 }
 
+static bool IsLastBlockEmpty;
 void FinalMachineCodeGen::finalCodeGen (BasicBlocksContainer *bbCls, ostream & os) {
     if (!bbCls)
         return;
@@ -202,18 +203,19 @@ void FinalMachineCodeGen::finalCodeGen (BasicBlocksContainer *bbCls, ostream & o
         vector <BasicBlock*>* basicBlock     = (*it).second->getVector();      
         vector <BasicBlock*>::iterator iter1 = basicBlock->begin();
         string blockLabel = (*iter1)->getBlockLabel();
-        bool IsLastBlockEmpty = false;
 
         if (blockLabel != "global")
             os << "// Function/Event Module begins" << endl;
+        IsLastBlockEmpty = false;
+
         for (; iter1 != basicBlock->end(); iter1++) {
             vector <InterCode*> ::iterator iter2  = (*iter1)->getICodeVector()->begin();
 
             if (IsLastBlockEmpty)
                 os << "JMP " << (*iter1)->getBlockLabel() << endl;
-
             os << (*iter1)->getBlockLabel() << ": ";
             IsLastBlockEmpty = true;
+
             for(; iter2 != (*iter1)->getICodeVector()->end(); iter2++) {
                 IsLastBlockEmpty = false;
                 convert_IC_MC(*iter2, os);
@@ -440,13 +442,14 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                                             os<<"MOVI "<<src1_regName<<" "<<dst_regName;
                                         }
                                     } else if (interCode->getsubCode() == OpNode::OpCode::UMINUS) {
-                                        src1_regName = src1->getRegisterName();
-                                        if (!IS_FLOAT(type_src1)) 
-                                            src1_regName = convertToFloat(src1, os);
+                                        if (IS_FLOAT(type_src1)) 
+                                            src1_regName = convertToInt(src1, os);
                                         os<<"NEG "<<src1_regName<<" "<<dst_regName;
                                     } else if (interCode->getsubCode() ==  OpNode::OpCode::NOT) {
                                         NOTLogic(src1_regName, dst_regName, os);
                                         IsEndlNeeded = false;
+                                    } else if (interCode->getsubCode() ==  OpNode::OpCode::BITNOT) {
+                                        os << "BNOT " << src1_regName << " " << dst_regName;
                                     }
 
                                 }
@@ -537,6 +540,7 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                             break;
                         }
          case ENTER  :  { 
+                            IsLastBlockEmpty = true;
                             fl_reg_used_cnt  = 0 ;
                             int_reg_used_cnt = 0 ;
                             break;

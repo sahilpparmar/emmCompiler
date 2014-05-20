@@ -28,6 +28,7 @@ unsigned *mem;
 
 #define NEG(x) (-x)
 #define FNEG(x) (-x)
+#define BNOT(x) (~x)
 
 #define UGT(x, y) ((unsigned)x > (unsigned)y)
 #define UGE(x, y) ((unsigned)x >= (unsigned)y)
