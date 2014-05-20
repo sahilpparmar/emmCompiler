@@ -54,7 +54,7 @@ void GlobalEntry::eventHandler(ostream& os) {
     os << S_EVENT_END << ": ";
     os << "IN" << R_PARAM << C_DUMMY_INP << endl;
     os << S_START << ": ";
-    os << "PRTS " << "\"\\nEnter Event Name ('0' for exit):\"" << endl;
+    os << "PRTS " << "\"\\nEnter Event Name ('0' for exit): \"" << endl;
     os << "IN" << R_PARAM << endl;
 
     // Generate code to select appropriate event

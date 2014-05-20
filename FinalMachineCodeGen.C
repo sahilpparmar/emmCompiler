@@ -202,14 +202,21 @@ void FinalMachineCodeGen::finalCodeGen (BasicBlocksContainer *bbCls, ostream & o
         vector <BasicBlock*>* basicBlock     = (*it).second->getVector();      
         vector <BasicBlock*>::iterator iter1 = basicBlock->begin();
         string blockLabel = (*iter1)->getBlockLabel();
+        bool IsLastBlockEmpty = false;
 
         if (blockLabel != "global")
             os << "// Function/Event Module begins" << endl;
         for (; iter1 != basicBlock->end(); iter1++) {
             vector <InterCode*> ::iterator iter2  = (*iter1)->getICodeVector()->begin();
+
+            if (IsLastBlockEmpty)
+                os << "JMP " << (*iter1)->getBlockLabel() << endl;
+
             os << (*iter1)->getBlockLabel() << ": ";
+            IsLastBlockEmpty = true;
             for(; iter2 != (*iter1)->getICodeVector()->end(); iter2++) {
-                 convert_IC_MC(*iter2, os);
+                IsLastBlockEmpty = false;
+                convert_IC_MC(*iter2, os);
             }
         }
 
@@ -221,7 +228,7 @@ void FinalMachineCodeGen::finalCodeGen (BasicBlocksContainer *bbCls, ostream & o
         os << endl;
     }
     os << endl << S_EXIT << ": ";
-    os << "PRTS " << "\"DONE\"" << endl << endl;
+    os << "PRTS " << "\"Successfully Exited\\n\"" << endl << endl;
 }
 
 void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
