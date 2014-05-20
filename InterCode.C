@@ -497,23 +497,23 @@ void BasicBlock::constantFolding (int *isOptimized) {
                             if(!isfloat) cond = (val_1 < val_2);
                             else cond = (valf_1 < valf_2);
                             break;
-                        default : cout << "unknown opcode"; 
+                        default : 
                                   break;
                     }
                     //If condition is true then directly goto to op[0] 
                     //TODO: please fix the following GOTO 
-                    if (cond) {
-                        flag = true; 
-                        tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::GOTO, 
-                                    OpNode::OpCode::INVALID, operands[0]->OnTrue()));
-                    } else {
-                        flag = true; 
-                        if (operands[0]->OnFalse())  {
-                                tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::GOTO, 
-                                         OpNode::OpCode::INVALID, operands[0]->OnFalse()));
-                        } 
-                    }
-                    //tempICodeVector->push_back(dupICodeVector->at(i));
+                   // if (cond) {
+                   //     flag = true; 
+                   //     tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::GOTO, 
+                   //                 OpNode::OpCode::INVALID, operands[0]->OnTrue()));
+                   // } else {
+                   //     flag = true; 
+                   //     if (operands[0]->OnFalse())  {
+                   //             tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::GOTO, 
+                   //                      OpNode::OpCode::INVALID, operands[0]->OnFalse()));
+                   //     } 
+                   // }
+                   tempICodeVector->push_back(dupICodeVector->at(i));
                 } else {
                     tempICodeVector->push_back(dupICodeVector->at(i));
                 }
@@ -695,33 +695,33 @@ void BasicBlock::constantPropogation (int *isOptimized) {
                                              }
                                              break;
 
+            
+           // case InterCode::OPNTYPE::IFREL : {
+           //                                     ExprNode** oprnd = (ExprNode**)(*it)->get3Operands();
+           //                                        if (op[0] && op[1] == NULL && op[2] == NULL)  {
+           //                                           if (cvar_map.find(oprnd[0]->getRefName()) != cvar_map.end()) {
+           //                                               oprnd[0] = cvar_map.find(oprnd[0]->getRefName())->second; 
+           //                                               flag     =  true;
+           //                                           }
+           //                                         } else {
+           //                                                 if (op[1])  {
+           //                                                      if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
+           //                                                          oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+           //                                                          flag     =  true;
+           //                                                      }
+           //                                                 }
+           //                                                 if (op[2])  {
+           //                                                      if (cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
+           //                                                          oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
+           //                                                          flag     =  true;
+           //                                                      }
+           //                                                 }
+           //                                        }
+           //                                        tempICodeVector->push_back(new InterCode (InterCode::OPNTYPE::IFREL,
+           //                                                  (*it)->getsubCode(), oprnd[0], oprnd[1], oprnd[2]));
 
-            case InterCode::OPNTYPE::IFREL : {
-                                                ExprNode** oprnd = (ExprNode**)(*it)->get3Operands();
-                                                   if (op[0] && op[1] == NULL && op[2] == NULL)  {
-                                                      if (cvar_map.find(oprnd[0]->getRefName()) != cvar_map.end()) {
-                                                          oprnd[0] = cvar_map.find(oprnd[0]->getRefName())->second; 
-                                                          flag     =  true;
-                                                      }
-                                                    } else {
-                                                            if (op[1])  {
-                                                                 if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
-                                                                     oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
-                                                                     flag     =  true;
-                                                                 }
-                                                            }
-                                                            if (op[2])  {
-                                                                 if (cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
-                                                                     oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
-                                                                     flag     =  true;
-                                                                 }
-                                                            }
-                                                   }
-                                                   tempICodeVector->push_back(new InterCode (InterCode::OPNTYPE::IFREL,
-                                                             (*it)->getsubCode(), oprnd[0], oprnd[1], oprnd[2]));
-
-                                            }
-                                            break;
+           //                                 }
+           //                                 break;
 
             default : 
                                              tempICodeVector->push_back(*it);
