@@ -541,7 +541,7 @@ void BasicBlock::constantPropogation (int *isOptimized) {
 
         //Node of type EXPR and op[0] = op[1] , op[2] is NULL 
         if ((*it)->getOPNType() == InterCode::OPNTYPE::EXPR && 
-                (*it)->getsubCode() == OpNode::OpCode::ASSIGN && 
+               (*it)->getsubCode() == OpNode::OpCode::ASSIGN &&
                 op[1]->exprNodeType() ==  ExprNode::ExprNodeType::VALUE_NODE) {
 
             //if variable already exists in map
@@ -552,6 +552,7 @@ void BasicBlock::constantPropogation (int *isOptimized) {
             }
 
             cvar_map.insert(pair<string, ExprNode*>(str, (ValueNode *)op[1]));
+            //cout << "\n line 1 debug: str" << op[1]->getRefName();
         }
 
         switch ((*it)->getOPNType()) {
@@ -594,6 +595,16 @@ void BasicBlock::constantPropogation (int *isOptimized) {
 
                                                      case OpNode::OpCode::BITNOT:
                                                      case OpNode::OpCode::UMINUS:
+                                                         {   
+                                                             //TODO: please fix this magic code
+                                                             oprnd[1]->type()->name();
+                                                             if (cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
+                                                                 oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                                 flag     =  true;
+                                                             }
+                                                         }
+                                                         break;
+                                                     
                                                      case OpNode::OpCode::ASSIGN:
                                                          {   
                                                              //TODO: please fix this magic code
