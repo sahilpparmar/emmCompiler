@@ -436,27 +436,22 @@ void BasicBlock::constantFolding (int *isOptimized) {
                         case OpNode::OpCode::NE:
                             if(!isfloat) cond = (val_1 != val_2);
                             else cond = (valf_1 != valf_2);
-                            flag = true; 
                             break;
                         case OpNode::OpCode::GE:
                             if(!isfloat) cond = (val_1 >= val_2);
                             else cond = (valf_1 >= valf_2);
-                            flag = true; 
                             break;
                         case OpNode::OpCode::LE:
                             if(!isfloat) cond = (val_1 <= val_2);
                             else cond = (valf_1 <= valf_2);
-                            flag = true; 
                             break;
                         case OpNode::OpCode::GT:
                             if(!isfloat) cond = (val_1 > val_2);
                             else cond = (valf_1 > valf_2);
-                            flag = true; 
                             break;
                         case OpNode::OpCode::LT:
                             if(!isfloat) cond = (val_1 < val_2);
                             else cond = (valf_1 < valf_2);
-                            flag = true; 
                             break;
                         default : cout << "unknown opcode"; 
                                   break;
@@ -464,12 +459,16 @@ void BasicBlock::constantFolding (int *isOptimized) {
                     //If condition is true then directly goto to op[0] 
                     //TODO: please fix the following GOTO 
                     if (cond) {
+                        flag = true; 
                         tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::GOTO, 
-                                    OpNode::OpCode::INVALID, operands[0]));
+                                    OpNode::OpCode::INVALID, operands[0]->OnTrue()));
                     } else {
-                        tempICodeVector->push_back(dupICodeVector->at(i));
+                        flag = true; 
+                        if (operands[0]->OnFalse())  {
+                                tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::GOTO, 
+                                         OpNode::OpCode::INVALID, operands[0]->OnFalse()));
+                        } 
                     }
-
                 } else {
                     tempICodeVector->push_back(dupICodeVector->at(i));
                 }
@@ -558,7 +557,7 @@ void BasicBlock::constantPropogation (int *isOptimized) {
 
         ExprNode** op = (ExprNode**)(*it)->get3Operands();
 
-        if (op[0] == NULL || op[1] == NULL)
+        if (op[0] == NULL)
         {
             tempICodeVector->push_back(*it);
             continue;
@@ -566,7 +565,7 @@ void BasicBlock::constantPropogation (int *isOptimized) {
 
         //Node of type EXPR and op[0] = op[1] , op[2] is NULL 
         if ((*it)->getOPNType() == InterCode::OPNTYPE::EXPR && 
-               (*it)->getsubCode() == OpNode::OpCode::ASSIGN &&
+               (*it)->getsubCode() == OpNode::OpCode::ASSIGN && op[1] &&
                 op[1]->exprNodeType() ==  ExprNode::ExprNodeType::VALUE_NODE) {
 
             //if variable already exists in map
@@ -648,6 +647,54 @@ void BasicBlock::constantPropogation (int *isOptimized) {
                                                              (*it)->getsubCode(), oprnd[0], oprnd[1], oprnd[2]));
                                              }
                                              break;
+
+
+
+            case InterCode::OPNTYPE::IFREL : {
+                                                ExprNode** oprnd = (ExprNode**)(*it)->get3Operands();
+                                                
+                                                if (op[0] && !op[1] && !op[2]) {
+                                                      if (cvar_map.find(oprnd[0]->getRefName()) != cvar_map.end()) {
+                                                          oprnd[0] = cvar_map.find(oprnd[0]->getRefName())->second; 
+                                                          flag     =  true;
+                                                      }
+                                                
+                                                } else {
+                                                      switch((*it)->getsubCode()) {
+                                                           case OpNode::OpCode::AND:
+                                                           case OpNode::OpCode::OR:
+                                                           case OpNode::OpCode::EQ: 
+                                                           case OpNode::OpCode::NE: 
+                                                           case OpNode::OpCode::GT:
+                                                           case OpNode::OpCode::LT:
+                                                           case OpNode::OpCode::GE:
+                                                           case OpNode::OpCode::LE: 
+                                                                                    { 
+                                                                                        if (oprnd[1] && cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
+                                                                                            oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                                                            flag     = true;
+                                                                                        } 
+
+                                                                                        if (oprnd[2] && cvar_map.find(oprnd[2]->getRefName()) != cvar_map.end()) {
+                                                                                            oprnd[2] = cvar_map.find(oprnd[2]->getRefName())->second; 
+                                                                                            flag     = true;
+                                                                                        } 
+                                                                                     }
+                                                                                     break;
+                                                           
+                                                           case OpNode::OpCode::NOT: {
+                                                                                        if (oprnd[1] && cvar_map.find(oprnd[1]->getRefName()) != cvar_map.end()) {
+                                                                                            oprnd[1] = cvar_map.find(oprnd[1]->getRefName())->second; 
+                                                                                            flag     = true;
+                                                                                        } 
+
+                                                                                     }
+                                                                                     break;
+                                                           default : break; 
+                                                      }
+                                              }
+                                            }
+                                            break;
 
             default : 
                                              tempICodeVector->push_back(*it);

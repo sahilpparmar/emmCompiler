@@ -387,7 +387,7 @@ class BasicBlocksContainer {
     
        void optimize() {
              
-             removeBlocks();
+             //removeBlocks();
              if (debugLevel > 0) {
                 cout << "\n\n===== Uncalled Functions Optimization =======";
                 printUsedContainers();
