@@ -1,5 +1,6 @@
 #include "InterCode.h"
 #define TAB_SPACE 8
+#define E_PREFIX    "_event_"
 
 long LabelClass::labelCount = 0;
 std::map <string, InterCode*> LabelClass::label_interCode_map;  
@@ -138,6 +139,49 @@ void InterCode::print(ostream &os) {
         default:
                     assert(0 && "Unsupported 3AddrCode");
     }
+}
+
+string InterCode::getLabel() { 
+    if (optype_ != LABEL) return "";
+    int id = (long)opnds_[0];
+    string *name = (string *) opnds_[1];
+    if (name && name->length()) {
+        return *name;
+    } else {
+        ostringstream os;
+        os << "L" << id;
+        return os.str();
+    }
+}
+
+bool InterCode::xchgSubcode() { 
+
+    switch (subCode_) {
+        case OpNode::OpCode::EQ:
+            subCode_ = OpNode::OpCode::NE;
+            break;
+        case OpNode::OpCode::NE:
+            subCode_ = OpNode::OpCode::EQ;
+            break;
+        case OpNode::OpCode::GT:
+            subCode_ = OpNode::OpCode::LE;
+            break;
+        case OpNode::OpCode::GE:
+            subCode_ = OpNode::OpCode::LT;
+            break;
+        case OpNode::OpCode::LE:
+            subCode_ = OpNode::OpCode::GT;
+            break;
+        case OpNode::OpCode::LT:
+            subCode_ = OpNode::OpCode::GE;
+            break;
+        default:
+            return false;
+            //subCode_ = OpNode::OpCode::INVALID;
+            //cout<<"Cannot negate the subcode_";
+            break;
+    }
+    return true;
 }
 
 void InterCodesClass::printMap() {
@@ -847,6 +891,35 @@ void BasicBlock::zeroRemoval(int *isOptimized) {
         *isOptimized = 1;
 }
 
+void BasicBlock::print(ostream &os) {
+
+    os << endl; 
+    os << blocklabel << ":" << endl;
+    prtSpace(os, TAB_SPACE);
+    os << "Prev: (";  
+
+    vector<string>::iterator iter = PrevBlockLabels.begin();
+    for ( ; iter != PrevBlockLabels.end(); ++iter) {
+        os << " " << *iter;
+    }
+    os << " )\n\n";
+
+    vector <InterCode*>::iterator it = InterCodeVector.begin();
+
+    for (; it != InterCodeVector.end(); ++it) {
+        (*it)->print(os);
+        os << endl;
+    }
+
+    os << endl; 
+    prtSpace(os, TAB_SPACE);
+    os << "next: (";  
+    iter = NextBlockLabels.begin();
+    for ( ; iter != NextBlockLabels.end(); ++iter) {
+        os << " " << *iter;
+    }
+    os << " )\n";
+}
 
 
 
@@ -877,6 +950,85 @@ void InterCodesClass::print (ostream &os) {
     }
 }
 
+
+BasicBlock* BasicBlocksClass::getBlockWithLabel (string label) {
+    vector <BasicBlock*>::iterator it = bbVector.begin();
+
+    for (; it != bbVector.end(); ++it) {
+        if (label.compare((*it)->getBlockLabel()) == 0)
+            return (*it);
+    }
+    //if block does not exist,then create block with new label
+    BasicBlock *newbb = new BasicBlock(label);
+    bbVector.push_back(newbb);
+    label_block_map.insert(pair<string, BasicBlock*> (label, newbb));
+    return newbb;
+}
+
+void BasicBlocksContainer::removeBlocks()  {
+    map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+    for (; it != bbContainer.end(); ++it) {
+        if ((bbUsedContainers.count((*it).first) == 0) && (((*it).first).compare("global") != 0) && (((*it).first).substr(0, 7) != E_PREFIX)) {
+            bbContainer.erase(it);
+        }
+    }
+}
+
+
+BasicBlocksClass* BasicBlocksContainer::insertInContainer (string name) {
+
+    if (bbContainer.find(name) == bbContainer.end()) {
+        BasicBlocksClass* bbCls = new BasicBlocksClass(); 
+        bbContainer.insert (pair<string, BasicBlocksClass*> (name, bbCls));
+
+        return bbCls;
+    } else {
+        return bbContainer.find(name)->second;
+    }
+}
+
+void BasicBlocksContainer::optimize() {
+
+    removeBlocks();
+    if (debugLevel > 0) {
+        cout << "\n\n===== Uncalled Functions Removal Optimization =======";
+        //printUsedContainers();
+        print(cout);
+    }
+
+    map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+
+    for (; it != bbContainer.end(); ++it) {
+        (*it).second->blockOptimize();
+
+    }
+
+    if (debugLevel > 0) {
+        cout << "\n\n=====Constant propogation and folding optimization=======";
+        print(cout);
+    }
+
+    for (it = bbContainer.begin() ; it != bbContainer.end(); ++it) {
+
+        //no need of live var analysis for global 
+        if ((*it).first.compare("global") != 0) 
+            (*it).second->liveVariableAnalysis();
+    }
+
+    if (debugLevel > 0) {
+        cout << "\n\n=========Dead Code Elmination Optimization==================";
+        print(cout);
+    }
+}
+
+void BasicBlocksContainer::print(ostream &os) {
+    map <string, BasicBlocksClass*>::iterator it = bbContainer.begin();
+    for (; it != bbContainer.end(); it++) {
+        os << "\n#####" << (*it).first << "#####" << endl;
+        (*it).second->print(os);
+        os << endl;
+    }
+}
 
 void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
 
