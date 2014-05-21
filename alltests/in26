@@ -1,9 +1,14 @@
-void foo(int a) {
+void foo() {
     double b;
     int c = 5;
     print();
     print("hello");
-    print(hi);
-    print(b+c, b*c, 5, obj);
+    print("hi");
+    print(b+c, b*c, 5);
 }
 
+event a();
+
+a() -> {
+    foo();
+}

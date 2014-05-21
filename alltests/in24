@@ -2,49 +2,52 @@
  * Tests: Empty if-then-else stmt; While, Break, Continue, Statements
  */
 
-    int logMessage(string x) ;	
-    int a = 5, b, c;
-    event open (double a1 , int a2 , unsigned int a3);
-	bool condition;
+void logMessage(string x) {
+    print(x);
+}
 
-    open(file, flags, mode) -> {
+int a = 5;
+int b, c;
+string s = "\\nAssignment in condition";
+event x (double a1 , int a2 , unsigned int a3);
+bool condition;
+
+x(file, flags, mode) -> {
     if (a == 0)
     {
-	
-        logMessage("Assignment in condition") ; 
+
+        logMessage(s) ; 
         if ( a < 5 )
         {
             b = 3;
         }
-    	else;
+        else;
 
     }
-    	else;
-    
-    while (a < 3) 
+    else;
+
+    while (true) 
     {
-                a = 10;
+        a = a + 1;
+        if (a == 10)
+        {
+            continue;
+        }
+        logMessage(s) ; 
+        while (a > 10)
+        {
+            a = b + c;
+            if (a > 20)
+            {
+                continue 2;
+            }
+            else
+            {
+                break 2;
+            }
+        }
 
-                if (a == 10)
-                {
-                    continue;
-                }
-		logMessage("Assignment in condition") ; 
-                    break;
-                while (a > 10)
-                {
-                    a = b + c;
-                    if (a > 20)
-                        {
-                            continue 2;
-                        }
-                        else
-                        {
-                            break 2;
-                        }
-                }
+    }
 
-                }
-    
-	};
+};
 

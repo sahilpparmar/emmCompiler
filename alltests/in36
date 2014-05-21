@@ -6,12 +6,11 @@ string s2 = "\\nParam 2: ";
 
 void aa(double a, double b) {
     a = a + b;
-    print("a",a);
+    print("\\na ",a);
 }
 
 a(i,j) -> {
     i = i + j;
-    print("\\n i",i);
     aa(i, j);
 };
 

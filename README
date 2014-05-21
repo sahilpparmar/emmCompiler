@@ -9,8 +9,8 @@ Ast.C                   ====>   typeCheck() and IR codegen() routines for AST No
 STEClasses.C            ====>   typeCheck() and IR codegen() routines for SymtabEntry Variables
 Value.C                 ====>   Stores literal values
 Type.C                  ====>   Stores types of different variable
-InterCode.C             ====>   Code for Basic block generation and different code Optimizations.
-FinalMachineCodeGen.C   ====>   Comverting IR to Final Machine Code
+InterCode.C             ====>   Code for Basic block generation and different Code Optimizations.
+FinalMachineCodeGen.C   ====>   Converting IR to Final Machine Code
 EventHandler.C          ====>   Machine Code Generation for Event Handling
 
 
@@ -19,8 +19,8 @@ Test Cases:
 All important test cases are stored in "demotests" folder. Following are different test cases:
 1_operator              ====>   Tests all binary and unary arithmetic operators 
 2_fibonaci              ====>   Recursive function to compute nth fibonaci number
-3_factorial             ====>   Recursive function to compute factorial number
-4_functionCall          ====>   Callgraph of event_a => foo20 => foo19 => ... => foo1
+3_factorial             ====>   Recursive function to compute factorial of a number
+4_functionCall          ====>   Function Call flow "event_a => foo20 => foo19 => ... => foo1"
 5_functionDeadCode      ====>   Eliminating Dead function definitions 
 6_whileloop             ====>   Tests usage of nested while loops with continue
 7_deadcode              ====>   Tests dead code elimiation of assignment statements

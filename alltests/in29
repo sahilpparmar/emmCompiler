@@ -1,23 +1,23 @@
 int x;
-
+event a(int ii);
 
 int bar(int aa) {
 
-int a = 10 + 20;
-int b = 5 - 2;
+    int a = 10 + 20;
+    int b = 5 - 2;
 
-int c = 1 + 10 * 100;
-int d = a * b;
-int e = 1 - c;
-int f = b / 4;
-int g = 10 / 2;
-int h = 10 % 2;
-int i = 1 | 1 & 0;
-int j = 0 & 1;
+    int c = 1 + 10 * 100;
+    int d = a * b;
+    int e = 1 - c;
+    int f = b / 4;
+    int g = 10 / 2;
+    int h = 10 % 2;
+    int i = 1 | 1 & 0;
+    int j = 0 & 1;
 
-int k = 1 ^ 1;
-int l = 1 << 2;
-int m = 100 >>  2;
+    int k = 1 ^ 1;
+    int l = 1 << 2;
+    int m = 100 >>  2;
     return aa + 1;
 }
 
@@ -27,11 +27,17 @@ int foo (int a) {
         a = 2;
     else
         a = 3;
-    
+
     if (a == 1)
         a = 2;
     else
         a = 3+bar(a)+bar(a)*2;
     return a;
 
+}
+
+event b(int aa);
+b(aa) -> {
+    aa=foo(aa);
+    print("Modified param: ", aa);
 }

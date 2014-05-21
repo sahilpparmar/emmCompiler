@@ -47,3 +47,9 @@ void main()
     else if(k>kk)
         k = k+1;
 }
+
+event e();
+
+e() -> {
+    main();
+}

@@ -7,3 +7,11 @@ int foo (int a) {
     }
     return mul;
 }
+
+event a(int aa);
+a(ii) -> {
+    mul = 1;
+    mul = foo(ii);
+    print ("2-power of param: ", mul);
+}
+

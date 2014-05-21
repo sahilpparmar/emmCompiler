@@ -4,20 +4,18 @@
  *
  */
 
-   class CString;
-
-    event open (double a1 , int a2 , unsigned int a3);
+    event o (double a1 , int a2 , unsigned int a3);
 
     int i = 2 ;
     int j = 3 ;
-    int k = 4.0 ;
+    int k = 4 ;
 
     byte b ;
     string s ;
 
 	void hh(int z);
 
-    int g(int x, double y, CString u) {
+    int g(int x, double y) {
          int a,b,c;
          return 1;
    };
@@ -29,14 +27,14 @@
   };
 
 
-    open(file, flags, mode) -> {
+    o(file, flags, mode) -> {
                      
                      if ((i < j) || (j > k)) {
                         i = (23 * (-i)/j);
                     }
                     else ;
 		 	
-  
+        file = f();
 
 
     };

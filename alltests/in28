@@ -1,33 +1,13 @@
-int logMessage(string x, int aa) ;	
 int a = 5, b, c;
-bool condition;
 
-int open(string file, int a, unsigned int mode)
+int read(string file, int a, unsigned int mode)
 {
-    while (a < 3) 
-    {
-        a = 10;
-
-        if (a == 10)
-        {
-            continue;
-        }
-        logMessage("Assignment in condition", 1) ; 
-        break;
-        while (a > 10)
-        {
-            a = b + c;
-            if (a > 20)
-            {
-                continue 2;
-            }
-            else
-            {
-                break 2;
-            }
-        }
-
-    }
+    print(file, a, mode);
     return a;
 };
 
+event q();
+string file = "hello.txt";
+q() -> {
+    read(file, 10, 0);
+};

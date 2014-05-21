@@ -2,18 +2,17 @@
  * Tests: Bit and Long Datatypes
  */
 
-    int logMessage(string x) ;	
     int a = 5;
     long b = 12345678;
     bit c = 1;
     short d = 1;
-    event open (int a1 , int a2 , unsigned int a3);
+    event o (int a1 , int a2 , unsigned int a3);
 
-    open(file, flags, mode) -> {
+    o(file, flags, mode) -> {
     if (a == 0)
     {
 	
-        logMessage("Assignment in condition") ; 
+        print("Assignment in condition") ; 
         c = 0;
     }
     	else;
@@ -22,7 +21,7 @@
     while (a < 3) 
     {
                 a = 10;
-		logMessage("Assignment in condition") ; 
+		print("Assignment in condition") ; 
                 b = 987654321;    
                 break;
                 while (a > 10)
