@@ -153,8 +153,8 @@ void push_registers(string retAdd, ostream &os) {
         fl--;
     }
 
-    string dst_regName     = allocateNewRegName(false);
-    int_reg_used_cnt--;
+    string dst_regName = allocateNewRegName(false);
+    //int_reg_used_cnt--;
     os<<"MOVL "<<retAdd<<" "<<dst_regName<<endl;
     os<<"STI  "<<dst_regName<<" "<<RSP<< C_PUSH_RET <<endl;
     os<<"SUB "<<RSP<<" 4 "<<RSP << endl;
@@ -179,7 +179,7 @@ void pop_registers(ostream &os) {
    //     fl++;
     }
 
-    for(int i=0; i<int_reg_used_cnt; i++)
+    for(int i=0; i<int_reg_used_cnt-1; i++)
     {
         sprintf(newRegName, "R%.3d", ++in);
         string temp(newRegName);
@@ -251,19 +251,21 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
 
                             push_registers(retAddrReg, os); 
                             os << "JMP  " << func_name << endl;
-                            if (int_reg_used_cnt || fl_reg_used_cnt)
+
+                            if ((int_reg_used_cnt-1) || fl_reg_used_cnt || opndsList[1]) {
                                 os << retAddrReg << ": ";
-                            pop_registers(os);
-                            if(opndsList[1])
-                            {
-                                ExprNode *src1    = opndsList[1];
-                                string retValueReg = src1->getRegisterName();
-                                if(IS_FLOAT(src1->type()))
-                                    os<<"MOVF "<<RRV_F<<" ";
-                                else
-                                    os<<"MOVI "<<RRV_I<<" ";
-                                os<<retValueReg<<endl;
-                                int_reg_used_cnt--; 
+                                pop_registers(os);
+
+                                if (opndsList[1]) {
+                                    ExprNode *src1    = opndsList[1];
+                                    string retValueReg = src1->getRegisterName();
+                                    if(IS_FLOAT(src1->type()))
+                                        os<<"MOVF "<<RRV_F<<" ";
+                                    else
+                                        os<<"MOVI "<<RRV_I<<" ";
+                                    os<<retValueReg<<endl;
+                                    //int_reg_used_cnt--; 
+                                }
                             }
                             reg_list.resize(0);
 
@@ -294,7 +296,7 @@ void FinalMachineCodeGen::convert_IC_MC(InterCode *interCode, ostream &os) {
                                      {
                                          regName = allocateNewRegName(true);
                                          str = "STF "+regName+" "+RSP;
-                                         fl_reg_used_cnt--;
+                                         //fl_reg_used_cnt--;
                                      }
                                     else
                                         str = "STI "+param->getRefName()+" "+RSP;

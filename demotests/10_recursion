@@ -1,0 +1,45 @@
+// recursion
+
+int b;
+double f = 5.0;
+string str = "Hello, compiler!";
+
+int foo(int depth) {
+    int local1 = 10;
+    int local2 = 20;
+
+    print("in foooo...............");
+
+    local1 = depth * 100;
+    print ("(before)foo - depth : ");
+    print (depth);
+    print (" -- ");
+    print ("local1 : ");
+    print (local1);
+    print ("\\n");
+    if (depth < 10) {
+        local2 = foo(depth+1);
+    } else
+        local2 = 4;
+    print("in foooo...............");
+    print ("(after )foo - depth : ");
+    print (depth);
+    print (" -- ");
+    print ("local1 : ");
+    print (local1);
+    print ("\\n");
+    return 23;
+}
+
+void test() {
+    print("Entering test...............\\n\\n");
+    foo(0);
+    print("\\nLeaving test...............\\n");
+}
+
+event a();
+
+a() ->  {
+    test();
+};
+

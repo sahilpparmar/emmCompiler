@@ -259,9 +259,6 @@ main(int argc, char *argv[], char *envp[]) {
             return 1;
         }
 
-        //DEBUG("======================Memory Allocation======================\n");
-        //ge->memAlloc(); 
-
         DEBUG("======================3 Addr Generation======================\n");
         InterCodesClass* in = ge->codeGen();
         if (debugLevel > 0) {
@@ -282,15 +279,6 @@ main(int argc, char *argv[], char *envp[]) {
         if (debugLevel > 0) {
            bbC->print(cout);
         }
-        /*
-        set <string>* bbCtrs = bbC->getUsedContainers();        
-        set <string>::iterator it;
-        cout << "\n Called Blocks :";
-        for (it = bbCtrs->begin(); it != bbCtrs->end(); ++it) {
-            //no need of live var analysis for global 
-                cout << (*it) << "\t";
-        }
-        */
             
         if (optLevel) {
             DEBUG("=========================Optimization========================\n");

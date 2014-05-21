@@ -461,10 +461,10 @@ void BasicBlock::constantFolding (int *isOptimized) {
                     
                     if (isfloat) {
                         temp = new ValueNode(new Value(resultf));
+                        temp->coercedType(new Type(Type::DOUBLE));
                     } else {
-                        temp =  new ValueNode(new Value(result, Type::INT));
+                        temp = new ValueNode(new Value(result, Type::INT));
                     }
-
                     tempICodeVector->push_back(new InterCode(InterCode::OPNTYPE::EXPR, 
                                 OpNode::OpCode::ASSIGN, operands[0], temp));
 
@@ -957,7 +957,6 @@ void BasicBlocksContainer::removeBlocks()  {
     }
 }
 
-
 BasicBlocksClass* BasicBlocksContainer::insertInContainer (string name) {
 
     if (bbContainer.find(name) == bbContainer.end()) {
@@ -1118,6 +1117,7 @@ void BasicBlocksContainer::createBlockStruct (InterCodesClass* ic) {
                 }
             }
             BBcls->ordervec.push_back(str);
+            isPrevJmp = false;
 
         } else if (op == InterCode::OPNTYPE::LEAVE ) {
             block->addCode (*it); 

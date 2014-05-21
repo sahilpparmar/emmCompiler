@@ -239,7 +239,7 @@ class ValueNode: public ExprNode {
                 os << value()->bval();
             } else {
                 if (tp && tp->tag() && Type::isFloat(tp->tag())) {
-                    os.precision(1);
+                    //os.precision(1);
                     os.setf(ios::fixed,ios::floatfield);
                     os << value()->dval();
                 }
@@ -253,7 +253,7 @@ class ValueNode: public ExprNode {
         string getRegisterName()
         {
             return getRefName();
-            }
+        }
 
     private:
         /* val_ field is already included in ExprNode, so no new data members */

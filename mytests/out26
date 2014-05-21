@@ -1,7 +1,0 @@
-
-=================Lexical and Syntax Parsing==================
-mytests/in26:11:Error: Undeclared identifier "hi"
-mytests/in26:17:Error: Undeclared identifier "z"
-mytests/in26:19:Error: Undeclared identifier "z"
-mytests/in26:21:Error: 3 syntax error(s) reported.
-Compilation terminated.

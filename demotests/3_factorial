@@ -1,0 +1,17 @@
+//Nested file and recursion
+
+event a(int aa);
+
+int factorial(int x)
+{
+    if (x<=1) 
+        return 1;
+    else
+        return x * factorial(x-1);
+}
+
+a(i)-> {
+    i = factorial(i);
+    print("\\nFactorial of 1st Param: ", i);
+}
+
